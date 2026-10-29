@@ -1,0 +1,309 @@
+# AGENTS.md: Dugtong OJT
+
+Read this file first. It states what we are building, the rules the product must follow, and how it should look. It does not say how to set up or structure the project; the repository itself is the source of truth for that. If a task conflicts with this file, stop and ask. If a decision changes, update this file in the same PR.
+
+## 1. What this project is
+
+Dugtong OJT is a web app (installable PWA) that replaces the paper DTR and scattered OJT paperwork. Students apply to partner companies, log their hours and a daily journal online, company supervisors approve them daily, and the coordinator monitors progress and exports records. When a student reaches the required hours, the supervisor submits a final evaluation and the system generates the student's certification.
+
+- Customer and pilot: PHINMA University of Iloilo, College of Information Technology Education (CITE), BSIT course only.
+- This is a long-lived product that future student batches will maintain. Favor clarity, tests, and documentation over cleverness.
+- Keep it simple. Do not gold-plate.
+
+## 2. Scope
+
+### In scope (pilot)
+
+- Single school (PHINMA UI), one department (CITE), one course (BSIT).
+- Roles: Platform Admin (the devs), Coordinator (one teacher), Supervisor (company staff), Student.
+- Admin enters the partner companies the school provides, and invites supervisors.
+- Coordinator imports students (CSV or Excel). Students get invitations.
+- Resume upload, listings, applications, deployment on acceptance.
+- Daily time in/out plus daily journal, with daily supervisor approval.
+- Required-hours tracking (coordinator-editable), final evaluation, certification PDF.
+- Coordinator dashboard, exports (CSV, printable DTR PDF).
+- Full audit logging.
+
+### Out of scope (do NOT build unless asked)
+
+- Other schools or departments (for example CHTM). Store things like required hours, evaluation criteria, and certificate templates as data per course or department, never as constants in code, so adding CHTM later is mostly data entry. Build nothing CHTM-specific.
+- Public or guest access. Every page and file requires login.
+- Company self-registration and document verification (the school decides partners).
+- MOA tracking, OJT requirements and prerequisites, daily-hours rules.
+- Partnership request flow, reports and appeals, company trust score.
+- Native mobile app, billing, alumni accounts, accreditation export packs.
+
+## 3. Tech stack (what we use)
+
+Next.js (App Router) and TypeScript, installable PWA. Clerk for auth, integrated with Supabase. Supabase Postgres and private Storage. Tailwind CSS, shadcn/ui, react-hook-form, Zod, TanStack Query. Do not introduce alternatives to these without asking.
+
+## 4. Roles and permissions
+
+| Role           | Who                             | Scope             |
+| -------------- | ------------------------------- | ----------------- |
+| Platform Admin | The Dugtong developers          | Whole system      |
+| Coordinator    | One CITE teacher                | BSIT course       |
+| Supervisor     | Company staff, invited by admin | Their own company |
+| Student        | Imported by the coordinator     | Self only         |
+
+There is no separate company representative. The first supervisor invited for a company is its owner: the named point of contact, who can invite other supervisors from the same company. Admin can transfer ownership.
+
+| Action                                                   | Student                | Supervisor                     | Coordinator       | Admin                        |
+| -------------------------------------------------------- | ---------------------- | ------------------------------ | ----------------- | ---------------------------- |
+| View own profile, logs, applications, certification      | yes                    | no                             | no                | yes                          |
+| Upload and replace own resume                            | yes                    | no                             | no                | no                           |
+| Browse active listings of partner companies              | yes                    | yes (own company)              | yes               | yes                          |
+| Create, edit, close listings                             | no                     | own company                    | no                | yes                          |
+| Apply to a listing, withdraw an application              | yes                    | no                             | no                | no                           |
+| Accept or reject applicants                              | no                     | own listings                   | no                | no                           |
+| Time in, time out, write journal                         | own, active deployment | no                             | no                | no                           |
+| Approve, reject, correct, reopen daily entries           | no                     | own company's students         | no                | support action only, audited |
+| View students' logs and hours                            | own                    | own company's students         | all BSIT students | all                          |
+| Edit required hours                                      | no                     | no                             | yes (audited)     | yes (audited)                |
+| Import student roster                                    | no                     | no                             | yes               | yes                          |
+| Submit evaluation                                        | no                     | own company's students         | no                | no                           |
+| View and export reports, DTR PDF                         | own DTR                | own company's students         | all BSIT students | all                          |
+| Create companies, invite supervisors, create coordinator | no                     | invite colleagues (owner only) | no                | yes                          |
+
+Default: the coordinator cannot approve or change a supervisor's decision. This is an open decision (section 12).
+
+## 5. Core flow
+
+1. Admin creates the CITE department, the BSIT course, the coordinator account, the school's partner companies, and invites the first supervisor per company.
+2. Coordinator imports the BSIT roster. Each student gets an invitation. Sign-up is invitation-only.
+3. Supervisors post listings for their company.
+4. Students upload a resume and apply to listings.
+5. A supervisor accepts an applicant. Acceptance is final and creates an active deployment immediately. No coordinator confirmation step.
+6. Each day the student times in, times out, and writes the journal. The entry becomes pending.
+7. The supervisor approves, rejects with a reason, or corrects the entry, daily.
+8. Approved hours accumulate toward the course's required hours.
+9. When required hours are reached, the supervisor submits the evaluation.
+10. The system generates the certification PDF. The coordinator exports records as needed.
+
+## 6. Business rules
+
+These are product rules. Never weaken them to make a feature easier.
+
+### Daily logs
+
+- One entry per deployment per day. Compute the log date in the `Asia/Manila` timezone, not UTC.
+- Time in and time out come from the server clock, never the user's device. Never accept a client-provided time for time in or out.
+- Statuses: open (timed in), pending (submitted), approved, rejected.
+- Only approved entries count toward hours.
+- The supervisor can approve, reject with a required reason, or correct times. Every correction keeps the old value in the audit log.
+- Rejected entries return to the student to fix and resubmit.
+- Approved entries are locked. Only the supervisor can reopen one, and the reopening is audited.
+- Bulk approve is supported for a day's pending entries.
+- Entries pending longer than a set number of days are flagged as stale to the coordinator. The threshold is an open decision.
+- Each entry has a break duration (default 0, supervisor-editable) and an optional location, so break deduction and location checks can be added later without redesign.
+
+### Applications and deployments
+
+- Default (confirm with the coordinator): a student may apply to several listings but may have only one active deployment.
+- Accepting an application creates the deployment and withdraws the student's other open applications. This must succeed or fail as a whole, never half-done.
+
+### Evaluation and certification
+
+- Evaluation unlocks only when approved hours are at least the course's required hours.
+- Submitting the evaluation generates the certification PDF.
+
+### Roster import
+
+- Preview first (validation: duplicates, missing emails, wrong course), then commit. A bad file must never half-import.
+
+## 7. Security, privacy, and audit
+
+- Every page, route, and file requires login. No public data. All storage is private. Use short-lived signed links for files.
+- Role and scope are checked on the server for every action. Never trust the client for role, company, student, or time.
+- **Users never write to tables directly.** All changes go through server code that first checks the caller's role and ownership (for example, a supervisor can only approve entries of their own company's students).
+- Row Level Security is enabled on every table, and user sessions get read access only where needed (students see only their own data).
+- The service-role key is server-only. Never expose it to client code, never put it in a `NEXT_PUBLIC_` variable, never commit it.
+- Resumes are visible only to the student, the coordinator, and supervisors of companies the student applied to.
+- Sign-up is invitation-only. Deactivated accounts lose access immediately.
+- Consent notice at first login. Student data is collected only for OJT, with limited retention, designed to follow the Philippine Data Privacy Act of 2012.
+- Never log or print personal data, tokens, or keys. Never commit `.env` files.
+
+### Audit
+
+Changes to daily logs, evaluations, deployments, required hours, company status, and company membership are recorded with old value, new value, who, and when. Audit records can be added but never edited or deleted.
+
+### Database guard rails
+
+These are standing rules, kept in the database so a future bug cannot break them:
+
+- One log per deployment per day.
+- One active deployment per student.
+- A single audit trigger records the changes listed above, including edits made outside the app.
+- Approved entries and audit rows cannot be edited or deleted, except through the audited reopen action.
+
+## 8. Code rules
+
+- TypeScript strict. No `any`.
+- Validate every input at the boundary with Zod (forms, server actions, route handlers, CSV rows).
+- Expected failures (validation, permission, not found) return a typed error result instead of throwing.
+- Schema changes are migrations kept in git. No manual dashboard edits.
+- Every access rule has a test, for example "student A cannot read student B's logs".
+- Add or update tests with the code.
+
+## 9. UI and copy
+
+- Build from approved mockups. Do not invent screens. If there is no mockup, ask.
+- Sentence case everywhere. Verb-first buttons ("Time in", "Reject entry", "Approve all").
+- Errors say what happened and what to do, in one sentence, with no "Error:" prefix.
+- Do not use "successfully", "please", or "click here".
+- Turn on tabular numerals for hours, times, and totals.
+
+## 10. Design tokens (light mode)
+
+Measured from the existing landing page, except values marked suggested. Pending, rejected, hover, and neutral colors are suggested additions. Dark mode values are not defined yet.
+
+```css
+:root {
+  /* Foundation */
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8; /* suggested */
+  --primary-tint: #e6eefe;
+  --primary-track: #d4e0fb;
+  --ink: #0f172a;
+  --muted: #596579;
+  --faint: #6b7686; /* suggested; the page's #798393 is too low-contrast for small text */
+  --disabled: #98a2b3; /* suggested */
+  --border: #eceef2;
+  --border-strong: #d5dae2; /* suggested */
+  --surface: #f5f7fa;
+  --page-wash: #f8fafe;
+  --focus-ring: rgb(37 99 235 / 0.4); /* suggested */
+
+  /* Success */
+  --success-tint: #d9f5ea;
+  --success-border: #a8e3cb;
+  --success: #087a55;
+  --success-hover: #066245;
+  --success-text: #087a55;
+
+  /* Warning (suggested) */
+  --warning-tint: #fef3c7;
+  --warning-border: #f6d776;
+  --warning: #b45309;
+  --warning-hover: #92400e;
+  --warning-text: #92400e;
+
+  /* Error (suggested) */
+  --error-tint: #fee2e2;
+  --error-border: #fca5a5;
+  --error: #dc2626;
+  --error-hover: #b91c1c;
+  --error-text: #b91c1c;
+
+  /* Info */
+  --info-tint: #e6eefe;
+  --info-border: #bcd0fb;
+  --info: #2563eb;
+  --info-hover: #1d4ed8;
+  --info-text: #1e40af;
+
+  /* Teal */
+  --teal-tint: #ddf4f4;
+  --teal-border: #a9dcdc;
+  --teal: #086a6a;
+  --teal-hover: #065454;
+  --teal-text: #086a6a;
+
+  /* Neutral (suggested) */
+  --neutral-tint: #eef1f5;
+  --neutral-border: #dfe3ea;
+  --neutral: #596579;
+  --neutral-hover: #475569;
+  --neutral-text: #596579;
+}
+```
+
+Use text on tint with the matching `-text` color, and white text on solid fills. All of these pairs pass the 4.5:1 contrast target.
+
+### Status to color role
+
+| Where       | State                            | Role            |
+| ----------- | -------------------------------- | --------------- |
+| Daily entry | Clocked in (open)                | info            |
+| Daily entry | Pending                          | warning         |
+| Daily entry | Approved                         | success         |
+| Daily entry | Rejected                         | error           |
+| Daily entry | Stale pending                    | warning (solid) |
+| Application | Applied                          | info            |
+| Application | Accepted                         | success         |
+| Application | Rejected                         | error           |
+| Application | Withdrawn                        | neutral         |
+| Deployment  | Active                           | success         |
+| Deployment  | Completed / ready for evaluation | teal            |
+| Deployment  | Ended or inactive                | neutral         |
+| Student     | Scope acknowledged               | teal            |
+
+Use the error solid fill only for destructive actions. Everything else that is wrong stays in the tint, so a table with several problems does not turn red.
+
+## 11. Fonts (proposed, confirm)
+
+Plus Jakarta Sans for headings (700 and 800), Inter for body and UI (400 and 600), JetBrains Mono for times and IDs. Always include system font fallbacks.
+
+## 12. Open decisions
+
+Do not decide these on your own. Ask, then record the answer here.
+
+- Certificate issuer and signatories.
+- Evaluation criteria and rating scale.
+- Can the coordinator override a supervisor's approval decision? Default: no.
+- Stale-pending threshold (days) and reminder timing.
+- Lunch-break rule for hours (default: none deducted).
+- Application rules: several applications allowed, one active deployment (confirm).
+- UI language (English assumed).
+- Dark mode palette.
+
+## 13. Rules for AI agents
+
+Do:
+
+- Read this file before changing anything. Prefer the smallest change that completes the task.
+- Enforce the business rules in section 6 on the server, not only in the UI.
+- Add or update tests with the code.
+- Ask when a requirement is unclear or missing, and record the answer in this file.
+
+Do not:
+
+- Build anything listed under "Out of scope".
+- Use the client clock for any hours-related timestamp.
+- Write to tables from the client, or use the service-role key outside server-only code.
+- Edit applied migrations, generated files, or audit rows.
+- Add public routes, public storage, or guest access.
+- Invent UI without a mockup, or invent business rules. Add them to "Open decisions" instead.
+- Add dependencies without a clear reason.
+
+### Definition of done
+
+- Matches the mockup and the rules in this file.
+- Permission checks and tests exist for every new action or table.
+- Zod validation on every new input.
+- Audit coverage for any new change to hours, evaluations, or deployments.
+- Typecheck, lint, and tests pass.
+
+## 14. Working on tickets
+
+- Work only from a ticket file in `tickets/`. No ticket, no coding. Read `AGENTS.md`, the ticket, and the mockup first.
+- If anything needed is missing or unclear, write the question under "Open questions" in the ticket and stop. Do not guess.
+- For anything bigger than a small change, write a plan in the ticket and wait until a human ticks "Plan approved".
+- Do only what "In scope" says. New ideas go under "Suggested new tickets", never into the code.
+- Order of authority: `AGENTS.md`, then the ticket, then your own ideas. If the first two conflict, stop and ask.
+- Never edit `AGENTS.md`, other tickets, or the scope of the current ticket unless a human says so.
+- Commit only on the developer's own branch, after each logical change, with the message `ticket-XX: short message`. Never commit to `dev`, `test`, or `main`. Never force-push. Never merge into `dev` yourself; a human opens and merges the PR.
+- One ticket at a time per branch. Do not start the next ticket until the previous one is merged into `dev`.
+- Tick the "Tested by AI" boxes only for commands you actually ran, and write the command and result next to them. Never tick a human box.
+- Before the PR: merge the latest `dev` into the branch and run the checks again. You may resolve trivial conflicts (imports, formatting). Stop and ask a human for conflicts in auth, database migrations, audit logic, or the section 6 rules.
+- Git steps for humans are in `CONTRIBUTING.md`.
+
+## 15. Local setup
+
+TODO (project owner): add install, environment variables, and run instructions after the project is scaffolded. Never commit secrets.
+
+<!-- ## 16. Reference
+
+- Final Development Plan (Claude Doc): link to be added.
+- Mockups: link or folder to be added.
+- Existing landing page (visual reference): https://dugtong-ojt.vercel.app/ -->
