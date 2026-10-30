@@ -39,7 +39,7 @@ export default function RootLayout({
       lang="en"
       className={`${plusJakarta.variable} ${inter.variable} ${jetBrainsMono.variable}`}
     >
-      <body>{children}</body>
+      <body className="font-sans text-ink">{children}</body>
     </html>
   );
 }

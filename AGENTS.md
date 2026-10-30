@@ -37,6 +37,8 @@ Dugtong OJT is a web app (installable PWA) that replaces the paper DTR and scatt
 
 Next.js (App Router) and TypeScript, installable PWA. Clerk for auth, integrated with Supabase. Supabase Postgres and private Storage. Tailwind CSS, shadcn/ui, react-hook-form, Zod, TanStack Query. Do not introduce alternatives to these without asking.
 
+Use Tailwind utility classes for component styling and shadcn/ui primitives for standard controls where appropriate. Keep global CSS to design-token variables, font setup, reset/base styles, and narrowly scoped exceptions that utilities cannot express; do not build page layouts in large bespoke CSS files.
+
 ## 4. Roles and permissions
 
 | Role           | Who                             | Scope             |
