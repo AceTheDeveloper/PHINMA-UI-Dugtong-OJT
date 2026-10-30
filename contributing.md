@@ -31,18 +31,19 @@ Work on **one ticket at a time** on your branch. Do not start the next ticket un
    git pull
    git switch ace          # your own branch
    git merge dev
-   git push
+   git push origin ace
    ```
-2. **Work and commit often**, after each logical change. Start every message with the ticket number:
+2. **Work, commit, and push each logical change** on `ace`. Push every commit to `origin/ace` immediately after creating it; do not leave completed work only in the local checkout. Stage only the files for that change, and start every commit message with the ticket number:
    ```
    ticket-01: add time-in action
    ticket-01: add time-in tests
    ```
+   If a push fails, report the failure and do not claim the change was published. Never push to `dev`, `test`, or `main`, and never force-push.
 3. **Sync every day** (the same `git merge dev` as above). Small, frequent merges keep conflicts small.
-4. **When the ticket is done:** merge `dev` into your branch one last time, run typecheck, lint and tests, and push.
+4. **When the ticket is done:** merge `dev` into your branch one last time, run typecheck, lint and tests, then push any new merge or fix commits to `origin/ace`.
 5. **Open a PR from your branch to `dev`.** Title it `ticket-01: Student time in and time out` and link the ticket file. Another developer reviews it.
 6. **Merge the PR using "Create a merge commit"**, not squash and not rebase. Squashing a long-lived personal branch makes the same changes conflict again on the next merge.
-7. **After the merge:** `git switch ace`, then `git merge dev` to line your branch up with `dev`. Now you can start the next ticket.
+7. **After the merge:** `git switch ace`, then `git merge dev` and `git push origin ace` to line your branch up with `dev`. Now you can start the next ticket.
 
 ## Promoting to test and production
 

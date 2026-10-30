@@ -3,11 +3,12 @@ import Link from "next/link";
 import { ArrowRight, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ScrollReveal from "./components/scroll-reveal";
+import ThemeToggle from "./components/theme-toggle";
 
 function Logo() {
   return (
     <Image
-      src="/dugtong-logo.png"
+      src="/dugtong-mark.png"
       alt="Dugtong OJT"
       width={48}
       height={48}
@@ -136,7 +137,7 @@ function HeroSample() {
         </div>
       </div>
 
-      <div className="absolute bottom-0 right-3 z-[2] w-[232px] rounded-[32px] border border-border-strong bg-ink p-2 shadow-[0_18px_44px_color-mix(in_srgb,var(--ink)_18%,transparent)] max-md:right-0 max-sm:w-[198px] max-sm:rounded-[28px] max-sm:p-[7px]">
+      <div className="absolute bottom-0 right-3 z-[2] w-[232px] rounded-[32px] border border-border-strong bg-ink p-2 shadow-[0_18px_44px_color-mix(in_srgb,var(--ink)_18%,transparent)] dark:bg-card dark:shadow-none max-md:right-0 max-sm:w-[198px] max-sm:rounded-[28px] max-sm:p-[7px]">
         <span className="absolute left-1/2 top-[14px] z-[1] h-[5px] w-14 -translate-x-1/2 rounded-full bg-copy-muted" />
         <div className="min-h-[442px] overflow-hidden rounded-[25px] bg-surface max-sm:min-h-[408px] max-sm:rounded-[22px]">
           <div className="flex h-14 items-center justify-between border-b border-border px-3.5 py-2 text-[11px] font-semibold">
@@ -319,13 +320,13 @@ export default function Home() {
   return (
     <>
       <a
-        className={`absolute left-2 top-2 z-20 -translate-y-[160%] rounded-lg bg-ink px-4 py-3 text-surface transition-transform duration-150 focus:translate-y-0 ${focusStyle}`}
+        className={`absolute left-2 top-2 z-20 -translate-y-[160%] rounded-lg bg-ink px-4 py-3 text-surface transition-transform duration-150 focus:translate-y-0 dark:bg-card dark:text-card-foreground ${focusStyle}`}
         href="#main-content"
       >
         Skip to content
       </a>
       <header className="relative z-[5]">
-        <div className="mx-auto flex min-h-[88px] w-[min(100%_-_64px,1200px)] items-center gap-8 max-sm:w-[calc(100%_-_48px)] max-sm:grid max-sm:min-h-0 max-sm:grid-cols-[minmax(0,1fr)_auto] max-sm:gap-x-3 max-sm:gap-y-0 max-sm:py-2.5">
+        <div className="mx-auto flex min-h-[88px] w-[min(100%_-_64px,1200px)] items-center gap-8 max-sm:w-[calc(100%_-_48px)] max-sm:grid max-sm:min-h-0 max-sm:grid-cols-[minmax(0,1fr)_auto_auto] max-sm:gap-x-3 max-sm:gap-y-0 max-sm:py-2.5">
           <Link
             className={`inline-flex min-h-11 shrink-0 items-center gap-2.5 font-heading text-[19px] font-extrabold tracking-[-0.03em] max-sm:text-[17px] ${focusStyle}`}
             href="/"
@@ -351,13 +352,14 @@ export default function Home() {
               Who it&apos;s for
             </a>
           </nav>
+          <ThemeToggle />
           <Button
             nativeButton={false}
             render={<Link href="/sign-in" />}
             role="link"
             variant="outline"
             size="lg"
-            className={`h-11 min-w-[88px] rounded-lg border-border-strong bg-transparent px-4 text-ink hover:border-primary hover:bg-transparent hover:text-primary-hover max-sm:col-start-2 max-sm:row-start-1 ${focusStyle}`}
+            className={`h-11 min-w-[88px] rounded-lg border-border-strong bg-transparent px-4 text-ink hover:border-primary hover:bg-transparent hover:text-primary-hover max-sm:col-start-3 max-sm:row-start-1 ${focusStyle}`}
           >
             Sign in
           </Button>
@@ -383,7 +385,7 @@ export default function Home() {
                   render={<Link href="/sign-in" />}
                   role="link"
                   size="lg"
-                  className={`h-12 min-w-[120px] rounded-lg bg-primary px-5 text-[15px] font-semibold text-white hover:bg-primary-hover ${focusStyle}`}
+                  className={`h-12 min-w-[120px] rounded-lg bg-primary px-5 text-[15px] font-semibold text-primary-foreground hover:bg-primary-hover ${focusStyle}`}
                 >
                   Sign in
                 </Button>
@@ -555,13 +557,13 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="bg-ink py-[76px] text-surface max-sm:py-16" data-reveal>
+        <section className="bg-ink py-[76px] text-surface max-sm:py-16 dark:bg-card dark:text-card-foreground" data-reveal>
           <div className="mx-auto flex w-[min(100%_-_64px,1200px)] items-center justify-between gap-8 max-sm:w-[calc(100%_-_48px)] max-sm:flex-col max-sm:items-start max-sm:gap-6">
             <div>
               <h2 className="mb-2.5 font-heading text-[clamp(32px,4vw,44px)] font-bold leading-[1.15] tracking-[-0.02em]">
                 Already have an invitation?
               </h2>
-              <p className="text-base text-surface">
+              <p className="text-base text-surface dark:text-card-foreground">
                 Sign in with the email your school has on file.
               </p>
             </div>
@@ -586,7 +588,7 @@ export default function Home() {
             aria-label="Dugtong OJT home"
           >
             <Image
-              src="/dugtong-logo.png"
+              src="/dugtong-mark.png"
               alt="Dugtong OJT"
               width={34}
               height={34}

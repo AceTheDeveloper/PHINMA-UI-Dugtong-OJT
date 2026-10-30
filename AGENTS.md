@@ -150,14 +150,16 @@ These are standing rules, kept in the database so a future bug cannot break them
 ## 9. UI and copy
 
 - Build from approved mockups. Do not invent screens. If there is no mockup, ask.
+- Support light and dark themes. Follow the system preference until the user chooses a theme, and remember explicit choices.
+- Use the design tokens for both themes; do not add raw color values in components.
 - Sentence case everywhere. Verb-first buttons ("Time in", "Reject entry", "Approve all").
 - Errors say what happened and what to do, in one sentence, with no "Error:" prefix.
 - Do not use "successfully", "please", or "click here".
 - Turn on tabular numerals for hours, times, and totals.
 
-## 10. Design tokens (light mode)
+## 10. Design tokens
 
-Measured from the existing landing page, except values marked suggested. Pending, rejected, hover, and neutral colors are suggested additions. Dark mode values are not defined yet.
+Light-mode values are measured from the existing landing page, except values marked suggested. Pending, rejected, hover, and neutral colors are suggested additions. Dark-mode values are defined in the `.dark` token set.
 
 ```css
 :root {
@@ -222,6 +224,73 @@ Measured from the existing landing page, except values marked suggested. Pending
 
 Use text on tint with the matching `-text` color, and white text on solid fills. All of these pairs pass the 4.5:1 contrast target.
 
+Dark-mode tokens:
+
+```css
+.dark {
+  --primary: #60a5fa;
+  --primary-hover: #93c5fd;
+  --primary-tint: #172b48;
+  --primary-track: #24456f;
+  --ink: #f1f5f9;
+  --muted: #a6b2c4;
+  --faint: #aab7ca;
+  --disabled: #64748b;
+  --border: #263449;
+  --border-strong: #3b4b63;
+  --surface: #152238;
+  --page-wash: #0b1220;
+  --focus-ring: rgb(96 165 250 / 0.4);
+  --success-tint: #12342e;
+  --success-border: #28604e;
+  --success: #087a55;
+  --success-hover: #066245;
+  --success-text: #6ee7b7;
+  --warning-tint: #3a2d12;
+  --warning-border: #7a5a1c;
+  --warning: #b45309;
+  --warning-hover: #92400e;
+  --warning-text: #fcd34d;
+  --error-tint: #3b1d25;
+  --error-border: #7c2c3b;
+  --error: #dc2626;
+  --error-hover: #b91c1c;
+  --error-text: #fca5a5;
+  --info-tint: #172b48;
+  --info-border: #294c7e;
+  --info: #2563eb;
+  --info-hover: #1d4ed8;
+  --info-text: #93c5fd;
+  --teal-tint: #123536;
+  --teal-border: #276466;
+  --teal: #086a6a;
+  --teal-hover: #065454;
+  --teal-text: #5eead4;
+  --neutral-tint: #202c3e;
+  --neutral-border: #3a4a61;
+  --neutral: #596579;
+  --neutral-hover: #475569;
+  --neutral-text: #cbd5e1;
+  --background: #0b1220;
+  --foreground: #f1f5f9;
+  --card: #111b2e;
+  --card-foreground: #f1f5f9;
+  --popover: #111b2e;
+  --popover-foreground: #f1f5f9;
+  --primary-foreground: #0b1220;
+  --secondary: #123536;
+  --secondary-foreground: #5eead4;
+  --muted-foreground: #a6b2c4;
+  --accent: #172b48;
+  --accent-foreground: #93c5fd;
+  --destructive: #f87171;
+  --input: #3b4b63;
+  --ring: #93c5fd;
+}
+```
+
+In dark mode, use `--primary-foreground` on the primary fill; do not assume white text remains readable on a lighter primary color. Keep all text/background pairs at or above 4.5:1 contrast.
+
 ### Status to color role
 
 | Where       | State                            | Role            |
@@ -257,7 +326,6 @@ Do not decide these on your own. Ask, then record the answer here.
 - Lunch-break rule for hours (default: none deducted).
 - Application rules: several applications allowed, one active deployment (confirm).
 - UI language (English assumed).
-- Dark mode palette.
 
 ## 13. Rules for AI agents
 
@@ -294,7 +362,7 @@ Do not:
 - Do only what "In scope" says. New ideas go under "Suggested new tickets", never into the code.
 - Order of authority: `AGENTS.md`, then the ticket, then your own ideas. If the first two conflict, stop and ask.
 - Never edit `AGENTS.md`, other tickets, or the scope of the current ticket unless a human says so.
-- Commit only on the developer's own branch, after each logical change, with the message `ticket-XX: short message`. Never commit to `dev`, `test`, or `main`. Never force-push. Never merge into `dev` yourself; a human opens and merges the PR.
+- Commit each logical change on the developer's own branch with the message `ticket-XX: short message`, then push that commit to `origin/ace`. Never commit or push to `dev`, `test`, or `main`; never force-push. If a push fails, report the failure and do not claim the change was published. Never merge into `dev` yourself; a human opens and merges the PR.
 - One ticket at a time per branch. Do not start the next ticket until the previous one is merged into `dev`.
 - Tick the "Tested by AI" boxes only for commands you actually ran, and write the command and result next to them. Never tick a human box.
 - Before the PR: merge the latest `dev` into the branch and run the checks again. You may resolve trivial conflicts (imports, formatting). Stop and ask a human for conflicts in auth, database migrations, audit logic, or the section 6 rules.
