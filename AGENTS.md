@@ -113,7 +113,7 @@ These are product rules. Never weaken them to make a feature easier.
 
 ## 7. Security, privacy, and audit
 
-- Every page, route, and file requires login. No public data. All storage is private. Use short-lived signed links for files.
+- Every page, route, and file requires login, except the public landing page at `/` and its non-OJT branding assets. The landing page contains no OJT data. No other public data. All OJT storage is private. Use short-lived signed links for files.
 - Role and scope are checked on the server for every action. Never trust the client for role, company, student, or time.
 - **Users never write to tables directly.** All changes go through server code that first checks the caller's role and ownership (for example, a supervisor can only approve entries of their own company's students).
 - Row Level Security is enabled on every table, and user sessions get read access only where needed (students see only their own data).
