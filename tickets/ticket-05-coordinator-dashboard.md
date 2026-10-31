@@ -67,6 +67,14 @@ Layout, mock data, and mock navigation for a single coordinator dashboard page. 
 - All names, student IDs, and company names are clearly fictional. No real student, teacher, or company data. Section 7 forbids real personal data in code.
 - Enough rows to exercise the states: every status in the color table, a student at 0 hours, one at exactly the required hours, one over, a stale pending entry, and a company with no deployed students.
 
+**shadcn/ui components and blocks**
+
+- Build the page from shadcn/ui components and blocks, added with the shadcn CLI so the source lives in `components/ui/` and follows the existing `components.json`. Do not hand-build controls that shadcn already provides.
+- Start from the shadcn dashboard and sidebar blocks (for example `dashboard-01` and a sidebar block such as `sidebar-07`) and adapt them to the sections above. Remove what the ticket does not ask for: no sample charts, drag-and-drop, or demo data that the coordinator does not need.
+- Use shadcn primitives for the pieces they cover: Sidebar, Card, Table, Badge, Progress, Input, Select, Button, Tabs or Toggle where needed, Sheet for the mobile menu, Tooltip, Avatar, Separator, and Skeleton if loading states are shown.
+- Restyle through the design tokens in section 10 (the shadcn alias variables already exist for both themes). No raw color values and no bespoke CSS for layout.
+- Status badges are a small shared wrapper around the shadcn Badge that maps each status to its color role, so the mapping lives in one place.
+
 **Quality**
 
 - Light and dark themes using the design tokens.
@@ -91,6 +99,7 @@ Layout, mock data, and mock navigation for a single coordinator dashboard page. 
 - [ ] The mock data module contains the states listed under "Mock data" and no real personal data.
 - [ ] The sidebar and mobile menu show all eight items; only Dashboard is active and the rest are marked as not built.
 - [ ] Search, status filter, company filter, and progress sort work on the mock students.
+- [ ] The page and shell are built from shadcn/ui components and dashboard and sidebar blocks added through the shadcn CLI, with unused block content removed.
 - [ ] Status badges and progress use design tokens and the status-to-color table, in both light and dark themes.
 - [ ] Hours, times, and counts use tabular numerals.
 - [ ] The page is usable at 390×844 and 1440×900 without horizontal page scroll.
@@ -115,11 +124,12 @@ Tested by a human:
 Proposed, not started:
 
 1. Add the typed mock data module and a small set of helpers (counts, progress, stale flags) kept separate from components.
-2. Build the shell: sidebar, mobile menu, header, theme toggle, with the inert navigation items.
-3. Build the summary cards and the attention panel.
-4. Build the student progress table with search, filters, sort, and the mobile stacked layout.
-5. Build the partner companies overview, quick actions, and recent activity.
-6. Check both themes, both viewports, and accessibility, then run the checks.
+2. Add the needed shadcn components and the dashboard and sidebar blocks with the CLI, then strip them down to what this ticket needs.
+3. Build the shell: sidebar, mobile menu, header, theme toggle, with the inert navigation items.
+4. Build the summary cards and the attention panel.
+5. Build the student progress table with search, filters, sort, and the mobile stacked layout.
+6. Build the partner companies overview, quick actions, and recent activity.
+7. Check both themes, both viewports, and accessibility, then run the checks.
 
 - [ ] Plan approved by a human
 
@@ -130,6 +140,7 @@ Proposed, not started:
 - Stale-pending threshold: open decision in section 12. The mock will use a placeholder; confirm that is fine.
 - Required hours: the mock needs a number. Proposed placeholder is clearly labelled as mock. Confirm, or give the real BSIT figure.
 - Navigation items: is the eight-item list right, or should it be shorter for the first version?
+- Dependencies: the shadcn dashboard block pulls in extra packages (for example a table library, a charts library, and drag-and-drop). Section 13 says not to add dependencies without a clear reason, and TanStack Table and a charts library are not in the stack in section 3. Proposed: take only the layout and the shadcn primitives, and use the plain shadcn Table with no new libraries. Confirm, or approve specific extra packages.
 - Test framework (section 12): needed before logic tests can be written for the filters and sorting.
 
 ## Suggested new tickets (ideas found along the way, not built)
