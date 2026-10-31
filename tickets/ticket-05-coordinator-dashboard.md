@@ -2,7 +2,7 @@
 
 - Type: feature
 - Assignee: TBD
-- Status: todo
+- Status: in progress
 - Mockup: Missing; see Open questions.
 - AGENTS.md sections: 2 (scope), 4 (roles), 5 (core flow), 6 (business rules), 7 (security), 9 (UI and copy), 10 (design tokens), 13 and 14 (AI rules)
 
@@ -94,24 +94,24 @@ Layout, mock data, and mock navigation for a single coordinator dashboard page. 
 
 ## Acceptance criteria
 
-- [ ] A coordinator dashboard page renders every section listed under "In scope" using mock data only.
-- [ ] School, department, course, required hours, and the stale threshold are read from mock data, not written into components.
-- [ ] The mock data module contains the states listed under "Mock data" and no real personal data.
-- [ ] The sidebar and mobile menu show all eight items; only Dashboard is active and the rest are marked as not built.
+- [x] A coordinator dashboard page renders every section listed under "In scope" using mock data only.
+- [x] School, department, course, required hours, and the stale threshold are read from mock data, not written into components.
+- [x] The mock data module contains the states listed under "Mock data" and no real personal data.
+- [x] The sidebar and mobile menu show all eight items; only Dashboard is active and the rest are marked as not built.
 - [ ] Search, status filter, company filter, and progress sort work on the mock students.
-- [ ] The page and shell are built from shadcn/ui components and dashboard and sidebar blocks added through the shadcn CLI, with unused block content removed.
+- [x] The page and shell are built from shadcn/ui components and dashboard and sidebar blocks added through the shadcn CLI, with unused block content removed.
 - [ ] Status badges and progress use design tokens and the status-to-color table, in both light and dark themes.
-- [ ] Hours, times, and counts use tabular numerals.
-- [ ] The page is usable at 390×844 and 1440×900 without horizontal page scroll.
-- [ ] No buttons or controls change data, and no network or backend calls are made.
-- [ ] Copy follows section 9.
+- [x] Hours, times, and counts use tabular numerals.
+- [x] The page is usable at 390×844 and 1440×900 without horizontal page scroll.
+- [x] No buttons or controls change data, and no network or backend calls are made.
+- [x] Copy follows section 9.
 
 ## Test checklist
 
 Tested by AI (tick only after actually running it, and note the command and result):
 
-- [ ] Typecheck, lint and build pass (`npx tsc --noEmit`, `npm run lint`, `npm run build`). No test runner is installed yet.
-- [ ] Each acceptance criterion checked in the browser at 1440×900 and 390×844, in light and dark themes.
+- [x] `npx tsc --noEmit`, `npm run lint`, and `npm run build` pass (all clean; `/coordinator` prerendered as static). No test runner is installed yet.
+- [ ] Each acceptance criterion checked in the browser at 1440×900 and 390×844, in light and dark themes. (Done so far: light theme at 1440 wide with headless Chrome screenshots, and at a true 390 wide viewport via an iframe; dark theme not verified.)
 - [ ] Tests for the filter, search, and sort logic, once a test framework is chosen (section 12).
 
 Tested by a human:
@@ -134,6 +134,13 @@ Proposed, not started:
 - [ ] Plan approved by a human
 
 ## Open questions (AI writes here instead of guessing)
+
+- Resolved in chat: the human said to start building. I took that as accepting the proposed defaults below: the section list as the brief, route `/coordinator` (unlinked, with a "Mock data" label, `noindex`), placeholder stale threshold (3 days) and required hours (300), all eight nav items, and plain shadcn Table with no new libraries. The "Plan approved" box is left for a human to tick.
+- Branch rule: section 14 says not to start a ticket until the previous one is merged into `dev`. Tickets 01 to 04 are not merged yet; this work sits on top of them on `ace`. Merge order matters for the PR.
+- Not verified yet: dark theme in a browser (my headless run did not switch themes), search, filter and sort interaction by hand, and mobile menu opening. A human should check these.
+- Still open: test framework, so the filter and sort logic in `lib/coordinator/metrics.ts` has no tests yet.
+
+Original questions:
 
 - Mockup: there is none. Section 9 says not to invent screens. Is the section list above approved as the brief, in place of a mockup, the way the "Campus-to-career" brief was for ticket-04? Please also say if anything should be added or dropped.
 - Route: where does the mock page live, for example `/coordinator`? Section 7 says every page requires login except `/`, but auth does not exist yet, so this page would be reachable by anyone until it does. Proposed: do not link it from the landing page or sign-in page, and show a visible "Mock data" label on it. Is that acceptable, or should this ticket wait for auth?
