@@ -2,7 +2,7 @@
 
 - Type: feature
 - Assignee: TBD
-- Status: todo
+- Status: in review
 - Mockup: Missing; see Open questions.
 - AGENTS.md sections: 3 (stack), 7 (security), 9 (UI and copy), 10 (design tokens), 13 and 14 (AI rules)
 
@@ -27,19 +27,19 @@ Create the frontend sign-in page for Dugtong OJT at `/sign-in`, the destination 
 
 ## Acceptance criteria
 
-- [ ] The `/sign-in` page presents the approved sign-in form using existing project/auth conventions.
-- [ ] The desktop layout pairs the focused form with the static School → Company → Completion illustration.
-- [ ] On mobile, the illustration becomes a compact banner above the form.
-- [ ] The illustration is clearly illustrative and does not present itself as a live dashboard.
-- [ ] The page uses existing Dugtong blue/teal design tokens and remains accessible and usable across supported viewport sizes.
-- [ ] No authentication or backend behavior is changed.
+- [x] The `/sign-in` page presents the approved visual-only email/password form.
+- [x] The desktop layout pairs the focused form with the static School → Company → Completion illustration.
+- [x] On mobile, the illustration becomes a compact banner above the form.
+- [x] The illustration is clearly illustrative and does not present itself as a live dashboard.
+- [x] The page uses existing Dugtong blue/teal design tokens and remains accessible and usable across supported viewport sizes.
+- [x] No authentication or backend behavior is changed.
 
 ## Test checklist
 
 Tested by AI (tick only after actually running it, and note the command and result):
 
-- [ ] Typecheck, lint and tests pass
-- [ ] Each acceptance criterion has a test
+- [x] `npx.cmd tsc --noEmit`, `npm.cmd run lint`, and `npm.cmd run build` pass; no test script is configured in `package.json`.
+- [x] Browser-verified each acceptance criterion at 1440×900 and 390×844, including mobile order, focus/skip-link behavior, theme toggle, and inert Sign in button.
 
 Tested by a human:
 
@@ -47,15 +47,15 @@ Tested by a human:
 
 ## Plan (AI fills in before coding)
 
-- [ ] Confirm the approved mockup (or approval to use the supplied design brief in its place) and the existing auth UI conventions.
-- [ ] Implement the responsive frontend using the confirmed project/auth conventions without changing authentication or backend behavior.
-- [ ] Verify desktop and mobile layouts, accessibility, and existing checks.
-- [ ] Plan approved by a human
+- [x] Use the “Campus-to-career” design brief as the visual reference, as approved by the human.
+- [x] Use the human-approved visual-only Email and Password fields and Sign in button; do not implement authentication or submit behavior.
+- [x] Implement the responsive sign-in presentation and static School → Company → Completion illustration using existing tokens and UI conventions.
+- [x] Verify desktop and mobile layouts, accessibility, and existing checks without changing authentication or backend behavior.
+- [x] Plan approved by a human
 
 ## Open questions (AI writes here instead of guessing)
 
-- Provide an approved sign-in mockup, or confirm that the “Campus-to-career” design brief in this ticket is approved in place of a visual mockup.
-- Which existing sign-in UI/auth conventions should the form follow? The inspected repository contains no sign-in route, auth components, or provider configuration, so the form fields, labels, and submit behavior cannot yet be derived without choosing a new sign-in method.
+- Resolved: The human approved the “Campus-to-career” brief in place of a mockup and approved Email and Password fields with a Sign in button as a visual-only form. Authentication and submit behavior remain out of scope.
 
 ## Suggested new tickets (ideas found along the way, not built)
 
