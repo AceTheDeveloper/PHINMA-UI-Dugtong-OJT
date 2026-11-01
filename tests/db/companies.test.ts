@@ -91,23 +91,24 @@ describe("supervisor_memberships", () => {
 });
 
 describe("invitations", () => {
-  let tokens = 0;
+  let invitees = 0;
 
   function invite(fields: {
     role: string;
     studentId?: string | null;
     companyId?: string | null;
+    courseId?: string | null;
   }) {
-    tokens += 1;
+    invitees += 1;
     return db.query(
-      `insert into invitations (email, role, student_id, company_id, token_hash, expires_at)
+      `insert into invitations (email, role, student_id, company_id, course_id, expires_at)
        values ($1, $2, $3, $4, $5, now() + interval '7 days')`,
       [
-        `invitee${tokens}@example.test`,
+        `invitee${invitees}@example.test`,
         fields.role,
         fields.studentId ?? null,
         fields.companyId ?? null,
-        `hash-${tokens}`,
+        fields.courseId ?? null,
       ],
     );
   }
@@ -126,11 +127,16 @@ describe("invitations", () => {
     await expect(invite({ role: "student" })).rejects.toThrow(/check constraint/);
   });
 
-  it("allows a coordinator invitation with no target and rejects one with a company", async () => {
-    await expect(invite({ role: "coordinator" })).resolves.toBeTruthy();
+  it("requires a course for a coordinator invitation and rejects a company target", async () => {
+    await expect(invite({ role: "coordinator" })).rejects.toThrow(
+      /check constraint/,
+    );
+    await expect(
+      invite({ role: "coordinator", courseId: courseA }),
+    ).resolves.toBeTruthy();
     const company = await insertCompany("Wrong Target Co");
     await expect(
-      invite({ role: "coordinator", companyId: company }),
+      invite({ role: "coordinator", courseId: courseA, companyId: company }),
     ).rejects.toThrow(/check constraint/);
   });
 
