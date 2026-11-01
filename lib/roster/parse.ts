@@ -11,7 +11,29 @@ import { fail, ok, type Result } from "@/lib/result";
 
 export const maxFileBytes = 2 * 1024 * 1024;
 export const maxRosterRows = 1000;
-export const rosterColumns = ["full_name", "student_number", "email"] as const;
+
+// The school's list of students taking OJT. Only the three read columns are
+// needed; the rest are carried in the template and ignored. Header matching
+// ignores case and spaces, and the older names stay accepted as aliases.
+export const rosterColumns = [
+  "SESSION NAME",
+  "CAMPUS",
+  "STUDENT ID",
+  "STUDENT NAME",
+  "GENDER",
+  "COLLEGE",
+  "COURSE",
+  "CURRICULUM",
+  "SUBJECT",
+  "SECTION",
+  "EMAIL",
+] as const;
+
+const fields = {
+  fullName: { label: "STUDENT NAME", keys: ["student_name", "full_name"] },
+  studentNumber: { label: "STUDENT ID", keys: ["student_id", "student_number"] },
+  email: { label: "EMAIL", keys: ["email"] },
+} as const;
 
 export type RosterRow = {
   row: number;
@@ -112,13 +134,25 @@ function rowsFromGrid(grid: string[][]): Result<RosterRow[]> {
   header.forEach((key, index) => {
     if (key && !position.has(key)) position.set(key, index);
   });
-  const missing = rosterColumns.filter((column) => !position.has(column));
+  const at = (field: keyof typeof fields): number | undefined => {
+    for (const key of fields[field].keys) {
+      const found = position.get(key);
+      if (found !== undefined) return found;
+    }
+    return undefined;
+  };
+  const missing = (Object.keys(fields) as (keyof typeof fields)[]).filter(
+    (field) => at(field) === undefined,
+  );
   if (missing.length > 0) {
     return fail(
       "validation",
-      `The header row is missing ${missing.join(", ")}. Use the columns ${rosterColumns.join(", ")}.`,
+      `The header row is missing ${missing.map((field) => fields[field].label).join(", ")}. Use the columns from the template.`,
     );
   }
+  const nameAt = at("fullName") ?? 0;
+  const numberAt = at("studentNumber") ?? 0;
+  const emailAt = at("email") ?? 0;
 
   const rows: RosterRow[] = [];
   for (let index = headerIndex + 1; index < grid.length; index += 1) {
@@ -126,9 +160,9 @@ function rowsFromGrid(grid: string[][]): Result<RosterRow[]> {
     if (line.every((cell) => cell === "")) continue;
     rows.push({
       row: index + 1,
-      fullName: line[position.get("full_name") ?? 0] ?? "",
-      studentNumber: line[position.get("student_number") ?? 0] ?? "",
-      email: line[position.get("email") ?? 0] ?? "",
+      fullName: line[nameAt] ?? "",
+      studentNumber: line[numberAt] ?? "",
+      email: line[emailAt] ?? "",
     });
     if (rows.length > maxRosterRows) {
       return fail("validation", `The file has more than ${maxRosterRows} rows. Split it and import in parts.`);

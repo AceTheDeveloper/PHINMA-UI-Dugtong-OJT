@@ -26,7 +26,29 @@ async function messageOf(file: { name: string; bytes: Uint8Array }) {
 }
 
 describe("CSV", () => {
-  it("reads the school template", async () => {
+  it("reads the school's list of students taking OJT and ignores its other columns", async () => {
+    const header =
+      "SESSION NAME,CAMPUS,STUDENT ID,STUDENT NAME,GENDER,COLLEGE,COURSE,CURRICULUM,SUBJECT,SECTION,EMAIL";
+    const rows = await rowsOf(
+      csv(
+        `${header}\n1st Sem 2026-2027,Iloilo,04-2122-041550,"REYES, ANA",F,CITE,BSIT,2021,OJT,A,ana@example.com\n`,
+      ),
+    );
+    expect(rows).toEqual([
+      { row: 2, fullName: "REYES, ANA", studentNumber: "04-2122-041550", email: "ana@example.com" },
+    ]);
+  });
+
+  it("reads the earlier column names too", async () => {
+    const rows = await rowsOf(
+      csv(
+        "full_name,student_number,email\nAna Reyes,A-2026-001,ana.reyes@example.com\nBen Santos,A-2026-002,ben.santos@example.com\n",
+      ),
+    );
+    expect(rows).toHaveLength(2);
+  });
+
+  it("reads the template", async () => {
     const rows = await rowsOf(
       csv(
         "full_name,student_number,email\nAna Reyes,A-2026-001,ana.reyes@example.com\nBen Santos,A-2026-002,ben.santos@example.com\n",
@@ -139,10 +161,10 @@ describe("refusals", () => {
 
   it("names the missing header columns", async () => {
     expect(await messageOf(csv("full_name,email\nAna,a@example.com"))).toBe(
-      "The header row is missing student_number. Use the columns full_name, student_number, email.",
+      "The header row is missing STUDENT ID. Use the columns from the template.",
     );
     expect(await messageOf(csv("name,number,mail\nAna,1,a@example.com"))).toMatch(
-      /missing full_name, student_number, email/,
+      /missing STUDENT NAME, STUDENT ID, EMAIL/,
     );
   });
 

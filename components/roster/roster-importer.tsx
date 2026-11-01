@@ -133,7 +133,7 @@ export function RosterImporter({
             <FormField
               id="roster-file"
               label="Student list"
-              hint="A .csv or .xlsx file with the columns full_name, student_number, and email."
+              hint="A .csv or .xlsx file in the school's list format. Only STUDENT ID, STUDENT NAME, and EMAIL are read."
             >
               <Input
                 ref={inputRef}
