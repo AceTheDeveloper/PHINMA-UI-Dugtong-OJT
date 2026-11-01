@@ -16,6 +16,7 @@ import {
   TodayCard,
 } from "@/components/landing/sample-cards";
 import { TeamAvatar, team } from "@/components/landing/team-avatar";
+import { isLandingOnly } from "@/lib/landing-only";
 import { cn } from "@/lib/utils";
 
 const container =
@@ -61,18 +62,20 @@ export function LandingHeader() {
           </a>
         </nav>
         <ThemeToggle />
-        <Button
-          nativeButton={false}
-          render={<Link href="/sign-in" />}
-          role="link"
-          size="lg"
-          className={cn(
-            "h-11 min-w-[88px] rounded-lg bg-primary px-4 text-primary-foreground hover:bg-primary-hover max-sm:col-start-3 max-sm:row-start-1",
-            focusStyle,
-          )}
-        >
-          Sign in
-        </Button>
+        {!isLandingOnly() && (
+          <Button
+            nativeButton={false}
+            render={<Link href="/sign-in" />}
+            role="link"
+            size="lg"
+            className={cn(
+              "h-11 min-w-[88px] rounded-lg bg-primary px-4 text-primary-foreground hover:bg-primary-hover max-sm:col-start-3 max-sm:row-start-1",
+              focusStyle,
+            )}
+          >
+            Sign in
+          </Button>
+        )}
       </div>
     </header>
   );
@@ -101,15 +104,17 @@ export function Hero() {
             and coordinators.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-6">
-            <Button
-              nativeButton={false}
-              render={<Link href="/sign-in" />}
-              role="link"
-              size="lg"
-              className={primaryButton}
-            >
-              Sign in
-            </Button>
+            {!isLandingOnly() && (
+              <Button
+                nativeButton={false}
+                render={<Link href="/sign-in" />}
+                role="link"
+                size="lg"
+                className={primaryButton}
+              >
+                Sign in
+              </Button>
+            )}
             <a
               className={cn(
                 "inline-flex min-h-12 items-center gap-2 text-[15px] font-semibold text-primary-hover transition-[gap] duration-150 hover:gap-3",
@@ -324,12 +329,14 @@ export function Team() {
   return (
     <section
       id="team"
-      className="border-y border-border bg-surface py-24 max-sm:py-16"
+      className="border-y border-border bg-gradient-to-b from-background via-primary-tint to-primary-track py-28 max-sm:py-20"
       data-reveal
     >
       <div className={cn(container, "text-center")}>
         <p className={eyebrow}>The team</p>
-        <h2 className={sectionHeading}>Built by the Dugtong team.</h2>
+        <h2 className="font-heading text-[clamp(36px,5.5vw,60px)] font-extrabold leading-[1.08] tracking-[-0.025em] text-balance">
+          Built by <span className="text-primary">Nerds of a Feather</span>.
+        </h2>
         <p className="mx-auto mt-3.5 max-w-[480px] text-base leading-[1.65] text-copy-muted">
           The people who build and maintain Dugtong OJT.
         </p>
@@ -352,6 +359,7 @@ export function Team() {
 }
 
 export function FinalCta() {
+  if (isLandingOnly()) return null;
   return (
     <section className="py-24 max-sm:py-16" data-reveal>
       <div
@@ -396,15 +404,17 @@ export function LandingFooter() {
         <p className="text-[13px] text-faint">
           Built for PHINMA University of Iloilo.
         </p>
-        <Link
-          href="/sign-in"
-          className={cn(
-            "inline-flex min-h-11 items-center text-sm font-semibold text-primary-hover",
-            focusStyle,
-          )}
-        >
-          Sign in
-        </Link>
+        {!isLandingOnly() && (
+          <Link
+            href="/sign-in"
+            className={cn(
+              "inline-flex min-h-11 items-center text-sm font-semibold text-primary-hover",
+              focusStyle,
+            )}
+          >
+            Sign in
+          </Link>
+        )}
       </div>
     </footer>
   );
