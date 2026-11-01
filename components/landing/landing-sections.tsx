@@ -324,12 +324,14 @@ export function Team() {
   return (
     <section
       id="team"
-      className="border-y border-border bg-surface py-24 max-sm:py-16"
+      className="border-y border-border bg-gradient-to-b from-background via-primary-tint to-primary-track py-28 max-sm:py-20"
       data-reveal
     >
       <div className={cn(container, "text-center")}>
         <p className={eyebrow}>The team</p>
-        <h2 className={sectionHeading}>Built by the Dugtong team.</h2>
+        <h2 className="font-heading text-[clamp(36px,5.5vw,60px)] font-extrabold leading-[1.08] tracking-[-0.025em] text-balance">
+          Built by <span className="text-primary">Nerds of a Feather</span>.
+        </h2>
         <p className="mx-auto mt-3.5 max-w-[480px] text-base leading-[1.65] text-copy-muted">
           The people who build and maintain Dugtong OJT.
         </p>
