@@ -1,6 +1,6 @@
 # To confirm with the school
 
-Questions we still need to ask the coordinator or supervisors. When you get an answer, tell the AI to record it in AGENTS.md section 12, then tick it here.
+Questions we still need to ask the coordinator or supervisors. When you get an answer, tell the AI to record it in `plan.md`, then tick it here.
 
 ## Ask the coordinator
 

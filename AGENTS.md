@@ -1,6 +1,6 @@
 # AGENTS.md: Dugtong OJT
 
-Read this file first. It states what we are building, the rules the product must follow, and how it should look. It does not say how to structure the project; the repository itself is the source of truth for that. Commands to run it are in section 15. If a task conflicts with this file, stop and ask. If a decision changes, a human updates this file in the same PR (AI agents propose the change in the ticket, see section 14).
+Read this file first. It states what we are building, the rules the product must follow, and how it should look. It does not say how to structure the project; the repository itself is the source of truth for that. Commands to run it are in section 15. Feature plans and decisions are in `plan.md`. If a task conflicts with this file, stop and ask. If a decision changes, a human updates this file in the same PR (AI agents propose the change in the ticket, see section 14).
 
 ## 1. What this project is
 
@@ -29,7 +29,7 @@ Dugtong OJT is a web app (installable PWA) that replaces the paper DTR and scatt
 - Other schools or departments (for example CHTM). Store things like required hours, evaluation criteria, and certificate templates as data per course or department, never as constants in code, so adding CHTM later is mostly data entry. Build nothing CHTM-specific.
 - Public or guest access. Every page and file requires login, except the public landing page (see section 7).
 - Company self-registration and document verification (the school decides partners).
-- MOA tracking, OJT requirements and prerequisites, and daily-hours rules other than the supervisor-set work schedule (section 6).
+- MOA tracking, OJT requirements and prerequisites, daily-hours rules.
 - Partnership request flow, reports and appeals, company trust score.
 - Native mobile app, billing, alumni accounts, accreditation export packs.
 
@@ -65,13 +65,10 @@ There is no separate company representative. The first supervisor invited for a 
 | Edit required hours                                      | no                     | no                             | yes (audited)     | yes (audited)                |
 | Import student roster                                    | no                     | no                             | yes               | yes                          |
 | Submit evaluation                                        | no                     | own company's students         | no                | no                           |
-| Create and edit the evaluation form                      | no                     | no                             | yes               | no                           |
-| View evaluations                                         | no                     | own company's students         | all BSIT students | all                          |
-| View certification                                       | own                    | no                             | all BSIT students | all                          |
 | View and export reports, DTR PDF                         | own DTR                | own company's students         | all BSIT students | all                          |
 | Create companies, invite supervisors, create coordinator | no                     | invite colleagues (owner only) | no                | yes                          |
 
-Default: the coordinator cannot approve or change a supervisor's decision. This is an open decision (section 12). The coordinator builds the evaluation form (criteria rated 1 to 5) and the supervisor completes it per student. Other companies' supervisors never see an evaluation. The certification is issued by the coordinator.
+Default: the coordinator cannot approve or change a supervisor's decision. This is an open decision (`plan.md`). Who can view evaluations and certifications is decided in `plan.md`.
 
 ## 5. Core flow
 
@@ -101,12 +98,6 @@ These are product rules. Never weaken them to make a feature easier.
 - Approved entries are locked. Only the supervisor can reopen one; Admin can do so only as an audited support action. Every reopening is audited.
 - Bulk approve is supported for a day's pending entries.
 - Entries pending longer than a set number of days are flagged as stale to the coordinator. The threshold is an open decision.
-- An open entry that never timed out is flagged to the supervisor and coordinator. The system never auto-closes it or invents hours. The supervisor sets the time out. A flagged entry does not block the student's next time in.
-- Each deployment has a work schedule (days, start and end times, in `Asia/Manila`) set by the supervisor. Only the supervisor can change it, and a change applies from then on, not to a single day. The schedule decides which date an entry belongs to, so night shifts that cross midnight map to the date of time in, and it is how a forgotten time out is detected.
-- A time out before the scheduled end is blocked, unless the student gives a reason. With a reason the entry is saved as an early out and shown to the supervisor with that reason. The server decides by its own clock, never the client's. Only approved hours actually worked count.
-- A student can time in from 30 minutes before the scheduled start. The window is stored as data, not a constant in code.
-- Overtime, meaning time outside the schedule, must be requested by the student first.
-- The early time out reason is free text, and the daily approval covers it. This is provisional; see section 12.
 - Each entry has a break duration (default 0, supervisor-editable) and an optional location, so break deduction and location checks can be added later without redesign.
 
 ### Applications and deployments
@@ -139,7 +130,7 @@ Rules marked "default" are implemented as written until a human changes them. Do
 
 ### Audit
 
-Changes to daily logs, evaluations, deployments, work schedules, required hours, company status, and company membership are recorded with old value, new value, who, and when. Audit records can be added but never edited or deleted.
+Changes to daily logs, evaluations, deployments, required hours, company status, and company membership are recorded with old value, new value, who, and when. Audit records can be added but never edited or deleted.
 
 ### Database guard rails
 
@@ -346,25 +337,9 @@ Use the error solid fill only for destructive actions. Everything else that is w
 
 Plus Jakarta Sans for headings (700 and 800), Inter for body and UI (400 and 600), JetBrains Mono for times and IDs. Always include system font fallbacks.
 
-## 12. Open decisions
+## 12. Plans and decisions
 
-Do not decide these on your own. Ask in the ticket's "Open questions"; a human records the answer here.
-
-- Certificate signatories. The coordinator issues the certificate; whose name and signature appear on it is to be confirmed.
-- Fonts (section 11 is proposed, not confirmed).
-- Shifts that cross midnight (BPO night shifts). Provisional: the entry belongs to the date of time in, and the time out may fall on the next day. To confirm with the coordinator; the one-log-per-day constraint may change.
-- REVISIT: what happens if the coordinator raises required hours after the evaluation is submitted. Expected to never happen, since the school's rules are imported before setup. Working default: an issued certificate stays valid and the change is audited. Decide before the evaluation ticket.
-- Evaluation form: the coordinator defines the criteria, rated 1 to 5. Needs a mockup for the form builder before any UI.
-- Can the coordinator override a supervisor's approval decision? Default: no.
-- Stale-pending threshold is 3 days, stored per course as data. Reminder timing is still open.
-- Lunch-break rule for hours (default: none deducted).
-- Late time in: how it is treated. Suggested: allowed, recorded and shown as late to the supervisor, with hours counted from the actual time in. Not decided.
-- Hours for an early arrival (time in within the 30 minutes before the scheduled start): count from the scheduled start or from the actual time in. Suggested: from the scheduled start. Not decided.
-- Overtime request: who approves it (suggested: the supervisor), how the student requests it, and whether it needs a reason. Needs a mockup before any UI.
-- Swapped day: whether it is a one-time exception for a single date (suggested, requested by the student and approved by the supervisor) or a permanent schedule change. Permanent changes are made by the supervisor editing the schedule. To ask the coordinator.
-- REMEMBER, early time out approval: the reason is free text and the daily approval covers it, because supervisors may be busy. Ask the supervisors and coordinator whether they want a separate approval step.
-- Application rules: several applications allowed, one active deployment (confirm).
-- UI language (English assumed).
+Feature plans, settled decisions, and open decisions live in `plan.md`, not in this file. Do not decide open decisions on your own: ask in the ticket's "Open questions" and a human records the answer in `plan.md`. This file holds general rules only.
 
 ## 13. Rules for AI agents
 
@@ -373,7 +348,7 @@ Do:
 - Read this file before changing anything. Prefer the smallest change that completes the task.
 - Enforce the business rules in section 6 on the server, not only in the UI.
 - Add or update tests with the code.
-- Ask when a requirement is unclear or missing, in the ticket's "Open questions". A human records the answer in this file.
+- Ask when a requirement is unclear or missing, in the ticket's "Open questions". A human records the answer in `plan.md`.
 - Test, commit, and push every logical change automatically, following section 14.
 
 Do not:
@@ -383,7 +358,7 @@ Do not:
 - Write to tables from the client, or use the service-role key outside server-only code.
 - Edit applied migrations, generated files, or audit rows.
 - Add public routes, public storage, or guest access.
-- Invent UI without a mockup, or invent business rules. Add them to "Open decisions" instead.
+- Invent UI without a mockup, or invent business rules. Add them to the open decisions in `plan.md` instead.
 - Add dependencies without a clear reason.
 
 ### Definition of done
@@ -398,7 +373,7 @@ Do not:
 
 - Work only from a ticket file in `tickets/`. No ticket, no coding. Read `AGENTS.md`, the ticket, and the mockup first.
 - If anything needed is missing or unclear, write the question under "Open questions" in the ticket and stop. Do not guess.
-- For anything bigger than a small change, write a plan in the ticket and wait until a human ticks "Plan approved".
+- Plan first. Before adding a new feature, the developer writes the plan in `plan.md` (one section per feature) and the ticket links to it. Wait until a human marks the plan approved. A small change needs no plan.
 - Do only what "In scope" says. New ideas go under "Suggested new tickets", never into the code.
 - Order of authority: `AGENTS.md`, then the ticket, then your own ideas. If the first two conflict, stop and ask.
 - Never edit `AGENTS.md`, other tickets, or the scope of the current ticket unless a human says so. To change `AGENTS.md`, write the proposal under "Suggested AGENTS.md changes" in the ticket; a human applies it.

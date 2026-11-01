@@ -34,7 +34,7 @@ Tested by a human:
 
 - [ ] Worked through in the browser as the roles involved
 
-## Plan (AI fills in before coding)
+## Plan (link to the plan in plan.md; plan first for any new feature)
 
 - [ ] Plan approved by a human
 
