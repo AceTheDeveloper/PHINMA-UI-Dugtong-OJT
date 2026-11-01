@@ -104,6 +104,9 @@ These are product rules. Never weaken them to make a feature easier.
 - An open entry that never timed out is flagged to the supervisor and coordinator. The system never auto-closes it or invents hours. The supervisor sets the time out. A flagged entry does not block the student's next time in.
 - Each deployment has a work schedule (days, start and end times, in `Asia/Manila`) set by the supervisor. Only the supervisor can change it, and a change applies from then on, not to a single day. The schedule decides which date an entry belongs to, so night shifts that cross midnight map to the date of time in, and it is how a forgotten time out is detected.
 - A time out before the scheduled end is blocked, unless the student gives a reason. With a reason the entry is saved as an early out and shown to the supervisor with that reason. The server decides by its own clock, never the client's. Only approved hours actually worked count.
+- A student can time in from 30 minutes before the scheduled start. The window is stored as data, not a constant in code.
+- Overtime, meaning time outside the schedule, must be requested by the student first.
+- The early time out reason is free text, and the daily approval covers it. This is provisional; see section 12.
 - Each entry has a break duration (default 0, supervisor-editable) and an optional location, so break deduction and location checks can be added later without redesign.
 
 ### Applications and deployments
@@ -355,8 +358,11 @@ Do not decide these on your own. Ask in the ticket's "Open questions"; a human r
 - Can the coordinator override a supervisor's approval decision? Default: no.
 - Stale-pending threshold is 3 days, stored per course as data. Reminder timing is still open.
 - Lunch-break rule for hours (default: none deducted).
-- Work schedule details: how early a student may time in before the scheduled start, how late counts as late, and what a student does on a day that is not in their schedule (for example overtime or a swapped day).
-- Early time out reasons: free text or a fixed list of reasons, and whether the supervisor must approve it separately or the daily approval covers it.
+- Late time in: how it is treated. Suggested: allowed, recorded and shown as late to the supervisor, with hours counted from the actual time in. Not decided.
+- Hours for an early arrival (time in within the 30 minutes before the scheduled start): count from the scheduled start or from the actual time in. Suggested: from the scheduled start. Not decided.
+- Overtime request: who approves it (suggested: the supervisor), how the student requests it, and whether it needs a reason. Needs a mockup before any UI.
+- Swapped day: whether it is a one-time exception for a single date (suggested, requested by the student and approved by the supervisor) or a permanent schedule change. Permanent changes are made by the supervisor editing the schedule. To ask the coordinator.
+- REMEMBER, early time out approval: the reason is free text and the daily approval covers it, because supervisors may be busy. Ask the supervisors and coordinator whether they want a separate approval step.
 - Application rules: several applications allowed, one active deployment (confirm).
 - UI language (English assumed).
 
