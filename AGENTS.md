@@ -395,7 +395,8 @@ Do not:
   1. Run the checks in section 15 (typecheck, lint, tests). Fix failures before going on.
   2. Only if every check passes, commit with the message `ticket-XX: short message`. Never commit code that fails a check.
   3. Push that commit to `origin/<developer-branch>`.
-- The developer's branch is named after the developer (for example `ace` for Arwin Clyde Simondac). Find it with `git branch --show-current`. If the current branch is `dev`, `test`, or `main`, or is not the developer's own branch, stop and ask instead of committing.
+- Several developers work in this repository, each on their own branch named after them. Never assume whose branch it is: find it with `git branch --show-current`. Commit and push only if that branch is not `dev`, `test`, or `main`, and it matches the developer you are working for (the ticket's Assignee, or the developer who started the session). If it is `dev`, `test`, `main`, or another developer's branch, or you are not sure, stop and ask instead of committing.
+- Work only on a ticket assigned to the developer you are working for. If the ticket's Assignee is someone else, stop and ask. Do not take over or edit another developer's ticket or branch.
 - Never commit or push to `dev`, `test`, or `main`; never force-push. If a check or a push fails, report the failure with its output and do not claim the change was published. Never merge into `dev` yourself; a human opens and merges the PR.
 - One ticket at a time per branch. Do not start the next ticket until the previous one is merged into `dev`.
 - Tick the "Tested by AI" boxes only for commands you actually ran, and write the command and result next to them. Never tick a human box.
