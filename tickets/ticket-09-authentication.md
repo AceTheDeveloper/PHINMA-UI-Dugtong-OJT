@@ -38,6 +38,7 @@ Sign-in, invitation-only sign-up, and the server checks every later feature reli
 - [ ] A second call for the same Clerk user returns the existing user.
 - [ ] `create_invitation` allows and refuses each role pairing as in the plan.
 - [ ] A deactivated user is refused on the next request, and sees the deactivated screen.
+- [ ] An Admin who did not sign in with Google is refused; the other roles are unaffected.
 - [ ] The role, scope, and active state are read from our database, never from Clerk token claims or metadata.
 - [ ] The service-role key appears only in server-only modules.
 - [ ] Public routes are exactly `/`, `/sign-in`, `/accept-invitation`, and branding assets, and a test fails if that list changes.
