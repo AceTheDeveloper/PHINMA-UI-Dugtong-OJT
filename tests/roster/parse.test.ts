@@ -162,6 +162,6 @@ describe("refusals", () => {
 
   it("refuses a corrupt .xlsx without throwing", async () => {
     const corrupt = { name: "roster.xlsx", bytes: new Uint8Array([0x50, 0x4b, 0x03, 0x04, 1, 2, 3, 4]) };
-    expect(await messageOf(corrupt)).toMatch(/could not be read/);
+    expect(await messageOf(corrupt)).toMatch(/too large once unpacked, or it is damaged/);
   });
 });
