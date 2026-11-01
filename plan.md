@@ -99,7 +99,7 @@ Key decisions that follow from AGENTS.md:
 - `time_in` and `time_out` are `timestamptz` set by `now()` in the database, never from the client.
 - Each log has `break_minutes` (default 0) and nullable `location`.
 
-#### 2. Database design
+#### 2. Database design (superseded by "Plan: core schema" below)
 
 Tables (all with RLS enabled, no direct client writes):
 
@@ -173,6 +173,130 @@ Domains: roster, companies, listings, applications, deployments, logs, evaluatio
 
 Add a `work_schedules` table per deployment (days, start and end time, effective-from), set only by the supervisor and audited. Daily logs read the schedule to assign the log date, enforce the time out rule, and detect forgotten time outs. Details are under "Daily logs and schedules" in Decisions.
 
+
+### Plan: core schema (ticket-08) [draft]
+
+#### What and why
+
+The database for the pilot (PHINMA UI, CITE, BSIT) that can grow to the whole university without a rewrite. Rule of thumb: **nothing about CITE or BSIT is a constant in code or in a column name.** CITE and BSIT are rows. Adding another department or course later is data entry plus, at most, a new coordinator assignment. We build nothing department-specific (AGENTS.md section 2).
+
+#### Principles
+
+- **Config is data, per course.** Required hours, stale threshold, time-in window, evaluation form, and certificate template all hang off a course or an OJT term.
+- **Scope is explicit.** Every row traces to a course (students, evaluations) or a company (supervisors, listings). RLS and `requireRole` check that chain, never a hard-coded course.
+- **History is never rewritten.** Rules that change over time (required hours, schedule, evaluation form) are versioned or snapshotted, so old records stay correct.
+- **Foreign keys over flexibility.** Separate assignment tables, not one polymorphic "scope" column, so the database enforces the links.
+- `uuid` primary keys, `created_at` and `updated_at` on every table, deactivate instead of delete.
+
+#### Entity groups
+
+**A. Academic structure**
+
+| Table       | Purpose                                                      | Notes                                                                                              |
+| ----------- | ------------------------------------------------------------ | -------------------------------------------------------------------------------------------------- |
+| schools     | The institution. One row now (PHINMA UI)                     | `name`, `timezone` (default `Asia/Manila`). Keeps the name and timezone out of code.               |
+| departments | CITE now, others later                                       | FK school; unique code                                                                             |
+| courses     | BSIT now                                                     | FK department; unique code                                                                         |
+| ojt_terms   | One OJT batch of a course (for example SY 2026-2027, term 1) | FK course; `required_hours`, `stale_threshold_days` (3), `time_in_window_minutes` (30), dates, status |
+
+`ojt_terms` is the key future-ready piece. Required hours live on the batch, so a later change applies to new batches and old batches keep their original value. This also removes most of the "required hours raised after evaluation" worry. The REVISIT item stays open for the rules.
+
+**B. People and access**
+
+| Table                   | Purpose                              | Notes                                                                                                 |
+| ----------------------- | ------------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| users                   | One row per Clerk identity           | unique `clerk_id`; `role` enum (admin, coordinator, supervisor, student); `is_active`                 |
+| coordinator_assignments | Which courses a coordinator manages  | (user, course). Many allowed, so a second coordinator or a department-wide one later is rows, not code |
+| students                | Roster record                        | FK user (null until the invite is accepted), course, ojt_term; unique (term, student_number); unique email |
+| supervisor_memberships  | Supervisor belongs to a company      | exactly one owner per company (partial unique index)                                                  |
+| invitations             | Invitation-only sign-up              | role, target (student or company), token hash, expiry, used_at                                        |
+| consents                | Data privacy notice acceptance       | (user, notice_version, accepted_at)                                                                   |
+
+The pilot (one coordinator, BSIT only) is just one `coordinator_assignments` row.
+
+**C. Companies and listings**
+
+| Table           | Purpose                           | Notes                                                                                           |
+| --------------- | --------------------------------- | ----------------------------------------------------------------------------------------------- |
+| companies       | Partner companies, school-wide    | status enum. Not tied to a department, since one company can host several departments           |
+| listings        | Company postings                  | FK company; status enum                                                                         |
+| listing_courses | Which courses a listing is open to | (listing, course). Pilot: every listing targets BSIT. Students see only listings for their course |
+
+**D. Applications and deployment**
+
+| Table              | Purpose                                | Constraints                                                                                       |
+| ------------------ | -------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| resumes            | Storage path per student               | one current per student; private bucket                                                           |
+| applications       | Student to listing                     | unique (student, listing); status enum                                                            |
+| deployments        | Accepted application                   | FK student, company, listing, ojt_term; unique partial index: one active per student; status enum |
+| work_schedules     | Supervisor-set schedule per deployment | `effective_from`; audited; the newest effective row applies                                       |
+| work_schedule_days | Days and times of a schedule           | (schedule, weekday, start_time, end_time); an end earlier than the start means the shift ends the next day (night shift) |
+
+**E. Daily logs**
+
+`daily_logs`: deployment, `log_date` (in the school timezone), `time_in` and `time_out` (server `now()`), `break_minutes` (default 0), `location` (nullable), `journal`, `status` (open, pending, approved, rejected), `reject_reason`, `early_out_reason`, `approved_by`, `approved_at`, and a **snapshot of the scheduled start and end** taken at time in, so a later schedule change never rewrites old entries. Unique (deployment, log_date). Late, early out, and forgotten time out are computed from the snapshot, not stored as separate truth.
+
+**F. Evaluation and certification**
+
+| Table                 | Purpose                              | Notes                                                                                          |
+| --------------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------- |
+| evaluation_forms      | Coordinator-built form per course    | `version`, `scale_min` 1, `scale_max` 5, status draft or published; published forms are immutable |
+| evaluation_criteria   | Criteria of a form                   | label, position                                                                                |
+| evaluations           | Supervisor's submitted evaluation    | one per deployment; references the exact form version used                                     |
+| evaluation_scores     | Rating per criterion                 | (evaluation, criterion); value within the form's scale                                         |
+| certificate_templates | Per course: issuer and layout data   | signatories stored as data; the signatory is still to confirm                                  |
+| certifications        | Generated PDF                        | one per evaluation; storage path; references the template version                              |
+
+**G. Audit**
+
+`audit_log`: table name, row id, action, old value (jsonb), new value (jsonb), actor user, source (`app` or `database`), timestamp. Insert only.
+
+**Deferred on purpose** (waiting on open decisions, added as later migrations): overtime requests, swapped-day exceptions, roster import staging (added with the roster ticket), stale reminders.
+
+#### Guard rails in the database
+
+- Unique (deployment, log_date); one active deployment per student; one owner per company; one evaluation per deployment.
+- Time out must be after time in. Hours are computed from approved logs, never stored as a running total.
+- Audit trigger on daily_logs, evaluations, deployments, work_schedules, ojt_terms (required hours), companies (status), and supervisor_memberships. It reads the acting user from a transaction-local setting that server code sets, so edits made outside the app are recorded as `database`.
+- `audit_log` rejects update and delete. Approved logs reject update and delete except through the audited reopen function.
+- Accept-application is one Postgres function (create the deployment, withdraw the other open applications). It is all or nothing.
+- Evaluation insert is rejected unless approved hours are at least the term's required hours.
+
+#### Access (RLS)
+
+- A helper reads the Clerk user id from the token and resolves the `users` row.
+- Select policies only. No insert, update, or delete policies for user sessions; all writes go through server code with the service-role key.
+- Students read their own rows. Supervisors read rows of their company's deployments. Coordinators read rows whose course is in their `coordinator_assignments`. Admin reads all.
+- Evaluations: supervisor (own company's students), coordinator, admin. Certifications: student (own), coordinator, admin.
+
+#### Migration order
+
+1. Academic structure (schools, departments, courses, ojt_terms) and seed rows for PHINMA UI, CITE, BSIT.
+2. Users, assignments, students, invitations, consents.
+3. Companies, listings, listing_courses.
+4. Resumes, applications, deployments, work schedules.
+5. Daily logs.
+6. Evaluation forms, evaluations, scores, certificate templates, certifications.
+7. Audit log and triggers.
+8. RLS policies and helper functions.
+
+Each migration ships with database tests for its guard rails.
+
+#### Testing
+
+- Database rules (constraints, triggers, RLS) are tested against a local Supabase with `supabase test db` (pgTAP). This needs Docker.
+- Server logic stays in Vitest (ticket-07).
+- Every row of the permission table in AGENTS.md section 4 gets an access test, for example "student A cannot read student B's logs".
+
+#### Open questions
+
+1. **One school or several?** Default: one `schools` row, and no tenant column on every table (the school is reachable through course, department, school). Does university-wide mean only PHINMA UI, or might other PHINMA schools join later? If so, a tenant strategy is a bigger decision.
+2. **OJT terms as the home of required hours.** Recommended. Each batch has its own required hours, and the coordinator imports students into a term. Is that how the school thinks about it (a batch per school year and semester)?
+3. **Companies shared across departments.** Recommended (`listing_courses` controls who sees what). Or should each department keep its own partner list?
+4. **Docker.** Is Docker installed on your machine and your teammates' machines? Without it we cannot run database tests locally.
+5. **Coordinators.** The model allows several coordinators and several courses per coordinator. The pilot has one. Does the school need anything else, such as a department head with read-only access?
+
+- [ ] Plan approved by a human
 
 ### Plan: test framework (ticket-07) [done]
 
