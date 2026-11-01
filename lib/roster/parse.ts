@@ -1,6 +1,6 @@
 import Papa from "papaparse";
 import { readSheet } from "read-excel-file/node";
-import { isSafeXlsx } from "@/lib/roster/safe-zip";
+import { repackXlsx } from "@/lib/roster/safe-zip";
 import { fail, ok, type Result } from "@/lib/result";
 
 // Turns an uploaded CSV or Excel file into plain text rows. Pure: it takes
@@ -72,8 +72,10 @@ export async function parseRosterFile(file: {
     return fail("validation", "The file does not match its extension. Save it again as .csv or .xlsx.");
   }
 
-  // An .xlsx is a ZIP that can unpack far larger than it is; measure first.
-  if (xlsx && !isSafeXlsx(file.bytes)) {
+  // An .xlsx is a ZIP that can unpack far larger than it is. The reader never
+  // sees the upload: it gets a clean copy built from entries measured under a cap.
+  const workbook = xlsx ? repackXlsx(file.bytes) : null;
+  if (xlsx && workbook === null) {
     return fail(
       "validation",
       "The Excel file is too large once unpacked, or it is damaged. Save the list as .csv and try again.",
@@ -82,7 +84,7 @@ export async function parseRosterFile(file: {
 
   let grid: string[][];
   try {
-    grid = xlsx ? await readExcel(file.bytes) : readCsv(file.bytes);
+    grid = workbook ? await readExcel(workbook) : readCsv(file.bytes);
   } catch {
     return fail("validation", unreadable);
   }
