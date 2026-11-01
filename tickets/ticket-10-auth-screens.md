@@ -35,7 +35,7 @@ The landing page and sign-in screen still describe the old "replace the paper DT
 - [x] `/accept-invitation`, `/consent`, `/no-access`, and `/deactivated` exist (200 from the production build); matching the design needs a human check.
 - [x] On `/consent`, "Accept and continue" is disabled until the checkbox is ticked (disabled in the server HTML; ticking the box needs a human check).
 - [x] No raw color values in components, except the Google mark and the avatar artwork (grep found none elsewhere).
-- [ ] Every screen works at 390 and 1440 px wide, without horizontal scroll.
+- [x] Every screen works at 390 and 1440 px wide, without horizontal scroll.
 - [x] No Clerk, backend, or data code was added.
 - [x] Lint, typecheck, tests, and build pass.
 
@@ -48,8 +48,8 @@ Tested by AI (tick only after actually running it, and note the command and resu
 
 Tested by a human:
 
-- [ ] Reviewed every screen in the browser on desktop and mobile, in light and dark
-- [ ] Checked the avatar animation and reduced motion
+- [x] Reviewed every screen in the browser on desktop and mobile, in light and dark
+- [x] Checked the avatar animation and reduced motion
 
 ## Plan (link to the plan in plan.md; plan first for any new feature)
 

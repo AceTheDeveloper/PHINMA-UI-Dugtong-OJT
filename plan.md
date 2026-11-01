@@ -357,7 +357,7 @@ Each migration ships with database tests for its guard rails.
 
 - [x] Plan approved by a human (approved by the developer in session)
 
-### Plan: authentication and authorization (ticket-09) [draft]
+### Plan: authentication and authorization (ticket-09) [approved]
 
 #### What and why
 
@@ -457,7 +457,7 @@ New dependencies, each with a reason: `@clerk/nextjs` (auth), `@supabase/supabas
 6. DECIDED (developer left it to the AI), Clerk instances: use the development instance while building. Create the production instance, with its own keys, its own Google OAuth credentials, and the production domain, before any real student or supervisor is invited. Development users and invitations do not carry over, so creating it early avoids re-inviting people.
 7. DECIDED, changed or deleted emails: skip for now. REMEMBER (see Open decisions): add a Clerk webhook for `user.updated` and `user.deleted` before the pilot goes live.
 
-- [ ] Plan approved by a human
+- [x] Plan approved by a human (approved by the developer in session)
 
 ### Plan: auth screens and landing page redesign (ticket-10) [approved]
 
