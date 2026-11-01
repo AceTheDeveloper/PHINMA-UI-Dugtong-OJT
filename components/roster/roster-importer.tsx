@@ -204,8 +204,10 @@ export function RosterImporter({
     });
   }
 
+  // The filter only applies while there are problems to show, so fixing the
+  // last one cannot leave the table empty behind a checkbox that is gone.
   const shown = preview
-    ? onlyProblems
+    ? onlyProblems && preview.withProblems > 0
       ? preview.rows.filter((row) => row.problems.length > 0)
       : preview.rows
     : [];
