@@ -65,10 +65,13 @@ There is no separate company representative. The first supervisor invited for a 
 | Edit required hours                                      | no                     | no                             | yes (audited)     | yes (audited)                |
 | Import student roster                                    | no                     | no                             | yes               | yes                          |
 | Submit evaluation                                        | no                     | own company's students         | no                | no                           |
+| Create and edit the evaluation form                      | no                     | no                             | yes               | no                           |
+| View evaluations                                         | no                     | own company's students         | all BSIT students | all                          |
+| View certification                                       | own                    | no                             | all BSIT students | all                          |
 | View and export reports, DTR PDF                         | own DTR                | own company's students         | all BSIT students | all                          |
 | Create companies, invite supervisors, create coordinator | no                     | invite colleagues (owner only) | no                | yes                          |
 
-Default: the coordinator cannot approve or change a supervisor's decision. This is an open decision (section 12). Who can view evaluations and certifications beyond the student and Admin is also open (section 12).
+Default: the coordinator cannot approve or change a supervisor's decision. This is an open decision (section 12). The coordinator builds the evaluation form (criteria rated 1 to 5) and the supervisor completes it per student. Other companies' supervisors never see an evaluation. The certification is issued by the coordinator.
 
 ## 5. Core flow
 
@@ -98,6 +101,7 @@ These are product rules. Never weaken them to make a feature easier.
 - Approved entries are locked. Only the supervisor can reopen one; Admin can do so only as an audited support action. Every reopening is audited.
 - Bulk approve is supported for a day's pending entries.
 - Entries pending longer than a set number of days are flagged as stale to the coordinator. The threshold is an open decision.
+- An open entry that never timed out is flagged to the supervisor and coordinator. The system never auto-closes it or invents hours. The supervisor sets the time out. A flagged entry does not block the student's next time in.
 - Each entry has a break duration (default 0, supervisor-editable) and an optional location, so break deduction and location checks can be added later without redesign.
 
 ### Applications and deployments
@@ -341,16 +345,16 @@ Plus Jakarta Sans for headings (700 and 800), Inter for body and UI (400 and 600
 
 Do not decide these on your own. Ask in the ticket's "Open questions"; a human records the answer here.
 
-- Certificate issuer and signatories.
+- Certificate signatories. The coordinator issues the certificate; whose name and signature appear on it is to be confirmed.
 - Fonts (section 11 is proposed, not confirmed).
-- Who can view evaluations and certifications besides the student and Admin (supervisor, coordinator).
-- What happens to an open entry that never timed out (forgotten time out): auto-close, flag, or supervisor correction.
-- How a shift that crosses midnight maps to "one entry per deployment per day".
-- What happens if the coordinator raises required hours after the evaluation is submitted.
-- Evaluation criteria and rating scale.
+- Shifts that cross midnight (BPO night shifts). Provisional: the entry belongs to the date of time in, and the time out may fall on the next day. To confirm with the coordinator; the one-log-per-day constraint may change.
+- REVISIT: what happens if the coordinator raises required hours after the evaluation is submitted. Expected to never happen, since the school's rules are imported before setup. Working default: an issued certificate stays valid and the change is audited. Decide before the evaluation ticket.
+- Evaluation form: the coordinator defines the criteria, rated 1 to 5. Needs a mockup for the form builder before any UI.
 - Can the coordinator override a supervisor's approval decision? Default: no.
-- Stale-pending threshold (days) and reminder timing.
+- Stale-pending threshold is 3 days, stored per course as data. Reminder timing is still open.
 - Lunch-break rule for hours (default: none deducted).
+- Student work schedules: proposed so the system can tell night shifts apart and spot forgotten time outs. Needs a decision, because section 2 lists "daily-hours rules" as out of scope. Open: who sets the schedule (coordinator, supervisor, or student), whether it can change per day, and whether it is only a reference or enforced.
+- Early time out (before the scheduled end): allow and count only the hours actually worked, flag it, or require a supervisor decision. Depends on the schedule decision above.
 - Application rules: several applications allowed, one active deployment (confirm).
 - UI language (English assumed).
 

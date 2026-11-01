@@ -144,13 +144,15 @@ Domains: roster, companies, listings, applications, deployments, logs, evaluatio
 Answered by the developer in session. A human records them in AGENTS.md section 12 (see "Suggested AGENTS.md changes").
 
 - ANSWERED, test framework: Vitest for unit and access tests, Playwright for browser tests later.
-- ANSWERED, forgotten time out: flag it; the supervisor corrects it. The system never invents hours. Still undecided: whether a flagged open entry blocks the student's next time in.
-- PROVISIONAL, shift crossing midnight: `log_date` is the date of time in, and a time out on the next day is allowed. Some partner companies run BPO shifts. TO CONFIRM with the coordinator; the unique constraint may change.
+- ANSWERED, forgotten time out: flag it; the supervisor corrects it. The system never invents hours. A flagged entry does not block the student's next time in. Applied to AGENTS.md section 6.
+- PROVISIONAL (now in AGENTS.md section 12), shift crossing midnight: `log_date` is the date of time in, and a time out on the next day is allowed. Some partner companies run BPO shifts. TO CONFIRM with the coordinator; the unique constraint may change.
 - ANSWERED, evaluation criteria: the coordinator creates the evaluation form (criteria rated 1 to 5). The supervisor fills it in per student. Needs a mockup before any UI (AGENTS.md section 9).
 - ANSWERED, evaluation visibility: the supervisor (own company's students only), coordinator, and Admin. Other supervisors never see them.
 - ANSWERED, certification visibility: the student, coordinator, and Admin.
 - ANSWERED, certificate issuer: the coordinator. OPEN: who signs the certificate (name and signature). TO CONFIRM.
 - ANSWERED, stale-pending threshold: 3 days (stored per course as data).
+- OPEN, student work schedules (raised by the developer): proposed to detect night shifts and forgotten time outs. Conflicts with AGENTS.md section 2 (daily-hours rules out of scope), so a human must decide. Questions: who sets the schedule, per-day changes, reference only or enforced.
+- OPEN, early time out: depends on the schedule decision. Options: count actual hours only, flag it, or supervisor decides.
 - REVISIT, required hours raised after an evaluation is submitted: the developer expects this never to happen, because the school's rules are imported before setup. Working default: an issued certificate stays valid, and the change is audited. DO NOT FORGET: revisit this before the evaluation ticket is built.
 
 ## Suggested AGENTS.md changes (a human applies these)
