@@ -355,6 +355,107 @@ Each migration ships with database tests for its guard rails.
 
 - [x] Plan approved by a human (approved by the developer in session)
 
+### Plan: authentication and authorization (ticket-09) [draft]
+
+#### What and why
+
+Sign-in, invitation-only sign-up, and the server checks that every later feature relies on. Clerk answers "who is this person". Our own database answers "what are they allowed to do". Nothing else in the app should have to think about auth: it calls one helper and gets a role and scope, or a typed refusal.
+
+#### Verified facts (checked against Clerk and Next.js docs on 2026-11-01)
+
+- Next.js 16 calls the request interceptor `proxy.ts` (it was `middleware.ts` before). Clerk's own advice is to protect access close to the data, not only in the proxy.
+- Clerk's native Supabase integration replaces the deprecated JWT template. Clerk adds `role: authenticated` to session tokens, the Clerk user id is the `sub` claim, and supabase-js takes an `accessToken` function that returns the Clerk token.
+- Clerk's **Invite-only** access mode (API value `restricted`) is what blocks sign-up without an invitation. An invitation by itself does not restrict anything.
+- `createInvitation` accepts `emailAddress`, `publicMetadata`, `redirectUrl`, `expiresInDays` (default 30), and `notify`. The invitation's `publicMetadata` is copied to the user when they sign up. Revoking an invitation is not confirmed from the docs yet; confirm during the build.
+
+#### Principles
+
+- **Clerk is identity only.** Role, scope, and active state come from our database on every request. Roles are never read from a Clerk token or metadata, so they cannot be stale or forged.
+- **Fail closed.** No session, no `users` row, inactive user, wrong role, or wrong scope all end in a refusal.
+- **Check next to the data.** The proxy only sends signed-out visitors to sign in. Real authorization happens in server layouts, server actions, and route handlers through one helper. The proxy is never the only check.
+- **Deactivation is immediate** because every request reads `is_active` from our database. Deactivating also bans the Clerk user and revokes their sessions, but the database check is the one that counts.
+
+#### How a person gets in
+
+1. An authorized person creates an invitation (`create_invitation`). It stores the role and target (student, company, or course) in our `invitations` table and creates the matching Clerk invitation, with our invitation id in its `publicMetadata`.
+2. The invitee opens the Clerk email link, lands on `/accept-invitation`, and sets their password. Clerk's invite-only mode means this is the only way to create an account.
+3. On their first authenticated request, the server finds no `users` row for their Clerk id, so it **provisions them just in time**: it reads their verified primary email and the invitation id from their Clerk profile, then calls `accept_invitation`. The function checks the invitation is pending, not expired, and addressed to that email, then in one transaction creates the `users` row, links the roster record (student), membership (supervisor, first one becomes owner), or course assignment (coordinator), and marks the invitation used.
+4. If the person has not accepted the current data privacy notice, they are sent to the consent screen before anything else.
+5. They land on their role home: `/student`, `/supervisor`, `/coordinator`, or `/admin`.
+
+Why just-in-time instead of a Clerk webhook: no public webhook route, no signing secret, and no race where a person lands before the webhook has run. A webhook can be added later for email changes and deletions.
+
+The first admin uses the same flow: `npm run bootstrap:admin -- <email>` is a script that calls `create_invitation` for the admin role and sends the Clerk invitation.
+
+#### Database changes (migration 4)
+
+Migrations 1 to 3 may already be on the hosted project, so these are changes in a new migration, not edits.
+
+- `invitations`: drop `token_hash` (Clerk issues the token), add `clerk_invitation_id` (unique), add `course_id` (a coordinator invitation needs a course), and update the target check: student needs a student, supervisor needs a company, coordinator needs a course, admin needs none.
+- `school_settings`: add `consent_notice_version` (data, so a new notice is a data change).
+- Functions, all called through `rpc` with the actor id and executable only by the service role:
+  - `create_invitation(actor, role, email, target)` enforces who may invite whom: admin invites any role; a supervisor who owns a company invites supervisors to that company; a coordinator invites students of their courses.
+  - `accept_invitation(clerk_id, email, full_name, invitation_id)` is atomic and idempotent (a second call for the same Clerk id returns the existing user).
+  - `record_consent(user, notice_version)`.
+  - `set_user_active(actor, user, active)`.
+
+#### Code
+
+| Path                             | Purpose                                                                                              |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `proxy.ts`                       | Clerk proxy. Public: `/`, `/sign-in`, `/accept-invitation`, and branding assets. Everything else needs a session. |
+| `lib/result.ts`                  | The typed result `{ ok: true, data } or { ok: false, error: { code, message } }` for expected failures. |
+| `lib/auth/session.ts`            | `getSession()` resolves Clerk id to our user and scope, provisioning on first visit.                 |
+| `lib/auth/authorize.ts`          | `authorize(roles)` for actions and route handlers (returns a result). `requireRole(roles)` for pages and layouts (redirects). |
+| `lib/auth/scope.ts`              | Scope: student id, course ids, company id and owner flag, resolved in one query.                      |
+| `lib/auth/provision.ts`          | The just-in-time step above.                                                                         |
+| `lib/db/admin.ts`                | Service-role Supabase client. Marked `server-only`; never imported by client code.                   |
+| `lib/db/user.ts`                 | Supabase client using the Clerk token, so reads obey RLS. Used once the RLS select policies exist.   |
+| `lib/db/rpc.ts`                  | The single wrapper server code uses to call the write functions.                                     |
+| `scripts/bootstrap-admin.ts`     | Creates the first admin invitation.                                                                  |
+| `.env.example`                   | Variable names with empty values.                                                                    |
+| `app/(roles)/layout.tsx` and the role homes | Layouts call `requireRole` and the consent gate.                                          |
+
+Session shape: `{ userId, clerkId, role, studentId?, courseIds?, companyId?, isCompanyOwner? }`.
+
+New dependencies, each with a reason: `@clerk/nextjs` (auth), `@supabase/supabase-js` (database client), `zod` (input validation, AGENTS.md section 8), `server-only` (keeps secrets out of the client bundle).
+
+#### Screens (need mockups before any UI)
+
+- Sign-in: exists as a visual-only page (ticket-04). This ticket makes it work, with no visual change.
+- Accept invitation (set password): proposed to reuse the sign-in layout.
+- Consent notice: proposed as a single card with the notice text and an "Accept and continue" button.
+- Not invited or no access, and deactivated account: one plain message screen each.
+
+#### Tests
+
+- Database tests (PGlite): `accept_invitation` for each role, wrong email, expired, already used, revoked, second call, and rollback on failure; first supervisor becomes owner and the second does not; `create_invitation` allows and refuses each role pairing; `set_user_active`.
+- Unit tests with injected Clerk and database fakes: no session, not provisioned, inactive user, wrong role, wrong scope, correct scope.
+- A test that lists the public routes, so adding a public route fails the build until someone updates it on purpose.
+- Browser tests (Playwright) come with the first real role-gated screen.
+
+#### Environment variables
+
+`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (server-only), `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY` (server-only). No webhook secret is needed. These names are added to AGENTS.md section 15.
+
+#### Steps for the human (dashboards)
+
+1. Clerk: set the access mode to **Invite-only**, then activate the Supabase integration and copy the Clerk domain.
+2. Supabase: Authentication, Sign In / Providers, add Clerk, paste the domain.
+3. Clerk: turn on email and password sign-in with email verification.
+
+#### Open questions
+
+1. **Sign-in methods.** Email and password only (my suggestion), or also Google? Students have school emails, supervisors use company emails.
+2. **Extra protection for Admin and Coordinator.** Turn on two-step verification for these roles? My suggestion: required for Admin, optional for the rest.
+3. **Invitation lifetime.** My suggestion: 7 days, resendable by whoever sent it. Clerk's default is 30.
+4. **Mockups.** Are the proposed accept-invitation and consent screens acceptable as a starting point, or will you provide mockups?
+5. **Invitation email.** Use Clerk's default email for now, and brand it later?
+6. **Clerk instances.** Use the Clerk development instance until the pilot, then create a production instance with its own keys?
+7. **Changed or deleted emails.** Out of scope for now. Confirm that a changed Clerk email does not need to update our `users` row yet.
+
+- [ ] Plan approved by a human
+
 ### Plan: test framework (ticket-07) [done]
 
 Install Vitest with `npm run test` and one example test. Done in ticket-07.

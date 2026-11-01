@@ -73,9 +73,9 @@ Known limit: PGlite is not hosted Supabase, so a human still applies the migrati
 
 ## Suggested new tickets (ideas found along the way, not built)
 
-- ticket-09: applications, deployments, work schedules (migration 4).
-- ticket-10: daily logs, hours view, and the write functions (migration 5).
-- ticket-11: evaluation forms, evaluations, certification (migration 6).
-- ticket-12: audit log, triggers, and the actor mechanism (migration 7).
-- ticket-13: RLS select policies (migration 8) with an access test per permission row.
-- Auth ticket: Clerk, invitation-only sign-up, `requireRole`, and the Clerk and Supabase connection.
+- applications, deployments, work schedules (migration 4).
+- daily logs, hours view, and the write functions (migration 5).
+- evaluation forms, evaluations, certification (migration 6).
+- audit log, triggers, and the actor mechanism (migration 7).
+- RLS select policies (migration 8) with an access test per permission row.
+- Authentication: planned in `plan.md` as ticket-09. The other tickets are numbered when they are written.
