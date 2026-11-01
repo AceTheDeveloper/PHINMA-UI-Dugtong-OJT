@@ -91,4 +91,5 @@ try {
 }
 
 console.log(`Invitation sent to ${email.data}. It expires in ${lifetimeDays} days.`);
-console.log("Open the email, then accept with the Google account for that address.");
+console.log("Open the email, then press Continue with Google on the invitation page.");
+console.log("Do not set a password: an admin account with a password is refused.");

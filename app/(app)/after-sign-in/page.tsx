@@ -8,7 +8,9 @@ import { authorize } from "@/lib/auth/server";
 export default async function AfterSignInPage() {
   const result = await authorize(roles, { requireConsent: false });
   if (!result.ok) {
-    redirect(redirectFor(result.error.code) ?? "/no-access");
+    // An unexpected failure (for example the database is unreachable) must not
+    // look like a missing invitation.
+    redirect(redirectFor(result.error.code) ?? "/no-access?reason=error");
   }
   if (!result.data.hasConsent) {
     redirect("/consent");

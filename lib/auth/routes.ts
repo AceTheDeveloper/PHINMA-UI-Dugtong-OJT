@@ -20,8 +20,9 @@ export function redirectFor(code: ErrorCode): string | null {
     case "unauthenticated":
       return "/sign-in";
     case "not_provisioned":
-    case "google_required":
       return "/no-access";
+    case "google_required":
+      return "/no-access?reason=google";
     case "inactive":
       return "/deactivated";
     case "consent_required":

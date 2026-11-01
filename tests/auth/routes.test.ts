@@ -63,7 +63,7 @@ describe("redirectFor", () => {
   it.each([
     ["unauthenticated", "/sign-in"],
     ["not_provisioned", "/no-access"],
-    ["google_required", "/no-access"],
+    ["google_required", "/no-access?reason=google"],
     ["inactive", "/deactivated"],
     ["consent_required", "/consent"],
     ["forbidden", null],
