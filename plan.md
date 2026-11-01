@@ -72,6 +72,7 @@ Do not decide these on your own. Ask in the ticket's "Open questions".
 - Overtime request: who approves (suggested: the supervisor), how it is requested, whether it needs a reason. Needs a mockup.
 - Swapped day: suggested, a one-time exception requested by the student and approved by the supervisor; permanent changes are the supervisor editing the schedule. To ask the coordinator.
 - Data retention: how long student data, resumes, and files are kept, and what happens when a batch closes (Data Privacy Act). Ask the school; tracked in `to-confirm.md`.
+- REMEMBER, Clerk webhook: sync a changed email into `users.email`, and when a Clerk account is deleted, deactivate our `users` row. Not needed while building (we match on the Clerk id, so nothing breaks), but do it before the pilot goes live. Needs a public webhook route and a signing secret, which is the reason it was left out of ticket-09.
 - REMEMBER, Resend: invitation emails move from Clerk's default to Resend later. The developer has questions about it to discuss first.
 - Reminder timing for stale pending entries.
 - Can the coordinator override a supervisor's approval decision? Default: no.
@@ -453,8 +454,69 @@ New dependencies, each with a reason: `@clerk/nextjs` (auth), `@supabase/supabas
 3. ANSWERED, invitation lifetime: 7 days, resendable by whoever sent it.
 4. ANSWERED, screens: the developer wants the sign-in screen revised (the current one is not modern enough) and has no mockup, so the AI proposes the design and the developer approves it before it is built. Suggested: do the four auth screens (sign-in, accept invitation, consent, no access) as one UI-only ticket first, with mock behavior, then wire them to Clerk.
 5. ANSWERED, invitation email: Clerk's default for now. REMEMBER: move to Resend later. The developer has questions about Resend to discuss first.
-6. OPEN, Clerk instances: use the development instance until the pilot, then create a production instance with its own keys?
-7. OPEN, changed or deleted emails: if someone changes their email in Clerk, or their Clerk account is deleted, our `users` row is not updated. Nothing breaks (we match on the Clerk id), but lists and exports could show an old email. Suggested: skip for now.
+6. DECIDED (developer left it to the AI), Clerk instances: use the development instance while building. Create the production instance, with its own keys, its own Google OAuth credentials, and the production domain, before any real student or supervisor is invited. Development users and invitations do not carry over, so creating it early avoids re-inviting people.
+7. DECIDED, changed or deleted emails: skip for now. REMEMBER (see Open decisions): add a Clerk webhook for `user.updated` and `user.deleted` before the pilot goes live.
+
+- [ ] Plan approved by a human
+
+### Plan: auth screens and landing page redesign (ticket-10) [draft]
+
+#### What and why
+
+The product is no longer only "replace the paper DTR". It now covers applying to partner companies, deployment, daily logs, evaluation, and certification, for the whole university over time. The landing page copy and the sign-in screen no longer say that, and the sign-in screen needs a more modern look. This ticket redesigns the landing page and builds the four auth screens, UI only, with mock behavior (no Clerk). Wiring to Clerk is ticket-09.
+
+Design proposal for review (private canvas, developer only): https://claude.ai/artifact/APqaZ2x74WjcWfxQHugUmz
+
+#### Screens
+
+| Screen               | Route                | Notes                                                                                           |
+| -------------------- | -------------------- | ----------------------------------------------------------------------------------------------- |
+| Landing page         | `/`                  | Public. Redesigned. Adds a team section. No OJT data.                                           |
+| Sign in              | `/sign-in`           | Google button, email and password, show or hide password, forgot password link.                 |
+| Accept invitation    | `/accept-invitation` | Shows the invited email and role, Google or set a password, expiry note.                        |
+| Data privacy consent | `/consent`           | Four summary cards, one checkbox, "Accept and continue" disabled until checked.                 |
+| No invitation found  | `/no-access`         | For a signed-in person with no invitation. "Try another account" and "Sign out".                |
+| Account deactivated  | `/deactivated`       | "Sign out" only.                                                                                |
+
+#### Design direction
+
+- Same brand: AGENTS.md section 10 tokens (light and dark), Plus Jakarta Sans for headings, Inter for body, JetBrains Mono for times and numbers. Fonts are still "proposed" in AGENTS.md section 11, so this follows that proposal.
+- Calmer and more modern: larger type, more space, 16 to 28 px rounded cards with a soft shadow, a faint dot grid behind illustrations, flat tinted panels instead of the old dark panel, and status badges that use the existing color roles.
+- The hero and the sign-in side panel show the product through sample cards (clocked in, approved hours, pending approvals, certification). They are drawn in HTML, not screenshots, use fictional data, and are labeled "Sample data".
+- Landing sections: header, hero, "One journey, six steps", "Who it's for" (student, supervisor, coordinator), "Records you can rely on", "Built by the Dugtong team", final call to action, footer.
+
+#### Copy (proposed, needs approval; the approved copy of ticket-01 no longer fits)
+
+- Hero H1: "Your OJT, from application to certification."
+- Hero subtext: "Apply to partner companies, log your hours and a short daily journal, get them approved the same day, and receive your certification when you finish. One place for students, supervisors, and coordinators."
+- Hero line: "Accounts are by invitation only."
+- Six steps: Apply, Get accepted, Log the day, Approve daily, Evaluate, Get certified.
+- Team heading: "Built by the Dugtong team." Names: Ace, Josiah, Neil, Khent, Bonnie.
+- Footer: "Built for PHINMA University of Iloilo."
+- The "Records you can rely on" lines are kept from ticket-01.
+- The consent summary is draft wording. The retention line is a placeholder until the school answers (see `to-confirm.md`).
+
+#### Build notes
+
+- Build with Tailwind utilities and shadcn/ui primitives using the existing tokens; no new colors in components. Light and dark themes both work.
+- Mock behavior only: the sign-in button and the other buttons navigate between the screens or do nothing. No Clerk, no data. Real behavior arrives in ticket-09.
+- The logo is `public/dugtong-mark.png`. The Google button uses a plain placeholder glyph in the proposal; the build uses the official Google mark.
+- The team section uses initials in tinted circles. Photos or roles can be added later.
+- Existing `/sign-in` and `/` pages are replaced. The theme toggle stays available on every public screen.
+
+#### Tests
+
+- Vitest for any logic (for example the consent button gate).
+- Browser checks at 1440 and 390 wide, in light and dark, on each screen.
+- Playwright comes later with the first role-gated screen.
+
+#### Open questions
+
+1. **Team section.** Names only (as proposed), or also a role and a photo for each person? Last names?
+2. **"Built for PHINMA University of Iloilo"** in the footer: is this wording acceptable for a public page?
+3. **Landing copy.** Approve the proposed H1, subtext, and six steps, or edit them?
+4. **Hero badge.** The proposal has a small teal badge above the headline ("Online training, tracked end to end"). Keep or remove?
+5. **Consent wording.** Who writes the final notice, and who approves it (the school or its data privacy officer)?
 
 - [ ] Plan approved by a human
 
