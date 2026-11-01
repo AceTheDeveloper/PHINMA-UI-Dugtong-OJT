@@ -1,7 +1,9 @@
+import Link from "next/link";
 import { Download, FileText, Upload } from "lucide-react";
 import { AttentionPanel } from "@/components/coordinator/attention-panel";
 import { CompaniesOverview } from "@/components/coordinator/companies-overview";
 import { RecentActivity } from "@/components/coordinator/recent-activity";
+import { RoleBadge } from "@/components/coordinator/status-badge";
 import { StudentTable } from "@/components/coordinator/student-table";
 import { SummaryCards } from "@/components/coordinator/summary-cards";
 import { Button } from "@/components/ui/button";
@@ -15,9 +17,12 @@ export default function CoordinatorDashboardPage() {
     <>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="font-heading text-2xl font-extrabold tracking-[-0.02em] text-ink">
-            Dashboard
-          </h1>
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="font-heading text-2xl font-extrabold tracking-[-0.02em] text-ink">
+              Dashboard
+            </h1>
+            <RoleBadge role="warning">Mock data</RoleBadge>
+          </div>
           <p className="mt-1 text-sm text-muted-foreground">
             {mockCourse.courseShort} · {mockCourse.departmentShort} · {mockCourse.school}
           </p>
@@ -26,7 +31,7 @@ export default function CoordinatorDashboardPage() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button type="button" variant="outline">
+          <Button variant="outline" nativeButton={false} render={<Link href="/coordinator/roster" />}>
             <Upload aria-hidden="true" data-icon="inline-start" />
             Import roster
           </Button>
