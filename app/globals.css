@@ -232,3 +232,39 @@ html.reveal-enabled [data-reveal].is-visible {
     @apply translate-y-0 opacity-100;
   }
 }
+
+/* Team avatars: a gentle bob, a slight head tilt, and a blink. Utilities cannot
+   define keyframes; the animate-[...] utilities on the avatar use these. */
+@keyframes dg-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes dg-tilt {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  30% {
+    transform: rotate(-3deg);
+  }
+  70% {
+    transform: rotate(3deg);
+  }
+}
+
+@keyframes dg-blink {
+  0%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+  95% {
+    transform: scaleY(0.1);
+  }
+}
