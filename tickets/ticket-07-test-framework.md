@@ -39,7 +39,7 @@ Tested by AI (tick only after actually running it, and note the command and resu
 
 Tested by a human:
 
-- [ ] Ran `npm run test` locally
+- [x] Ran `npm run test` locally (passes)
 
 ## Plan (AI fills in before coding)
 

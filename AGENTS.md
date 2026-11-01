@@ -35,7 +35,7 @@ Dugtong OJT is a web app (installable PWA) that replaces the paper DTR and scatt
 
 ## 3. Tech stack (what we use)
 
-Next.js (App Router) and TypeScript, installable PWA. Clerk for auth, integrated with Supabase. Supabase Postgres and private Storage. Tailwind CSS, shadcn/ui, react-hook-form, Zod, TanStack Query. Do not introduce alternatives to these without asking.
+Next.js (App Router) and TypeScript, installable PWA. Clerk for auth, integrated with Supabase. Supabase Postgres and private Storage. Tailwind CSS, shadcn/ui, react-hook-form, Zod, TanStack Query. Tests: Vitest (unit and access-rule tests); Playwright (browser tests) is added once screens exist. Do not introduce alternatives to these without asking.
 
 Use Tailwind utility classes for component styling and shadcn/ui primitives for standard controls where appropriate. Keep global CSS to design-token variables, font setup, reset/base styles, and narrowly scoped exceptions that utilities cannot express; do not build page layouts in large bespoke CSS files.
 
@@ -343,7 +343,6 @@ Do not decide these on your own. Ask in the ticket's "Open questions"; a human r
 
 - Certificate issuer and signatories.
 - Fonts (section 11 is proposed, not confirmed).
-- Test framework (none is installed yet; section 8 requires tests).
 - Who can view evaluations and certifications besides the student and Admin (supervisor, coordinator).
 - What happens to an open entry that never timed out (forgotten time out): auto-close, flag, or supervisor correction.
 - How a shift that crosses midnight maps to "one entry per deployment per day".
@@ -412,9 +411,9 @@ Commands, run from the repository root:
 - Lint: `npm run lint`
 - Typecheck: `npx tsc --noEmit`
 - Build: `npm run build`
-- Tests: none yet. Add the command here when a test framework is chosen (section 12).
+- Tests: `npm run test` (single run). Watch mode: `npm run test:watch`.
 
-The checks that gate every commit (section 14) are lint, typecheck, and tests once they exist.
+The checks that gate every commit and push (section 14) are lint, typecheck, and tests. Run `npm run test` before every commit and every push; do not commit or push if it fails.
 
 TODO (project owner): add environment variables once Clerk and Supabase are wired in. Never commit secrets.
 
