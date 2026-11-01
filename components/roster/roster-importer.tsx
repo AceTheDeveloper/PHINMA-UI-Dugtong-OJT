@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/table";
 import type { BatchOption, Preview, PreviewRow } from "@/lib/roster/types";
 
-// Step 1: choose a batch and a file. Step 2: read the preview, and edit or
+// Step 1: choose a batch and a file (it previews on its own). Step 2: read the preview, and edit or
 // remove rows with problems. Step 3: commit. Nothing is written until commit.
 // After every edit or removal the rows go back to the server to be checked
 // again, and commit sends the rows on screen, which the server checks once
@@ -49,7 +49,6 @@ export function RosterImporter({
 }) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
-  const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<Preview | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -60,10 +59,10 @@ export function RosterImporter({
   const [draft, setDraft] = useState<Draft>({ fullName: "", studentNumber: "", email: "" });
   const [pending, startTransition] = useTransition();
 
-  function form(): FormData {
+  function form(file: File): FormData {
     const data = new FormData();
     data.set("batchId", selectedBatchId);
-    if (file) data.set("file", file);
+    data.set("file", file);
     return data;
   }
 
@@ -74,7 +73,6 @@ export function RosterImporter({
   }
 
   function reset() {
-    setFile(null);
     setPreview(null);
     setMessage(null);
     clearWork();
@@ -155,16 +153,15 @@ export function RosterImporter({
     );
   }
 
-  function runPreview() {
+  // Runs as soon as a file is chosen, so there is no button to press. A file
+  // that cannot be read clears the chooser, so the same file can be chosen again
+  // after it is fixed.
+  function runPreview(file: File) {
     setMessage(null);
     setNotice(null);
-    if (!file) {
-      setMessage("Choose a .csv or .xlsx file first.");
-      return;
-    }
     startTransition(async () => {
       try {
-        const result = await previewRoster(form());
+        const result = await previewRoster(form(file));
         if (result.ok) {
           setPreview(result.data);
           setOnlyProblems(false);
@@ -172,9 +169,11 @@ export function RosterImporter({
         } else {
           setPreview(null);
           setMessage(result.error.message);
+          if (inputRef.current) inputRef.current.value = "";
         }
       } catch {
         setMessage(unexpected);
+        if (inputRef.current) inputRef.current.value = "";
       }
     });
   }
@@ -252,20 +251,23 @@ export function RosterImporter({
                 accept=".csv,.xlsx"
                 disabled={pending}
                 onChange={(event) => {
-                  setFile(event.target.files?.[0] ?? null);
+                  const chosen = event.target.files?.[0] ?? null;
                   setPreview(null);
                   clearWork();
                   setMessage(null);
                   setNotice(null);
+                  if (chosen) runPreview(chosen);
                 }}
               />
             </FormField>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <Button type="button" disabled={pending || !file} onClick={runPreview}>
-              <FileSpreadsheet aria-hidden="true" data-icon="inline-start" />
-              {pending && !preview ? "Reading file" : "Preview roster"}
-            </Button>
+            {pending && !preview ? (
+              <p role="status" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+                <FileSpreadsheet aria-hidden="true" className="size-4" />
+                Reading file
+              </p>
+            ) : null}
             <a
               href="/coordinator/roster/template"
               className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
