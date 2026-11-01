@@ -367,7 +367,7 @@ Do not:
 - Permission checks and tests exist for every new action or table.
 - Zod validation on every new input.
 - Audit coverage for any new change to hours, evaluations, or deployments.
-- Typecheck, lint, and tests pass (commands in section 15).
+- Lint, typecheck, tests, and build pass (commands in section 15).
 
 ## 14. Working on tickets
 
@@ -378,7 +378,7 @@ Do not:
 - Order of authority: `AGENTS.md`, then the ticket, then your own ideas. If the first two conflict, stop and ask.
 - Never edit `AGENTS.md`, other tickets, or the scope of the current ticket unless a human says so. To change `AGENTS.md`, write the proposal under "Suggested AGENTS.md changes" in the ticket; a human applies it.
 - Test, commit, and push automatically; do not wait to be asked. After each logical change:
-  1. Run the checks in section 15 (typecheck, lint, tests). Fix failures before going on.
+  1. Run the checks in section 15 (lint, typecheck, tests, build). Fix failures before going on. Skip them only for a documentation-only change (see section 15).
   2. Only if every check passes, commit with the message `ticket-XX: short message`. Never commit code that fails a check.
   3. Push that commit to `origin/<developer-branch>`.
 - Several developers work in this repository, each on their own branch named after them. Never assume whose branch it is: find it with `git branch --show-current`. Commit and push only if that branch is not `dev`, `test`, or `main`, and it matches the developer you are working for (the ticket's Assignee, or the developer who started the session). If it is `dev`, `test`, `main`, or another developer's branch, or you are not sure, stop and ask instead of committing.
@@ -400,7 +400,9 @@ Commands, run from the repository root:
 - Build: `npm run build`
 - Tests: `npm run test` (single run). Watch mode: `npm run test:watch`.
 
-The checks that gate every commit and push (section 14) are lint, typecheck, and tests. Run `npm run test` before every commit and every push; do not commit or push if it fails.
+The checks that gate every commit and push (section 14) are lint (`npm run lint`), typecheck (`npx tsc --noEmit`), tests (`npm run test`), and build (`npm run build`). Run all four before every commit and every push; do not commit or push if any fails.
+
+Exception: if a change touches only planning and ticket documents (`plan.md`, `to-confirm.md`, files in `tickets/`, `contributing.md`, `README.md`, and this file), skip the checks and commit and push directly. Any change to code, tests, migrations, configuration, or `package.json` runs all four checks, even if it also changes documents.
 
 TODO (project owner): add environment variables once Clerk and Supabase are wired in. Never commit secrets.
 
