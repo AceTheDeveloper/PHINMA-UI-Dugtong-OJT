@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { SignOutButton } from "@clerk/nextjs";
 import { Lock } from "lucide-react";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { outlineAction } from "@/components/auth/auth-parts";
@@ -24,16 +24,16 @@ export default function DeactivatedPage() {
           a mistake, contact your coordinator or company supervisor.
         </p>
         <div className="mt-7">
-          <Button
-            nativeButton={false}
-            render={<Link href="/sign-in" />}
-            role="link"
-            variant="outline"
-            size="lg"
-            className={outlineAction}
-          >
-            Sign out
-          </Button>
+          <SignOutButton redirectUrl="/sign-in">
+            <Button
+              type="button"
+              variant="outline"
+              size="lg"
+              className={outlineAction}
+            >
+              Sign out
+            </Button>
+          </SignOutButton>
         </div>
       </div>
     </AuthShell>

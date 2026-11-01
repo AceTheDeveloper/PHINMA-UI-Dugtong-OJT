@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { requireRole } from "@/lib/auth/server";
 import { AppSidebar } from "@/components/coordinator/app-sidebar";
 import { RoleBadge } from "@/components/coordinator/status-badge";
 import { Separator } from "@/components/ui/separator";
@@ -8,16 +9,17 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import ThemeToggle from "../components/theme-toggle";
+import ThemeToggle from "@/app/components/theme-toggle";
 
 export const metadata: Metadata = {
   title: "Coordinator dashboard | Dugtong OJT",
   robots: { index: false, follow: false },
 };
 
-export default function CoordinatorLayout({
+export default async function CoordinatorLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  await requireRole(["coordinator", "admin"]);
   return (
     <TooltipProvider>
       <SidebarProvider>

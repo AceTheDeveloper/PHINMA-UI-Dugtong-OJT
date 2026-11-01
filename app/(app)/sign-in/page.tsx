@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
-import ThemeToggle from "../components/theme-toggle";
+import { SignIn } from "@clerk/nextjs";
+import ThemeToggle from "@/app/components/theme-toggle";
 import { BrandLink } from "@/components/brand-link";
-import { SignInForm } from "@/components/auth/sign-in-form";
+import { clerkAppearance } from "@/components/auth/clerk-appearance";
 import {
   CertificationCard,
   HoursCard,
@@ -30,7 +31,12 @@ export default function SignInPage() {
           <p className="mb-8 mt-3 text-base leading-[1.65] text-copy-muted">
             Sign in to continue your OJT.
           </p>
-          <SignInForm />
+          <SignIn
+            routing="hash"
+            withSignUp={false}
+            forceRedirectUrl="/after-sign-in"
+            appearance={clerkAppearance}
+          />
           <p className="mt-7 rounded-xl border border-border bg-surface px-4 py-3.5 text-sm leading-[1.6] text-copy-muted">
             Accounts are by invitation only. If you have not received one, ask
             your coordinator or company supervisor.

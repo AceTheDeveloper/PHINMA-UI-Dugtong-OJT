@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { redirect } from "next/navigation";
+import { SignOutButton } from "@clerk/nextjs";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { ConsentForm } from "@/components/auth/consent-form";
 import { focusStyle } from "@/components/brand-link";
+import { roleHome, roles } from "@/lib/auth/roles";
+import { requireRole } from "@/lib/auth/server";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -30,20 +33,27 @@ const summary = [
   },
 ];
 
-export default function ConsentPage() {
+export default async function ConsentPage() {
+  const session = await requireRole(roles, { requireConsent: false });
+  if (session.hasConsent) {
+    redirect(roleHome(session.role));
+  }
+
   return (
     <AuthShell
       maxWidth="max-w-[640px]"
       headerAction={
-        <Link
-          href="/sign-in"
-          className={cn(
-            "inline-flex min-h-11 items-center text-sm font-semibold text-copy-muted hover:text-ink",
-            focusStyle,
-          )}
-        >
-          Sign out
-        </Link>
+        <SignOutButton redirectUrl="/sign-in">
+          <button
+            type="button"
+            className={cn(
+              "inline-flex min-h-11 items-center text-sm font-semibold text-copy-muted hover:text-ink",
+              focusStyle,
+            )}
+          >
+            Sign out
+          </button>
+        </SignOutButton>
       }
     >
       <h1 className="font-heading text-[32px] font-extrabold leading-[1.15] tracking-[-0.04em]">
