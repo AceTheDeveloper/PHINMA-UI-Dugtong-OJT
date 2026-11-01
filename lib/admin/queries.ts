@@ -420,6 +420,8 @@ export type AuditEntry = {
   id: string;
   table: string;
   rowId: string;
+  // A readable name for the changed record, such as a company name
+  subject: string | null;
   action: "insert" | "update" | "delete";
   oldValue: Record<string, unknown> | null;
   newValue: Record<string, unknown> | null;
@@ -475,6 +477,7 @@ export async function getAudit(
       .in("id", actorIds.length ? actorIds : [noRow]),
   );
   if (!actors.ok) return actors;
+  const subjects = await subjectNames(rows.data);
 
   return ok({
     total: count ?? rows.data.length,
@@ -483,6 +486,7 @@ export async function getAudit(
       id: row.id,
       table: row.table_name,
       rowId: row.row_id,
+      subject: subjects.get(`${row.table_name}:${row.row_id}`) ?? null,
       action: row.action,
       oldValue: row.old_value,
       newValue: row.new_value,
@@ -510,4 +514,63 @@ export async function getAuditActors(): Promise<Result<{ id: string; name: strin
       .map((user) => ({ id: user.id, name: user.full_name }))
       .sort((a, b) => a.name.localeCompare(b.name)),
   );
+}
+
+// Looks up a readable name for each audited record on this page. A record
+// that no longer exists has no name here; the screen falls back to the stored
+// old value.
+async function subjectNames(rows: z.infer<typeof auditRow>[]): Promise<Map<string, string>> {
+  const names = new Map<string, string>();
+  const idsFor = (table: string) => [
+    ...new Set(rows.filter((row) => row.table_name === table).map((row) => row.row_id)),
+  ];
+  const lookups: [string, string, (row: Record<string, unknown>) => string][] = [
+    ["departments", "id, code, name", (r) => `${String(r.code)} ${String(r.name)}`],
+    ["courses", "id, code, name", (r) => `${String(r.code)} ${String(r.name)}`],
+    ["ojt_batches", "id, school_year", (r) => `Batch ${String(r.school_year)}`],
+    ["companies", "id, name", (r) => String(r.name)],
+    ["invitations", "id, email", (r) => String(r.email)],
+    ["students", "id, full_name", (r) => String(r.full_name)],
+    ["users", "id, full_name", (r) => String(r.full_name)],
+  ];
+  await Promise.all(
+    lookups.map(async ([table, columns, label]) => {
+      const ids = idsFor(table);
+      if (ids.length === 0) return;
+      const found = await read(z.array(z.record(z.string(), z.unknown())), () =>
+        db().from(table).select(columns).in("id", ids),
+      );
+      if (!found.ok) return;
+      for (const record of found.data) {
+        names.set(`${table}:${String(record.id)}`, label(record));
+      }
+    }),
+  );
+  // Memberships are keyed by the supervisor's user id.
+  const memberIds = idsFor("supervisor_memberships");
+  if (memberIds.length > 0) {
+    const users = await read(z.array(userRow), () =>
+      db().from("users").select("id, full_name, email, is_active").in("id", memberIds),
+    );
+    if (users.ok) {
+      for (const user of users.data) {
+        names.set(`supervisor_memberships:${user.id}`, user.full_name);
+      }
+    }
+  }
+  // Coordinator assignments are keyed "user id:course id".
+  const assignmentIds = idsFor("coordinator_assignments");
+  const userIds = assignmentIds.map((id) => id.split(":")[0]);
+  if (userIds.length > 0) {
+    const users = await read(z.array(userRow), () =>
+      db().from("users").select("id, full_name, email, is_active").in("id", userIds),
+    );
+    if (users.ok) {
+      for (const id of assignmentIds) {
+        const user = users.data.find((candidate) => candidate.id === id.split(":")[0]);
+        if (user) names.set(`coordinator_assignments:${id}`, user.full_name);
+      }
+    }
+  }
+  return names;
 }
