@@ -459,7 +459,7 @@ New dependencies, each with a reason: `@clerk/nextjs` (auth), `@supabase/supabas
 
 - [ ] Plan approved by a human
 
-### Plan: auth screens and landing page redesign (ticket-10) [draft]
+### Plan: auth screens and landing page redesign (ticket-10) [approved]
 
 #### What and why
 
@@ -501,7 +501,7 @@ Design proposal for review (private canvas, developer only): https://claude.ai/a
 - Build with Tailwind utilities and shadcn/ui primitives using the existing tokens; no new colors in components. Light and dark themes both work.
 - Mock behavior only: the sign-in button and the other buttons navigate between the screens or do nothing. No Clerk, no data. Real behavior arrives in ticket-09.
 - The logo is `public/dugtong-mark.png`. The Google button uses a plain placeholder glyph in the proposal; the build uses the official Google mark.
-- The team section uses initials in tinted circles. Photos or roles can be added later.
+- The team section shows an animated illustrated avatar for each person (Ace, Josiah, Neil, Khent, Bonnie) as a stand-in for their photo: a gentle bob, a slight head tilt, and a blink, drawn as inline SVG with a distinct hairstyle, skin tone, and shirt color each. The animation stops when the visitor prefers reduced motion. Photos replace these later. Avatar artwork colors are illustration colors, not UI tokens.
 - Existing `/sign-in` and `/` pages are replaced. The theme toggle stays available on every public screen.
 
 #### Tests
@@ -512,13 +512,13 @@ Design proposal for review (private canvas, developer only): https://claude.ai/a
 
 #### Open questions
 
-1. **Team section.** Names only (as proposed), or also a role and a photo for each person? Last names?
-2. **"Built for PHINMA University of Iloilo"** in the footer: is this wording acceptable for a public page?
-3. **Landing copy.** Approve the proposed H1, subtext, and six steps, or edit them?
-4. **Hero badge.** The proposal has a small teal badge above the headline ("Online training, tracked end to end"). Keep or remove?
-5. **Consent wording.** Who writes the final notice, and who approves it (the school or its data privacy officer)?
+1. ANSWERED, team section: first names with animated avatars as stand-ins for photos. Roles, last names, and real photos can be added later.
+2. ACCEPTED with approval, footer wording "Built for PHINMA University of Iloilo."
+3. ACCEPTED with approval, landing copy (H1, subtext, six steps) as proposed.
+4. ACCEPTED with approval, hero badge kept as proposed.
+5. OPEN, consent wording: who writes the final notice and who approves it (the school or its data privacy officer)? The build uses the draft wording with a placeholder for the retention period until this is answered.
 
-- [ ] Plan approved by a human
+- [x] Plan approved by a human (approved by the developer in session)
 
 ### Plan: test framework (ticket-07) [done]
 
