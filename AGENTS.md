@@ -153,6 +153,7 @@ These are standing rules, kept in the database so a future bug cannot break them
 ## 9. UI and copy
 
 - Build from approved mockups. Do not invent screens. If there is no mockup, ask.
+- Exception: Platform Admin screens (the admin's own pages for departments, courses, companies, and invitations) need no mockup. The agent designs them from the design tokens, the fonts, and the patterns already in the repo, and the plan describes each screen in words. Every other role's screens still need a mockup.
 - Support light and dark themes. Follow the system preference until the user chooses a theme, and remember explicit choices.
 - Use the design tokens for both themes; do not add raw color values in components.
 - Sentence case everywhere. Verb-first buttons ("Time in", "Reject entry", "Approve all").
@@ -358,12 +359,12 @@ Do not:
 - Write to tables from the client, or use the service-role key outside server-only code.
 - Edit applied migrations, generated files, or audit rows.
 - Add public routes, public storage, or guest access.
-- Invent UI without a mockup, or invent business rules. Add them to the open decisions in `plan.md` instead.
+- Invent UI without a mockup (except Platform Admin screens, see section 9), or invent business rules. Add them to the open decisions in `plan.md` instead.
 - Add dependencies without a clear reason.
 
 ### Definition of done
 
-- Matches the mockup and the rules in this file.
+- Matches the mockup (or, for Platform Admin screens, the plan) and the rules in this file.
 - Permission checks and tests exist for every new action or table.
 - Zod validation on every new input.
 - Audit coverage for any new change to hours, evaluations, or deployments.
