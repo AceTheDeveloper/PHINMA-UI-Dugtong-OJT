@@ -21,6 +21,9 @@ Questions we still need to ask the coordinator or supervisors. When you get an a
 - [ ] **Data retention.** How long should student data, resumes, and certificates be kept, and what should happen when a batch closes (archive, delete, anonymize)? Ask the school, and its data privacy officer if there is one.
   - Affects: deletion jobs, file storage, the consent notice text.
 
+- [ ] **Data privacy notice wording.** Who writes the final consent notice, and who approves it (the school or its data privacy officer)? The consent screen has a placeholder for how long data is kept.
+  - Affects: the consent screen text (ticket-10) and the retention rule.
+
 ## Ask the supervisors and the coordinator
 
 - [ ] **Early time out approval.** The reason is free text and the daily approval covers it, because supervisors may be busy. Do they want a separate approval step for early outs?
