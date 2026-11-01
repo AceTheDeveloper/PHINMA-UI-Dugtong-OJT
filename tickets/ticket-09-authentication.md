@@ -38,7 +38,7 @@ Sign-in, invitation-only sign-up, and the server checks every later feature reli
 - [x] A second call for the same Clerk user returns the existing user. (`tests/db/auth.test.ts`)
 - [x] `create_invitation` allows and refuses each role pairing as in the plan. (`tests/db/auth.test.ts`)
 - [x] A deactivated user is refused on the next request, and sees the deactivated screen. (`getSession` refuses an inactive user and `redirectFor` sends them to `/deactivated`: `tests/auth/`; the live screen needs a human check)
-- [x] An Admin who did not sign in with Google is refused; the other roles are unaffected. (`tests/auth/session.test.ts`)
+- [x] An Admin without a verified, matching Google account, or with a password on the account, is refused; the other roles are unaffected. (`tests/auth/session.test.ts`)
 - [x] The role, scope, and active state are read from our database, never from Clerk token claims or metadata. (`tests/auth/session.test.ts`; only the invitation id is read from Clerk metadata)
 - [x] The service-role key appears only in server-only modules. (grep: only `lib/db/admin.ts` and `scripts/bootstrap-admin.mts`; no `NEXT_PUBLIC_` copy)
 - [x] Public routes are exactly `/`, `/sign-in`, `/accept-invitation`, and branding assets, and a test fails if that list changes. (`tests/auth/routes.test.ts` scans every page in `app/`)
@@ -74,6 +74,7 @@ Human steps in the dashboards (before the browser checks):
 - Two-step verification is off: Clerk's authenticator app is Pro only and we stay on the free plan (see `plan.md`, REMEMBER).
 - Revoking a Clerk invitation: the app revokes only our own row, not the Clerk invitation, which expires on its own after 7 days. Revoking on Clerk's side is not built.
 - DECISION TO REVIEW: sign-in and accept-invitation use Clerk's prebuilt components (`SignIn`, `SignUp`) inside our branded layout and tokens, not the custom forms drawn in ticket-10. Clerk v7's custom-flow API was new and cannot be tested here without a live Clerk and Google login, so the prebuilt components are the safe choice. Custom forms can replace them later once checked against a live instance.
+- Security review finding, partly fixed: Admin enforcement now also requires the Google email to match the primary email and no password on the account. Still open: it checks the account, not the sign-in method of this session, so Clerk's email-code sign-in (if enabled for sign-in) would be a way around it. A human checks the sign-in methods in the Clerk dashboard, and the Admin account must have its password removed.
 - A signed-in Admin with no Google account lands on the generic "No invitation found" screen, which is misleading. A dedicated message needs a design.
 - Under Cache Components, Clerk lives in a route group `app/(app)/` with a Suspense boundary, so the landing page stays prerendered.
 

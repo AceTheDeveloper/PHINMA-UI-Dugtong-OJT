@@ -36,6 +36,7 @@ function identity(overrides: Partial<ClerkIdentity> = {}): ClerkIdentity {
     fullName: "Ana Sample",
     invitationId: null,
     hasGoogle: false,
+    hasPassword: true,
     ...overrides,
   };
 }
@@ -152,9 +153,17 @@ describe("getSession", () => {
     expect(result).toMatchObject({ ok: false, error: { code: "google_required" } });
   });
 
-  it("accepts an Admin signed in with Google", async () => {
+  it("refuses an Admin who has Google linked but also a password", async () => {
     const result = await getSession(
-      identity({ hasGoogle: true }),
+      identity({ hasGoogle: true, hasPassword: true }),
+      store([row({ role: "admin" })]),
+    );
+    expect(result).toMatchObject({ ok: false, error: { code: "google_required" } });
+  });
+
+  it("accepts an Admin with a verified Google account and no password", async () => {
+    const result = await getSession(
+      identity({ hasGoogle: true, hasPassword: false }),
       store([row({ role: "admin" })]),
     );
     expect(result).toMatchObject({ ok: true, data: { role: "admin" } });

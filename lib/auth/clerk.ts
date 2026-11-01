@@ -25,11 +25,14 @@ export async function getClerkIdentity(): Promise<ClerkIdentity | null> {
     emailVerified: primary?.verification?.status === "verified",
     fullName: name || null,
     invitationId: metadata.success ? metadata.data.invitation_id : null,
-    // A verified Google account linked to the user. Admins need one.
+    // A verified Google account whose email is the user's primary email.
     hasGoogle: user.externalAccounts.some(
       (account) =>
         (account.provider === "google" || account.provider === "oauth_google") &&
-        account.verification?.status === "verified",
+        account.verification?.status === "verified" &&
+        !!primary &&
+        account.emailAddress.toLowerCase() === primary.emailAddress.toLowerCase(),
     ),
+    hasPassword: user.passwordEnabled,
   };
 }

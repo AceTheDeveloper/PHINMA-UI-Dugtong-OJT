@@ -10,7 +10,10 @@ export type ClerkIdentity = {
   emailVerified: boolean;
   fullName: string | null;
   invitationId: string | null;
+  // A verified Google account that matches the primary email.
   hasGoogle: boolean;
+  // The account has a password, so a password sign-in is possible.
+  hasPassword: boolean;
 };
 
 // The two database calls the session needs. Real implementation: lib/db/rpc.ts.
@@ -91,8 +94,14 @@ export async function getSession(
   if (!row.is_active) {
     return fail("inactive", "This account is deactivated.");
   }
-  if (row.role === "admin" && !identity.hasGoogle) {
-    return fail("google_required", "Admins must sign in with Google.");
+  // Admins must be able to sign in only through Google, which brings Google's
+  // own two-step verification. A password on the account would be a way around
+  // it, so an Admin with a password is refused until it is removed.
+  if (row.role === "admin" && (!identity.hasGoogle || identity.hasPassword)) {
+    return fail(
+      "google_required",
+      "Admins must sign in with Google and have no password on the account.",
+    );
   }
   return ok(toSession(identity.clerkId, row));
 }
