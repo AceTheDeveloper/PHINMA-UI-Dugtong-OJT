@@ -326,8 +326,8 @@ Enums are listed here so migrations, server code, and tests agree. Transitions n
 #### Migration order
 
 1. Academic structure (school_settings, departments, courses, ojt_batches) and seed rows for PHINMA UI, CITE, BSIT.
-2. Users, assignments, students, invitations, consents.
-3. Companies, listings, listing_courses.
+2. Users, coordinator assignments, students, consents.
+3. Companies, supervisor memberships, invitations, listings, listing_courses.
 4. Resumes, applications, deployments, work schedules.
 5. Daily logs.
 6. Evaluation forms, evaluations, scores, certificate templates, certifications.

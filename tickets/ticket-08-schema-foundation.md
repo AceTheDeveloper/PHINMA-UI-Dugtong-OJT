@@ -2,7 +2,7 @@
 
 - Type: feature
 - Assignee: Arwin Clyde B. Simondac
-- Status: todo
+- Status: in progress
 - Mockup: not needed (no UI)
 - AGENTS.md sections: 2 scope, 4 roles, 7 security and audit, 8 code rules, 14 tickets
 - Plan: `plan.md`, "Plan: core schema (ticket-08)" (approved)
@@ -16,8 +16,8 @@ First slice of the database from the approved core schema plan. It sets up how d
 1. **PGlite spike.** Confirm PGlite (Postgres in WebAssembly) running inside Vitest can apply our SQL migrations, enforce constraints, run triggers, and enforce RLS with a stubbed `auth.jwt()`. If it cannot, stop and write the finding under Open questions; the fallback is a separate hosted Supabase test project (needs a human decision).
 2. **Test harness.** A helper under `tests/db/` that applies every file in `supabase/migrations/` to a fresh PGlite database and stubs the Supabase-only functions used by our SQL.
 3. **Migration 1, academic structure:** `school_settings` (single row, seeded), `departments`, `courses`, `ojt_batches`, with the enums and constraints from the plan.
-4. **Migration 2, people and access:** `users`, `coordinator_assignments`, `students`, `supervisor_memberships` (one company per supervisor, one owner per company), `invitations`, `consents`.
-5. **Migration 3, companies and listings:** `companies`, `listings`, `listing_courses`.
+4. **Migration 2, people and access:** `users`, `coordinator_assignments`, `students`, `consents`.
+5. **Migration 3, companies and listings:** `companies`, `supervisor_memberships` (one company per supervisor, one owner per company), `invitations`, `listings`, `listing_courses`. Supervisor memberships and invitations moved here from migration 2 because both point at companies.
 6. `supabase/seed.sql` for development data (PHINMA UI, CITE, BSIT, a 2026-2027 batch). Never applied to production.
 7. Database tests for each guard rail added in these migrations.
 8. RLS enabled on every new table, with no insert, update, or delete policies for user sessions. Select policies come with the RLS ticket; until then user sessions can read nothing.
@@ -31,23 +31,23 @@ First slice of the database from the approved core schema plan. It sets up how d
 
 ## Acceptance criteria
 
-- [ ] The PGlite spike result is recorded (works, or the blocker and fallback).
-- [ ] `npm run test` applies all migrations to a fresh database and the db tests pass.
-- [ ] `school_settings` cannot hold more than one row.
-- [ ] A course cannot have two batches with the same school year.
-- [ ] A company cannot have two owners; a supervisor cannot belong to two companies.
-- [ ] A student number is unique within a batch; a student email is unique.
-- [ ] A listing can be linked to several courses, and a listing with no course link is detectable.
-- [ ] RLS is enabled on every new table, and a session role with no policies cannot read or write them.
-- [ ] No CITE or BSIT value is hard-coded in a migration other than seed data.
-- [ ] Typecheck, lint, and tests pass.
+- [x] The PGlite spike result is recorded (works, or the blocker and fallback).
+- [x] `npm run test` applies all migrations to a fresh database and the db tests pass.
+- [x] `school_settings` cannot hold more than one row.
+- [x] A course cannot have two batches with the same school year.
+- [x] A company cannot have two owners; a supervisor cannot belong to two companies.
+- [x] A student number is unique within a batch; a student email is unique.
+- [x] A listing can be linked to several courses, and a listing with no course link is detectable.
+- [x] RLS is enabled on every new table, and a session role with no policies cannot read or write them.
+- [x] No CITE or BSIT value is hard-coded in a migration other than seed data.
+- [x] Typecheck, lint, and tests pass.
 
 ## Test checklist
 
 Tested by AI (tick only after actually running it, and note the command and result):
 
-- [ ] Typecheck, lint and tests pass
-- [ ] Each acceptance criterion has a test
+- [x] Typecheck, lint and tests pass (`npm run test`: 5 files, 50 tests passed; `npx tsc --noEmit` clean; `npm run lint` clean)
+- [x] Each acceptance criterion has a test (`tests/db/`)
 
 Tested by a human:
 
@@ -61,7 +61,11 @@ See `plan.md`, "Plan: core schema (ticket-08)", migrations 1 to 3 and "Testing".
 
 ## Open questions (AI writes here instead of guessing)
 
-- None yet. Open school questions are in `to-confirm.md` and do not block this ticket.
+- None blocking. Open school questions are in `to-confirm.md`.
+
+Spike result: PGlite works. Inside Vitest it applied the SQL migrations, enforced constraints and triggers, enforced RLS by role (`anon`, `authenticated`), let a `bypassrls` service role through, and accepted a stubbed `auth.jwt()`. Booting one in-memory database per test file takes several seconds, so `hookTimeout` is 60 s in `vitest.config.mts`.
+
+Known limit: PGlite is not hosted Supabase, so a human still applies the migrations with `supabase db push` and checks the tables (human box below). "Exactly one owner per company" is enforced as at most one owner; a company with no owner yet is allowed, and the "first supervisor is the owner" rule belongs to the invite function in the admin ticket.
 
 ## Suggested AGENTS.md changes (a human applies these)
 
