@@ -1,6 +1,7 @@
 import "server-only";
 import { clerkClient } from "@clerk/nextjs/server";
 import { z } from "zod";
+import { getClerkInvitationId } from "@/lib/admin/queries";
 import { fail, ok, type Result } from "@/lib/result";
 import {
   createInvitation,
@@ -40,4 +41,25 @@ export async function inviteUser(
     return fail("unexpected", "The invitation could not be sent. Try again in a moment.");
   }
   return ok(invitationId);
+}
+
+// Revokes an invitation in our database (the one that counts, because
+// acceptance checks it) and then in Clerk so its email link stops working too.
+// If Clerk fails the row is still revoked and the invitation cannot be used.
+export async function revokeInvitationEverywhere(
+  actorId: string,
+  invitationId: string,
+): Promise<Result<null>> {
+  const clerkInvitationId = await getClerkInvitationId(invitationId);
+  const revoked = await revokeInvitation(actorId, invitationId);
+  if (!revoked.ok) return revoked;
+  if (clerkInvitationId.ok && clerkInvitationId.data) {
+    try {
+      const client = await clerkClient();
+      await client.invitations.revokeInvitation(clerkInvitationId.data);
+    } catch {
+      // already revoked, accepted, or expired on Clerk's side; nothing to undo
+    }
+  }
+  return ok(null);
 }
