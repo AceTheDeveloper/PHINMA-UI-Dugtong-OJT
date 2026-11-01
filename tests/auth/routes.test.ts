@@ -52,8 +52,9 @@ describe("public routes", () => {
     walk(appDir);
 
     expect(routes.length).toBeGreaterThan(3);
+    // /sign-in/sso-callback is where Google returns the browser after sign-in.
     expect(routes.filter(isPublicPath).sort()).toEqual(
-      ["/", "/accept-invitation", "/sign-in"].sort(),
+      ["/", "/accept-invitation", "/sign-in", "/sign-in/sso-callback"].sort(),
     );
   });
 });

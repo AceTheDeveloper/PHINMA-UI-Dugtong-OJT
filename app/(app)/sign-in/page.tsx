@@ -1,19 +1,33 @@
 import type { Metadata } from "next";
-import { SignIn } from "@clerk/nextjs";
+import { redirect } from "next/navigation";
+import { auth } from "@clerk/nextjs/server";
 import ThemeToggle from "@/app/components/theme-toggle";
 import { BrandLink } from "@/components/brand-link";
-import { clerkAppearance } from "@/components/auth/clerk-appearance";
+import { SignInForm } from "@/components/auth/sign-in-form";
 import {
   CertificationCard,
   HoursCard,
   TodayCard,
 } from "@/components/landing/sample-cards";
+import { afterSignInPath } from "@/lib/auth/sign-in-flow";
 
 export const metadata: Metadata = {
   title: "Sign in · Dugtong OJT",
 };
 
-export default function SignInPage() {
+const noAccountNotice =
+  "There is no invitation for that Google account. Use the link in your invitation email.";
+
+export default async function SignInPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ reason?: string }>;
+}) {
+  const { userId } = await auth();
+  if (userId) redirect(afterSignInPath);
+
+  const { reason } = await searchParams;
+
   return (
     <div className="grid min-h-screen grid-cols-2 bg-background max-lg:grid-cols-1">
       <section className="flex min-w-0 flex-col px-14 pb-10 pt-7 max-sm:px-6">
@@ -31,11 +45,8 @@ export default function SignInPage() {
           <p className="mb-8 mt-3 text-base leading-[1.65] text-copy-muted">
             Sign in to continue your OJT.
           </p>
-          <SignIn
-            routing="hash"
-            withSignUp={false}
-            forceRedirectUrl="/after-sign-in"
-            appearance={clerkAppearance}
+          <SignInForm
+            notice={reason === "no-account" ? noAccountNotice : undefined}
           />
           <p className="mt-7 rounded-xl border border-border bg-surface px-4 py-3.5 text-sm leading-[1.6] text-copy-muted">
             Accounts are by invitation only. If you have not received one, ask
