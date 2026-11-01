@@ -194,8 +194,8 @@ The database for the pilot (PHINMA UI, CITE, BSIT) that can grow to the whole un
 
 | Table       | Purpose                                                      | Notes                                                                                              |
 | ----------- | ------------------------------------------------------------ | -------------------------------------------------------------------------------------------------- |
-| schools     | The institution. One row now (PHINMA UI)                     | `name`, `timezone` (default `Asia/Manila`). Keeps the name and timezone out of code.               |
-| departments | CITE now, others later                                       | FK school; unique code                                                                             |
+| school_settings | PHINMA UI only. A single-row table                       | `name`, `timezone` (default `Asia/Manila`). A check keeps it to one row. No tenant column anywhere else. |
+| departments | CITE now, others later                                       | unique code                                                                                        |
 | courses     | BSIT now                                                     | FK department; unique code                                                                         |
 | ojt_terms   | One OJT batch of a course (for example SY 2026-2027, term 1) | FK course; `required_hours`, `stale_threshold_days` (3), `time_in_window_minutes` (30), dates, status |
 
@@ -271,7 +271,7 @@ The pilot (one coordinator, BSIT only) is just one `coordinator_assignments` row
 
 #### Migration order
 
-1. Academic structure (schools, departments, courses, ojt_terms) and seed rows for PHINMA UI, CITE, BSIT.
+1. Academic structure (school_settings, departments, courses, ojt_terms) and seed rows for PHINMA UI, CITE, BSIT.
 2. Users, assignments, students, invitations, consents.
 3. Companies, listings, listing_courses.
 4. Resumes, applications, deployments, work schedules.
@@ -284,17 +284,20 @@ Each migration ships with database tests for its guard rails.
 
 #### Testing
 
-- Database rules (constraints, triggers, RLS) are tested against a local Supabase with `supabase test db` (pgTAP). This needs Docker.
+- No Docker (developer machines cannot run it), so `supabase test db` and a local Supabase are out.
+- Database rules (constraints, triggers, audit, RLS) are tested inside Vitest with PGlite, which is real Postgres compiled to WebAssembly and runs in-process. Migrations are plain SQL files applied to PGlite in the test setup. Supabase-only functions such as `auth.jwt()` are stubbed in one test helper.
+- PGlite is not identical to hosted Supabase. So each migration is also applied to the hosted dev project with `supabase db push` and checked by hand before the PR.
+- First step of ticket-08 is a small spike to confirm PGlite handles our triggers and RLS. If it does not, fall back to a separate hosted Supabase test project.
 - Server logic stays in Vitest (ticket-07).
 - Every row of the permission table in AGENTS.md section 4 gets an access test, for example "student A cannot read student B's logs".
 
 #### Open questions
 
-1. **One school or several?** Default: one `schools` row, and no tenant column on every table (the school is reachable through course, department, school). Does university-wide mean only PHINMA UI, or might other PHINMA schools join later? If so, a tenant strategy is a bigger decision.
-2. **OJT terms as the home of required hours.** Recommended. Each batch has its own required hours, and the coordinator imports students into a term. Is that how the school thinks about it (a batch per school year and semester)?
-3. **Companies shared across departments.** Recommended (`listing_courses` controls who sees what). Or should each department keep its own partner list?
-4. **Docker.** Is Docker installed on your machine and your teammates' machines? Without it we cannot run database tests locally.
-5. **Coordinators.** The model allows several coordinators and several courses per coordinator. The pilot has one. Does the school need anything else, such as a department head with read-only access?
+1. ANSWERED, one school or several: PHINMA UI only. No tenant column; school name and timezone live in a single-row `school_settings` table.
+2. **OJT terms as the home of required hours.** Recommended; waiting on the developer's answer (see the explanation in the session).
+3. **Companies shared across departments.** Recommended; waiting on the developer's answer.
+4. ANSWERED, Docker: not available on any developer machine. Database tests use PGlite (see Testing).
+5. TO CONFIRM with the school: does it need anything beyond one coordinator per course, such as a department head with read-only access? Tracked in `to-confirm.md`. The model already allows several coordinators.
 
 - [ ] Plan approved by a human
 

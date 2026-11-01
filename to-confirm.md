@@ -15,6 +15,9 @@ Questions we still need to ask the coordinator or supervisors. When you get an a
 - [ ] **Overtime requests.** Who approves them (we suggest the supervisor), and does the student need to give a reason?
   - Affects: a new request screen (needs a mockup).
 
+- [ ] **Extra coordinator roles.** The system allows several coordinators, each assigned to courses. Does the school need anything beyond one coordinator, such as a department head with read-only access, or a second coordinator per course?
+  - Affects: `coordinator_assignments` and RLS in the core schema (ticket-08).
+
 ## Ask the supervisors and the coordinator
 
 - [ ] **Early time out approval.** The reason is free text and the daily approval covers it, because supervisors may be busy. Do they want a separate approval step for early outs?
