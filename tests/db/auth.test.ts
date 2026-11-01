@@ -642,6 +642,7 @@ describe("resolve_session", () => {
       course_ids: string[];
       company_id: string | null;
       is_company_owner: boolean;
+      has_consent: boolean;
     }>("select * from resolve_session($1)", [clerkId]);
   }
   async function clerkOf(user: string) {
@@ -672,6 +673,17 @@ describe("resolve_session", () => {
     expect(owner).toMatchObject({ role: "supervisor", company_id: company1, is_company_owner: true });
     const member = (await resolve(await clerkOf(member1))).rows[0];
     expect(member).toMatchObject({ company_id: company1, is_company_owner: false });
+  });
+
+  it("reports whether the current privacy notice was accepted", async () => {
+    const user = await insertUser("student");
+    const clerkId = await clerkOf(user);
+    expect((await resolve(clerkId)).rows[0].has_consent).toBe(false);
+    await db.query("select record_consent($1::uuid, 'v1')", [user]);
+    expect((await resolve(clerkId)).rows[0].has_consent).toBe(true);
+    await db.query("update school_settings set consent_notice_version = 'v9'");
+    expect((await resolve(clerkId)).rows[0].has_consent).toBe(false);
+    await db.query("update school_settings set consent_notice_version = 'v1'");
   });
 
   it("returns an admin with no scope, and reports inactive users", async () => {

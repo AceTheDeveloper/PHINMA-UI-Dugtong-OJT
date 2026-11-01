@@ -41,3 +41,4 @@ yarn-error.log*
 next-env.d.ts
 # supabase CLI local cache (project link info, never commit)
 supabase/.temp/
+!.env.example

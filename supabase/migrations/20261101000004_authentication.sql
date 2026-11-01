@@ -341,7 +341,8 @@ returns table (
   student_id uuid,
   course_ids uuid[],
   company_id uuid,
-  is_company_owner boolean
+  is_company_owner boolean,
+  has_consent boolean
 )
 language sql stable as $$
   select
@@ -365,6 +366,11 @@ language sql stable as $$
     coalesce(
       (select m.is_owner from supervisor_memberships m where m.user_id = u.id),
       false
+    ),
+    exists (
+      select 1 from consents c
+      where c.user_id = u.id
+        and c.notice_version = (select consent_notice_version from school_settings)
     )
   from users u
   where u.clerk_id = p_clerk_id
