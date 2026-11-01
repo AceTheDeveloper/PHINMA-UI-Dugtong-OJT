@@ -151,8 +151,8 @@ Answered by the developer in session. A human records them in AGENTS.md section 
 - ANSWERED, certification visibility: the student, coordinator, and Admin.
 - ANSWERED, certificate issuer: the coordinator. OPEN: who signs the certificate (name and signature). TO CONFIRM.
 - ANSWERED, stale-pending threshold: 3 days (stored per course as data).
-- OPEN, student work schedules (raised by the developer): proposed to detect night shifts and forgotten time outs. Conflicts with AGENTS.md section 2 (daily-hours rules out of scope), so a human must decide. Questions: who sets the schedule, per-day changes, reference only or enforced.
-- OPEN, early time out: depends on the schedule decision. Options: count actual hours only, flag it, or supervisor decides.
+- ANSWERED, student work schedules: the supervisor sets the schedule per deployment and can change it (applies from then on, not per day). It is enforced. Applied to AGENTS.md sections 2, 6, 7. Schema impact: add a `work_schedules` table per deployment, audited. Remaining details are in AGENTS.md section 12.
+- ANSWERED, early time out: blocked unless the student gives a reason; with a reason it is saved as an early out and flagged to the supervisor. Actual hours only.
 - REVISIT, required hours raised after an evaluation is submitted: the developer expects this never to happen, because the school's rules are imported before setup. Working default: an issued certificate stays valid, and the change is audited. DO NOT FORGET: revisit this before the evaluation ticket is built.
 
 ## Suggested AGENTS.md changes (a human applies these)

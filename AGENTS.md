@@ -29,7 +29,7 @@ Dugtong OJT is a web app (installable PWA) that replaces the paper DTR and scatt
 - Other schools or departments (for example CHTM). Store things like required hours, evaluation criteria, and certificate templates as data per course or department, never as constants in code, so adding CHTM later is mostly data entry. Build nothing CHTM-specific.
 - Public or guest access. Every page and file requires login, except the public landing page (see section 7).
 - Company self-registration and document verification (the school decides partners).
-- MOA tracking, OJT requirements and prerequisites, daily-hours rules.
+- MOA tracking, OJT requirements and prerequisites, and daily-hours rules other than the supervisor-set work schedule (section 6).
 - Partnership request flow, reports and appeals, company trust score.
 - Native mobile app, billing, alumni accounts, accreditation export packs.
 
@@ -102,6 +102,8 @@ These are product rules. Never weaken them to make a feature easier.
 - Bulk approve is supported for a day's pending entries.
 - Entries pending longer than a set number of days are flagged as stale to the coordinator. The threshold is an open decision.
 - An open entry that never timed out is flagged to the supervisor and coordinator. The system never auto-closes it or invents hours. The supervisor sets the time out. A flagged entry does not block the student's next time in.
+- Each deployment has a work schedule (days, start and end times, in `Asia/Manila`) set by the supervisor. Only the supervisor can change it, and a change applies from then on, not to a single day. The schedule decides which date an entry belongs to, so night shifts that cross midnight map to the date of time in, and it is how a forgotten time out is detected.
+- A time out before the scheduled end is blocked, unless the student gives a reason. With a reason the entry is saved as an early out and shown to the supervisor with that reason. The server decides by its own clock, never the client's. Only approved hours actually worked count.
 - Each entry has a break duration (default 0, supervisor-editable) and an optional location, so break deduction and location checks can be added later without redesign.
 
 ### Applications and deployments
@@ -134,7 +136,7 @@ Rules marked "default" are implemented as written until a human changes them. Do
 
 ### Audit
 
-Changes to daily logs, evaluations, deployments, required hours, company status, and company membership are recorded with old value, new value, who, and when. Audit records can be added but never edited or deleted.
+Changes to daily logs, evaluations, deployments, work schedules, required hours, company status, and company membership are recorded with old value, new value, who, and when. Audit records can be added but never edited or deleted.
 
 ### Database guard rails
 
@@ -353,8 +355,8 @@ Do not decide these on your own. Ask in the ticket's "Open questions"; a human r
 - Can the coordinator override a supervisor's approval decision? Default: no.
 - Stale-pending threshold is 3 days, stored per course as data. Reminder timing is still open.
 - Lunch-break rule for hours (default: none deducted).
-- Student work schedules: proposed so the system can tell night shifts apart and spot forgotten time outs. Needs a decision, because section 2 lists "daily-hours rules" as out of scope. Open: who sets the schedule (coordinator, supervisor, or student), whether it can change per day, and whether it is only a reference or enforced.
-- Early time out (before the scheduled end): allow and count only the hours actually worked, flag it, or require a supervisor decision. Depends on the schedule decision above.
+- Work schedule details: how early a student may time in before the scheduled start, how late counts as late, and what a student does on a day that is not in their schedule (for example overtime or a swapped day).
+- Early time out reasons: free text or a fixed list of reasons, and whether the supervisor must approve it separately or the daily approval covers it.
 - Application rules: several applications allowed, one active deployment (confirm).
 - UI language (English assumed).
 
