@@ -60,6 +60,15 @@ function upload(text: string, overrides: { batch?: string; name?: string } = {})
   return form;
 }
 
+const goodRows = [
+  { row: 2, fullName: "Ana Reyes", studentNumber: "A-1", email: "ana@example.test" },
+  { row: 3, fullName: "Ben Santos", studentNumber: "A-2", email: "ben@example.test" },
+];
+
+function working(rows: unknown[] = goodRows, overrides: { batch?: string } = {}) {
+  return { batchId: overrides.batch ?? batchId, rows };
+}
+
 function nothingWasWritten() {
   expect(rpc.importRoster).not.toHaveBeenCalled();
   expect(invitations.inviteUser).not.toHaveBeenCalled();
@@ -100,7 +109,8 @@ beforeEach(() => {
 
 const calls: { name: string; run: () => Promise<{ ok: boolean }> }[] = [
   { name: "previewRoster", run: () => actions.previewRoster(upload(goodCsv)) },
-  { name: "commitRoster", run: () => actions.commitRoster(upload(goodCsv)) },
+  { name: "recheckRoster", run: () => actions.recheckRoster(working()) },
+  { name: "commitRoster", run: () => actions.commitRoster(working()) },
   { name: "sendInvitations", run: () => actions.sendInvitations({ batchId }) },
   { name: "resendInvitation", run: () => actions.resendInvitation({ studentId }) },
 ];
@@ -214,11 +224,74 @@ describe("previewRoster", () => {
   }
 });
 
+describe("recheckRoster", () => {
+  beforeEach(asCoordinator);
+
+  it("checks the rows on screen and writes nothing", async () => {
+    const result = await actions.recheckRoster(
+      working([
+        { row: 2, fullName: "Ana", studentNumber: "A-1", email: "ana@example.test" },
+        { row: 4, fullName: "Cy", studentNumber: "A-1", email: "cy@example.test" },
+      ]),
+    );
+    expect(result).toMatchObject({ ok: true, data: { ready: 1, withProblems: 1 } });
+    if (result.ok) expect(result.data.rows[1].problems).toEqual(["Student number repeats row 2."]);
+    nothingWasWritten();
+  });
+
+  it("clears a problem once the row is fixed", async () => {
+    const result = await actions.recheckRoster(
+      working([{ row: 2, fullName: "Ana", studentNumber: "A-1", email: "ana@example.test" }]),
+    );
+    expect(result).toMatchObject({ ok: true, data: { ready: 1, withProblems: 0 } });
+  });
+
+  it("reports an over-long or malformed value as a problem, not a refusal", async () => {
+    const result = await actions.recheckRoster(
+      working([{ row: 2, fullName: "x".repeat(200), studentNumber: "A-1", email: "nope" }]),
+    );
+    expect(result).toMatchObject({ ok: true, data: { withProblems: 1 } });
+  });
+
+  it("refuses a closed batch", async () => {
+    queries.getBatchCourse.mockResolvedValue(ok({ courseId: myCourse, status: "closed" }));
+    expect(await actions.recheckRoster(working())).toMatchObject({
+      ok: false,
+      error: { code: "conflict" },
+    });
+  });
+
+  const bad: [string, () => unknown][] = [
+    ["no input", () => undefined],
+    ["a batch id that is not an id", () => working(goodRows, { batch: "not-an-id" })],
+    ["no rows", () => working([])],
+    ["more than 1,000 rows", () =>
+      working(
+        Array.from({ length: 1001 }, (_, i) => ({
+          row: i + 2,
+          fullName: "A",
+          studentNumber: String(i),
+          email: `a${i}@example.test`,
+        })),
+      )],
+    ["repeated row numbers", () => working([goodRows[0], goodRows[0]])],
+    ["a row without a number", () => working([{ fullName: "A", studentNumber: "1", email: "a@b.co" }])],
+    ["a value that is not text", () => working([{ ...goodRows[0], email: 5 }])],
+  ];
+  for (const [label, input] of bad) {
+    it(`refuses ${label} before any lookup`, async () => {
+      expect((await actions.recheckRoster(input())).ok).toBe(false);
+      expect(queries.getBatchCourse).not.toHaveBeenCalled();
+      nothingWasWritten();
+    });
+  }
+});
+
 describe("commitRoster", () => {
   beforeEach(asCoordinator);
 
-  it("imports a clean file with the session user as the actor", async () => {
-    const result = await actions.commitRoster(upload(goodCsv));
+  it("imports the rows with the session user as the actor", async () => {
+    const result = await actions.commitRoster(working());
     expect(result).toEqual({ ok: true, data: { imported: 2 } });
     expect(rpc.importRoster).toHaveBeenCalledWith(userId, batchId, [
       { row: 2, fullName: "Ana Reyes", studentNumber: "A-1", email: "ana@example.test", problems: [] },
@@ -226,9 +299,21 @@ describe("commitRoster", () => {
     ]);
   });
 
-  it("never sends a file with problems to the database", async () => {
+  it("imports only the rows that were kept, so a removed row is never imported", async () => {
+    await actions.commitRoster(working([goodRows[1]]));
+    const sent = rpc.importRoster.mock.calls[0][2] as { row: number }[];
+    expect(sent.map((row) => row.row)).toEqual([3]);
+  });
+
+  it("imports an edited row as edited", async () => {
+    await actions.commitRoster(working([{ ...goodRows[0], email: "fixed@example.test" }]));
+    const sent = rpc.importRoster.mock.calls[0][2] as { email: string }[];
+    expect(sent[0].email).toBe("fixed@example.test");
+  });
+
+  it("never sends rows with problems to the database", async () => {
     const result = await actions.commitRoster(
-      upload("full_name,student_number,email\nAna,A-1,ana@example.test\nBen,A-2,not-an-email\n"),
+      working([goodRows[0], { row: 3, fullName: "Ben", studentNumber: "A-2", email: "not-an-email" }]),
     );
     expect(result).toMatchObject({
       ok: false,
@@ -237,7 +322,7 @@ describe("commitRoster", () => {
     nothingWasWritten();
   });
 
-  it("checks again on the server even if a preview looked clean", async () => {
+  it("checks again on the server even if the screen looked clean", async () => {
     queries.getConflictContext.mockImplementation(async (_batch: string, course: string) =>
       ok({
         courseId: course,
@@ -246,22 +331,25 @@ describe("commitRoster", () => {
         accountEmails: new Set<string>(),
       }),
     );
-    expect((await actions.commitRoster(upload(goodCsv))).ok).toBe(false);
+    expect((await actions.commitRoster(working())).ok).toBe(false);
+    nothingWasWritten();
+  });
+
+  it("refuses an empty roster", async () => {
+    expect((await actions.commitRoster(working([]))).ok).toBe(false);
     nothingWasWritten();
   });
 
   it("passes a database refusal on as a typed result", async () => {
     rpc.importRoster.mockResolvedValue(fail("conflict", "row 2: email is already on the roster"));
-    expect(await actions.commitRoster(upload(goodCsv))).toEqual({
+    expect(await actions.commitRoster(working())).toEqual({
       ok: false,
       error: { code: "conflict", message: "row 2: email is already on the roster" },
     });
   });
 
-  it("ignores any actor id sent in the form", async () => {
-    const form = upload(goodCsv);
-    form.set("actorId", "someone-else");
-    await actions.commitRoster(form);
+  it("ignores any actor id sent with the rows", async () => {
+    await actions.commitRoster({ ...working(), actorId: "someone-else" });
     expect(rpc.importRoster.mock.calls[0][0]).toBe(userId);
   });
 });

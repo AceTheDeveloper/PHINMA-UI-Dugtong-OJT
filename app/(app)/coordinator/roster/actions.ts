@@ -7,14 +7,19 @@ import { authorize } from "@/lib/auth/server";
 import type { Session } from "@/lib/auth/session";
 import { importRoster } from "@/lib/db/rpc";
 import { fail, ok, type Result } from "@/lib/result";
-import { parseRosterFile } from "@/lib/roster/parse";
+import { parseRosterFile, type RosterRow } from "@/lib/roster/parse";
 import {
   getBatchCourse,
   getConflictContext,
   getStudentForAction,
   getStudentsToInvite,
 } from "@/lib/roster/queries";
-import { batchSchema, rosterUploadSchema, studentSchema } from "@/lib/roster/schemas";
+import {
+  batchSchema,
+  rosterRowsSchema,
+  rosterUploadSchema,
+  studentSchema,
+} from "@/lib/roster/schemas";
 import type { Preview, SendReport } from "@/lib/roster/types";
 import { validateRoster } from "@/lib/roster/validate";
 
@@ -46,7 +51,42 @@ async function batchInScope(
 
 type Checked = { preview: Preview; session: Session };
 
-// The shared first half of preview and commit: parse and validate the upload.
+// The shared check behind preview, re-check, and commit: the caller's course,
+// an open batch, then the roster rules against the database. Whatever the
+// browser says about a row is never trusted.
+async function checkRows(
+  session: Session,
+  batchId: string,
+  fileName: string,
+  rows: RosterRow[],
+): Promise<Result<Checked>> {
+  const batch = await batchInScope(session, batchId);
+  if (!batch.ok) return batch;
+  if (batch.data.status === "closed") {
+    return fail("conflict", "That OJT batch is closed. Choose an open batch.");
+  }
+
+  const context = await getConflictContext(
+    batchId,
+    batch.data.courseId,
+    rows.map((row) => row.email.trim().toLowerCase()).filter((email) => email !== ""),
+  );
+  if (!context.ok) return context;
+
+  const check = validateRoster(rows, context.data);
+  return ok({
+    session,
+    preview: {
+      batchId,
+      fileName,
+      rows: check.rows,
+      ready: check.ready,
+      withProblems: check.withProblems,
+    },
+  });
+}
+
+// Reads the uploaded file, then checks its rows.
 async function checkUpload(raw: unknown): Promise<Result<Checked>> {
   const session = await access();
   if (!session.ok) return session;
@@ -60,36 +100,28 @@ async function checkUpload(raw: unknown): Promise<Result<Checked>> {
     return fail("validation", input.error.issues[0]?.message ?? "Check the upload and try again.");
   }
 
+  // Scope first, so a file is never read for a batch the caller cannot use.
   const batch = await batchInScope(session.data, input.data.batchId);
   if (!batch.ok) return batch;
-  if (batch.data.status === "closed") {
-    return fail("conflict", "That OJT batch is closed. Choose an open batch.");
-  }
 
   const parsed = await parseRosterFile({
     name: input.data.file.name,
     bytes: new Uint8Array(await input.data.file.arrayBuffer()),
   });
   if (!parsed.ok) return parsed;
+  return checkRows(session.data, input.data.batchId, input.data.file.name, parsed.data);
+}
 
-  const context = await getConflictContext(
-    input.data.batchId,
-    batch.data.courseId,
-    parsed.data.map((row) => row.email.trim().toLowerCase()).filter((email) => email !== ""),
-  );
-  if (!context.ok) return context;
+// Checks the rows the coordinator is working on, after edits and removals.
+async function checkWorkingRows(raw: unknown): Promise<Result<Checked>> {
+  const session = await access();
+  if (!session.ok) return session;
 
-  const check = validateRoster(parsed.data, context.data);
-  return ok({
-    session: session.data,
-    preview: {
-      batchId: input.data.batchId,
-      fileName: input.data.file.name,
-      rows: check.rows,
-      ready: check.ready,
-      withProblems: check.withProblems,
-    },
-  });
+  const input = rosterRowsSchema.safeParse(raw);
+  if (!input.success) {
+    return fail("validation", input.error.issues[0]?.message ?? "Check the rows and try again.");
+  }
+  return checkRows(session.data, input.data.batchId, "", input.data.rows);
 }
 
 export async function previewRoster(raw: unknown): Promise<Result<Preview>> {
@@ -97,8 +129,16 @@ export async function previewRoster(raw: unknown): Promise<Result<Preview>> {
   return checked.ok ? ok(checked.data.preview) : checked;
 }
 
+// Same rules as the preview, for rows edited or removed on screen. Writes nothing.
+export async function recheckRoster(raw: unknown): Promise<Result<Preview>> {
+  const checked = await checkWorkingRows(raw);
+  return checked.ok ? ok(checked.data.preview) : checked;
+}
+
+// Imports the rows on screen, all or none. The file is not read again: the
+// rows are checked on the server as if they were a fresh upload.
 export async function commitRoster(raw: unknown): Promise<Result<{ imported: number }>> {
-  const checked = await checkUpload(raw);
+  const checked = await checkWorkingRows(raw);
   if (!checked.ok) return checked;
   const { preview, session } = checked.data;
   if (preview.withProblems > 0) {
