@@ -1,18 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { acceptConsent } from "@/app/(app)/consent/actions";
 import { primaryAction } from "@/components/auth/auth-parts";
 import { focusStyle } from "@/components/brand-link";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-// Mock: accepting only moves on. Recording consent happens in ticket-09.
 export function ConsentForm() {
   const [agreed, setAgreed] = useState(false);
 
   return (
-    <div>
+    <form action={acceptConsent}>
       <div className="mt-7 flex items-start gap-3">
         <input
           id="agree"
@@ -33,27 +32,15 @@ export function ConsentForm() {
       </div>
 
       <div className="mt-7">
-        {agreed ? (
-          <Button
-            nativeButton={false}
-            render={<Link href="/" />}
-            role="link"
-            size="lg"
-            className={primaryAction}
-          >
-            Accept and continue
-          </Button>
-        ) : (
-          <Button
-            type="button"
-            size="lg"
-            disabled
-            className={cn(primaryAction, "opacity-45")}
-          >
-            Accept and continue
-          </Button>
-        )}
+        <Button
+          type="submit"
+          size="lg"
+          disabled={!agreed}
+          className={cn(primaryAction, "disabled:opacity-45")}
+        >
+          Accept and continue
+        </Button>
       </div>
-    </div>
+    </form>
   );
 }

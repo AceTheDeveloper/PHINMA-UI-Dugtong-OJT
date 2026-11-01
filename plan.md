@@ -72,6 +72,7 @@ Do not decide these on your own. Ask in the ticket's "Open questions".
 - Overtime request: who approves (suggested: the supervisor), how it is requested, whether it needs a reason. Needs a mockup.
 - Swapped day: suggested, a one-time exception requested by the student and approved by the supervisor; permanent changes are the supervisor editing the schedule. To ask the coordinator.
 - Data retention: how long student data, resumes, and files are kept, and what happens when a batch closes (Data Privacy Act). Ask the school; tracked in `to-confirm.md`.
+- REMEMBER, two-step verification: Clerk's authenticator app needs the Pro plan, so it is off while we stay on the free plan. Revisit if we upgrade; then require it for Admin (and optionally Coordinator). Until then Admins protect their accounts by signing in with Google, which brings the Google account's own two-step verification. DECIDED: code requires every Admin (the Platform Admin, meaning the Dugtong developers) to be signed in with a Google account; `requireRole` refuses an Admin unless they have a verified Google account whose email matches their primary email AND no password on the account (so a password sign-in is impossible). Other roles are not affected. KNOWN GAP: the code checks the account, not the method used for this session, so if Clerk's email-code sign-in is switched on for sign-in, an Admin could still use it. Fix in the Clerk dashboard (sign-in methods) or by reading the session's first factor if Clerk exposes it. Found by the automated security review.
 - REMEMBER, Clerk webhook: sync a changed email into `users.email`, and when a Clerk account is deleted, deactivate our `users` row. Not needed while building (we match on the Clerk id, so nothing breaks), but do it before the pilot goes live. Needs a public webhook route and a signing secret, which is the reason it was left out of ticket-09.
 - REMEMBER, Resend: invitation emails move from Clerk's default to Resend later. The developer has questions about it to discuss first.
 - Reminder timing for stale pending entries.
@@ -445,12 +446,12 @@ New dependencies, each with a reason: `@clerk/nextjs` (auth), `@supabase/supabas
 1. Clerk: set the access mode to **Invite-only**, then activate the Supabase integration and copy the Clerk domain.
 2. Supabase: Authentication, Sign In / Providers, add Clerk, paste the domain.
 3. Clerk: turn on email and password sign-in with email verification, and Google as a social connection. In development Clerk's shared Google credentials work; production needs our own.
-4. Clerk: enable the authenticator app as a second step.
+
 
 #### Open questions
 
 1. ANSWERED, sign-in methods: email and password, plus Google. A Google account is accepted only if its verified email matches the invitation (our `accept_invitation` checks this). In production, Google sign-in needs our own Google OAuth credentials, which the human creates in Google Cloud.
-2. ANSWERED (confirm the explanation), two-step verification: yes. Required for Admin, optional for the others. This is a second code from an authenticator app after the password, not device trust. Clerk's plan limits for it are checked when building; our `requireRole` can refuse an Admin whose Clerk account has no second step.
+2. DECIDED, two-step verification: not now. Clerk's authenticator app is a Pro feature and the project stays on the free plan. No second step is required in code, but Admins must use Google sign-in (see the REMEMBER note below). REMEMBER (see Open decisions): revisit if the project moves to Clerk Pro.
 3. ANSWERED, invitation lifetime: 7 days, resendable by whoever sent it.
 4. ANSWERED, screens: the developer wants the sign-in screen revised (the current one is not modern enough) and has no mockup, so the AI proposes the design and the developer approves it before it is built. Suggested: do the four auth screens (sign-in, accept invitation, consent, no access) as one UI-only ticket first, with mock behavior, then wire them to Clerk.
 5. ANSWERED, invitation email: Clerk's default for now. REMEMBER: move to Resend later. The developer has questions about Resend to discuss first.

@@ -41,14 +41,21 @@ export function Field({
   );
 }
 
-// Mock: no sign-in is wired yet (ticket-09).
-export function GoogleButton() {
+export function GoogleButton({
+  onClick,
+  disabled,
+}: {
+  onClick?: () => void;
+  disabled?: boolean;
+}) {
   return (
     <Button
       type="button"
       variant="outline"
       size="lg"
-      className={cn(outlineAction, "gap-3")}
+      onClick={onClick}
+      disabled={disabled}
+      className={cn(outlineAction, "gap-3 disabled:opacity-60")}
     >
       <GoogleMark className="size-5" />
       Continue with Google
