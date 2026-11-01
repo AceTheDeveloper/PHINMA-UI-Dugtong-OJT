@@ -41,6 +41,13 @@ Plan template:
 
 - Other companies' supervisors never see an evaluation.
 
+### Structure and listings
+
+- PHINMA UI only. No tenant column; school name and timezone live in a single-row `school_settings` table.
+- OJT runs once per school year, for 4th years. A batch (`ojt_batches`) is one course's OJT in one school year and holds its required hours, so a later change applies to the next batch only.
+- Partner companies are one school-wide list, entered once. Each listing says which courses can apply (`listing_courses`).
+- A student's listings page shows only listings open to their own course, chosen automatically from the student's course and enforced on the server and in RLS. No course filter for students. Search by company or title is fine.
+
 ### Daily logs and schedules
 
 - Stale-pending threshold is 3 days, stored per course as data.
@@ -182,7 +189,7 @@ The database for the pilot (PHINMA UI, CITE, BSIT) that can grow to the whole un
 
 #### Principles
 
-- **Config is data, per course.** Required hours, stale threshold, time-in window, evaluation form, and certificate template all hang off a course or an OJT term.
+- **Config is data, per course.** Required hours, stale threshold, time-in window, evaluation form, and certificate template all hang off a course or an OJT batch.
 - **Scope is explicit.** Every row traces to a course (students, evaluations) or a company (supervisors, listings). RLS and `requireRole` check that chain, never a hard-coded course.
 - **History is never rewritten.** Rules that change over time (required hours, schedule, evaluation form) are versioned or snapshotted, so old records stay correct.
 - **Foreign keys over flexibility.** Separate assignment tables, not one polymorphic "scope" column, so the database enforces the links.
@@ -197,9 +204,9 @@ The database for the pilot (PHINMA UI, CITE, BSIT) that can grow to the whole un
 | school_settings | PHINMA UI only. A single-row table                       | `name`, `timezone` (default `Asia/Manila`). A check keeps it to one row. No tenant column anywhere else. |
 | departments | CITE now, others later                                       | unique code                                                                                        |
 | courses     | BSIT now                                                     | FK department; unique code                                                                         |
-| ojt_terms   | One OJT batch of a course (for example SY 2026-2027, term 1) | FK course; `required_hours`, `stale_threshold_days` (3), `time_in_window_minutes` (30), dates, status |
+| ojt_batches | One OJT batch of a course: the students doing OJT in one school year | FK course; `school_year` (for example 2026-2027), unique (course, school_year); `required_hours`, `stale_threshold_days` (3), `time_in_window_minutes` (30), dates, status |
 
-`ojt_terms` is the key future-ready piece. Required hours live on the batch, so a later change applies to new batches and old batches keep their original value. This also removes most of the "required hours raised after evaluation" worry. The REVISIT item stays open for the rules.
+`ojt_batches` is the key future-ready piece. Required hours live on the batch, so a later change applies to new batches and old batches keep their original value. This also removes most of the "required hours raised after evaluation" worry. The REVISIT item stays open for the rules.
 
 **B. People and access**
 
@@ -207,7 +214,7 @@ The database for the pilot (PHINMA UI, CITE, BSIT) that can grow to the whole un
 | ----------------------- | ------------------------------------ | ----------------------------------------------------------------------------------------------------- |
 | users                   | One row per Clerk identity           | unique `clerk_id`; `role` enum (admin, coordinator, supervisor, student); `is_active`                 |
 | coordinator_assignments | Which courses a coordinator manages  | (user, course). Many allowed, so a second coordinator or a department-wide one later is rows, not code |
-| students                | Roster record                        | FK user (null until the invite is accepted), course, ojt_term; unique (term, student_number); unique email |
+| students                | Roster record                        | FK user (null until the invite is accepted), course, ojt_batch; unique (batch, student_number); unique email |
 | supervisor_memberships  | Supervisor belongs to a company      | exactly one owner per company (partial unique index)                                                  |
 | invitations             | Invitation-only sign-up              | role, target (student or company), token hash, expiry, used_at                                        |
 | consents                | Data privacy notice acceptance       | (user, notice_version, accepted_at)                                                                   |
@@ -228,7 +235,7 @@ The pilot (one coordinator, BSIT only) is just one `coordinator_assignments` row
 | ------------------ | -------------------------------------- | ------------------------------------------------------------------------------------------------- |
 | resumes            | Storage path per student               | one current per student; private bucket                                                           |
 | applications       | Student to listing                     | unique (student, listing); status enum                                                            |
-| deployments        | Accepted application                   | FK student, company, listing, ojt_term; unique partial index: one active per student; status enum |
+| deployments        | Accepted application                   | FK student, company, listing, ojt_batch; unique partial index: one active per student; status enum |
 | work_schedules     | Supervisor-set schedule per deployment | `effective_from`; audited; the newest effective row applies                                       |
 | work_schedule_days | Days and times of a schedule           | (schedule, weekday, start_time, end_time); an end earlier than the start means the shift ends the next day (night shift) |
 
@@ -257,10 +264,10 @@ The pilot (one coordinator, BSIT only) is just one `coordinator_assignments` row
 
 - Unique (deployment, log_date); one active deployment per student; one owner per company; one evaluation per deployment.
 - Time out must be after time in. Hours are computed from approved logs, never stored as a running total.
-- Audit trigger on daily_logs, evaluations, deployments, work_schedules, ojt_terms (required hours), companies (status), and supervisor_memberships. It reads the acting user from a transaction-local setting that server code sets, so edits made outside the app are recorded as `database`.
+- Audit trigger on daily_logs, evaluations, deployments, work_schedules, ojt_batches (required hours), companies (status), and supervisor_memberships. It reads the acting user from a transaction-local setting that server code sets, so edits made outside the app are recorded as `database`.
 - `audit_log` rejects update and delete. Approved logs reject update and delete except through the audited reopen function.
 - Accept-application is one Postgres function (create the deployment, withdraw the other open applications). It is all or nothing.
-- Evaluation insert is rejected unless approved hours are at least the term's required hours.
+- Evaluation insert is rejected unless approved hours are at least the batch's required hours.
 
 #### Access (RLS)
 
@@ -271,7 +278,7 @@ The pilot (one coordinator, BSIT only) is just one `coordinator_assignments` row
 
 #### Migration order
 
-1. Academic structure (school_settings, departments, courses, ojt_terms) and seed rows for PHINMA UI, CITE, BSIT.
+1. Academic structure (school_settings, departments, courses, ojt_batches) and seed rows for PHINMA UI, CITE, BSIT.
 2. Users, assignments, students, invitations, consents.
 3. Companies, listings, listing_courses.
 4. Resumes, applications, deployments, work schedules.
@@ -294,8 +301,8 @@ Each migration ships with database tests for its guard rails.
 #### Open questions
 
 1. ANSWERED, one school or several: PHINMA UI only. No tenant column; school name and timezone live in a single-row `school_settings` table.
-2. **OJT terms as the home of required hours.** Recommended; waiting on the developer's answer (see the explanation in the session).
-3. **Companies shared across departments.** Recommended; waiting on the developer's answer.
+2. ANSWERED, OJT batches as the home of required hours: yes. OJT runs once per school year, only for 4th years, and a batch shares the same required hours. Renamed `ojt_terms` to `ojt_batches`.
+3. ANSWERED, companies shared across departments: yes. One school-wide company list; `listing_courses` says which courses a listing is open to.
 4. ANSWERED, Docker: not available on any developer machine. Database tests use PGlite (see Testing).
 5. TO CONFIRM with the school: does it need anything beyond one coordinator per course, such as a department head with read-only access? Tracked in `to-confirm.md`. The model already allows several coordinators.
 
