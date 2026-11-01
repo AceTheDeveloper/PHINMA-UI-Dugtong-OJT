@@ -38,7 +38,6 @@ Sign-in, invitation-only sign-up, and the server checks every later feature reli
 - [ ] A second call for the same Clerk user returns the existing user.
 - [ ] `create_invitation` allows and refuses each role pairing as in the plan.
 - [ ] A deactivated user is refused on the next request, and sees the deactivated screen.
-- [ ] An Admin without a second step is refused (if Clerk cannot require it per role).
 - [ ] The role, scope, and active state are read from our database, never from Clerk token claims or metadata.
 - [ ] The service-role key appears only in server-only modules.
 - [ ] Public routes are exactly `/`, `/sign-in`, `/accept-invitation`, and branding assets, and a test fails if that list changes.
@@ -63,7 +62,7 @@ See `plan.md`, "Plan: authentication and authorization (ticket-09)".
 
 Human steps in the dashboards (before the browser checks):
 
-1. Clerk: set the access mode to Invite-only; turn on email and password with email verification, Google as a social connection, and the authenticator app as a second step; activate the Supabase integration and copy the Clerk domain.
+1. Clerk: set the access mode to Invite-only; turn on email and password with email verification, and Google as a social connection; activate the Supabase integration and copy the Clerk domain.
 2. Supabase: Authentication, Sign In / Providers, add Clerk and paste the domain.
 3. Apply migration 4 with `npx supabase db push`.
 
@@ -71,7 +70,7 @@ Human steps in the dashboards (before the browser checks):
 
 ## Open questions (AI writes here instead of guessing)
 
-- Whether Clerk can require a second step for the Admin role only is checked during the build. If it cannot, `requireRole` enforces it.
+- Two-step verification is off: Clerk's authenticator app is Pro only and we stay on the free plan (see `plan.md`, REMEMBER).
 - Revoking a Clerk invitation is not confirmed in the docs; checked during the build.
 
 ## Suggested AGENTS.md changes (a human applies these)
