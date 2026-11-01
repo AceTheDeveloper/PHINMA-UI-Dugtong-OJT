@@ -36,20 +36,28 @@ export function SignInForm({ notice }: { notice?: string }) {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
-    const outcome = await signInWithPassword(
-      signIn,
-      {
-        email: String(form.get("email") ?? ""),
-        password: String(form.get("password") ?? ""),
-      },
-      go,
-    );
-    setMessage(outcome.ok ? undefined : outcome.message);
+    try {
+      const outcome = await signInWithPassword(
+        signIn,
+        {
+          email: String(form.get("email") ?? ""),
+          password: String(form.get("password") ?? ""),
+        },
+        go,
+      );
+      setMessage(outcome.ok ? undefined : outcome.message);
+    } catch {
+      setMessage("Sign-in did not work. Refresh the page and try again.");
+    }
   }
 
   async function handleGoogle() {
-    const outcome = await signInWithGoogle(signIn);
-    setMessage(outcome.ok ? undefined : outcome.message);
+    try {
+      const outcome = await signInWithGoogle(signIn);
+      setMessage(outcome.ok ? undefined : outcome.message);
+    } catch {
+      setMessage("Google sign-in did not start. Refresh the page and try again.");
+    }
   }
 
   return (

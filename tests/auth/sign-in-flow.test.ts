@@ -8,6 +8,7 @@ import {
 function fakeApi(overrides: Partial<SignInApi> = {}) {
   const api = {
     status: "complete",
+    reset: vi.fn<SignInApi["reset"]>().mockResolvedValue({ error: null }),
     password: vi.fn<SignInApi["password"]>().mockResolvedValue({ error: null }),
     sso: vi.fn<SignInApi["sso"]>().mockResolvedValue({ error: null }),
     finalize: vi.fn<SignInApi["finalize"]>(async ({ navigate }) => {
@@ -97,6 +98,38 @@ describe("signInWithPassword", () => {
     const outcome = await signInWithPassword(api, values, go);
     expect(outcome).toEqual({ ok: false, message: "Session could not start." });
     expect(go).not.toHaveBeenCalled();
+  });
+});
+
+describe("a leftover sign-in attempt", () => {
+  it("is cleared before a password sign-in", async () => {
+    const api = fakeApi();
+    await signInWithPassword(api, values, vi.fn());
+    expect(vi.mocked(api.reset).mock.invocationCallOrder[0]).toBeLessThan(
+      vi.mocked(api.password).mock.invocationCallOrder[0],
+    );
+  });
+
+  it("is cleared before Google starts, so Google still opens after a wrong password", async () => {
+    const api = fakeApi();
+    await signInWithGoogle(api);
+    expect(api.reset).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(api.reset).mock.invocationCallOrder[0]).toBeLessThan(
+      vi.mocked(api.sso).mock.invocationCallOrder[0],
+    );
+  });
+
+  it("stops with a message if it cannot be cleared", async () => {
+    const api = fakeApi({
+      reset: vi.fn().mockResolvedValue({ error: { message: "Could not reset." } }),
+    });
+    expect(await signInWithGoogle(api)).toEqual({ ok: false, message: "Could not reset." });
+    expect(await signInWithPassword(api, values, vi.fn())).toEqual({
+      ok: false,
+      message: "Could not reset.",
+    });
+    expect(api.sso).not.toHaveBeenCalled();
+    expect(api.password).not.toHaveBeenCalled();
   });
 });
 

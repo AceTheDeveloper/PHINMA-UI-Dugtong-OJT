@@ -5,6 +5,7 @@ type ApiError = { message: string; longMessage?: string; code?: string } | null;
 
 export type SignInApi = {
   status: string;
+  reset(): Promise<{ error: ApiError }>;
   password(params: {
     identifier: string;
     password: string;
@@ -51,6 +52,11 @@ export async function signInWithPassword(
     return { ok: false, message: "Enter your email and password." };
   }
 
+  // Start clean: a leftover attempt (for example a failed password) must not
+  // be reused.
+  const cleared = await api.reset();
+  if (cleared.error) return { ok: false, message: messageFor(cleared.error) };
+
   const attempt = await api.password({ identifier: email, password: values.password });
   if (attempt.error) return { ok: false, message: messageFor(attempt.error) };
   if (api.status !== "complete") return { ok: false, message: unsupportedStep };
@@ -64,6 +70,11 @@ export async function signInWithPassword(
 
 // On success the browser leaves for Google, so there is nothing to return.
 export async function signInWithGoogle(api: SignInApi): Promise<SignInOutcome> {
+  // Clerk's sso() silently does nothing when a sign-in attempt is already open
+  // (for example after a wrong password), so clear it first.
+  const cleared = await api.reset();
+  if (cleared.error) return { ok: false, message: messageFor(cleared.error) };
+
   const attempt = await api.sso({
     strategy: "oauth_google",
     redirectUrl: afterSignInPath,
