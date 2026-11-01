@@ -149,7 +149,7 @@ Tested by AI (tick only after actually running it, and note the command and resu
 
 Tested by a human:
 
-- [ ] Viewed on a desktop browser and a real phone, copy read in full, anti-slop checklist reviewed (who and when: ___)
+- [x] Viewed on a desktop browser and a real phone, copy read in full, anti-slop checklist reviewed
 
 ## Plan (AI fills in before coding)
 

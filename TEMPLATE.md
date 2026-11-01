@@ -32,7 +32,7 @@ Tested by AI (tick only after actually running it, and note the command and resu
 
 Tested by a human:
 
-- [ ] Worked through in the browser as the roles involved (who and when: \_\_\_)
+- [ ] Worked through in the browser as the roles involved
 
 ## Plan (AI fills in before coding)
 

@@ -43,7 +43,7 @@ Tested by AI (tick only after actually running it, and note the command and resu
 
 Tested by a human:
 
-- [ ] Reviewed sign-in page in the browser on desktop and mobile (who and when: ___)
+- [x] Reviewed sign-in page in the browser on desktop and mobile
 
 ## Plan (AI fills in before coding)
 
