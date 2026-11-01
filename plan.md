@@ -72,6 +72,7 @@ Do not decide these on your own. Ask in the ticket's "Open questions".
 - Overtime request: who approves (suggested: the supervisor), how it is requested, whether it needs a reason. Needs a mockup.
 - Swapped day: suggested, a one-time exception requested by the student and approved by the supervisor; permanent changes are the supervisor editing the schedule. To ask the coordinator.
 - Data retention: how long student data, resumes, and files are kept, and what happens when a batch closes (Data Privacy Act). Ask the school; tracked in `to-confirm.md`.
+- REMEMBER, Resend: invitation emails move from Clerk's default to Resend later. The developer has questions about it to discuss first.
 - Reminder timing for stale pending entries.
 - Can the coordinator override a supervisor's approval decision? Default: no.
 - Lunch-break rule for hours (default: none deducted).
@@ -442,17 +443,18 @@ New dependencies, each with a reason: `@clerk/nextjs` (auth), `@supabase/supabas
 
 1. Clerk: set the access mode to **Invite-only**, then activate the Supabase integration and copy the Clerk domain.
 2. Supabase: Authentication, Sign In / Providers, add Clerk, paste the domain.
-3. Clerk: turn on email and password sign-in with email verification.
+3. Clerk: turn on email and password sign-in with email verification, and Google as a social connection. In development Clerk's shared Google credentials work; production needs our own.
+4. Clerk: enable the authenticator app as a second step.
 
 #### Open questions
 
-1. **Sign-in methods.** Email and password only (my suggestion), or also Google? Students have school emails, supervisors use company emails.
-2. **Extra protection for Admin and Coordinator.** Turn on two-step verification for these roles? My suggestion: required for Admin, optional for the rest.
-3. **Invitation lifetime.** My suggestion: 7 days, resendable by whoever sent it. Clerk's default is 30.
-4. **Mockups.** Are the proposed accept-invitation and consent screens acceptable as a starting point, or will you provide mockups?
-5. **Invitation email.** Use Clerk's default email for now, and brand it later?
-6. **Clerk instances.** Use the Clerk development instance until the pilot, then create a production instance with its own keys?
-7. **Changed or deleted emails.** Out of scope for now. Confirm that a changed Clerk email does not need to update our `users` row yet.
+1. ANSWERED, sign-in methods: email and password, plus Google. A Google account is accepted only if its verified email matches the invitation (our `accept_invitation` checks this). In production, Google sign-in needs our own Google OAuth credentials, which the human creates in Google Cloud.
+2. ANSWERED (confirm the explanation), two-step verification: yes. Required for Admin, optional for the others. This is a second code from an authenticator app after the password, not device trust. Clerk's plan limits for it are checked when building; our `requireRole` can refuse an Admin whose Clerk account has no second step.
+3. ANSWERED, invitation lifetime: 7 days, resendable by whoever sent it.
+4. ANSWERED, screens: the developer wants the sign-in screen revised (the current one is not modern enough) and has no mockup, so the AI proposes the design and the developer approves it before it is built. Suggested: do the four auth screens (sign-in, accept invitation, consent, no access) as one UI-only ticket first, with mock behavior, then wire them to Clerk.
+5. ANSWERED, invitation email: Clerk's default for now. REMEMBER: move to Resend later. The developer has questions about Resend to discuss first.
+6. OPEN, Clerk instances: use the development instance until the pilot, then create a production instance with its own keys?
+7. OPEN, changed or deleted emails: if someone changes their email in Clerk, or their Clerk account is deleted, our `users` row is not updated. Nothing breaks (we match on the Clerk id), but lists and exports could show an old email. Suggested: skip for now.
 
 - [ ] Plan approved by a human
 
