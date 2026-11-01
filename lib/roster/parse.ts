@@ -24,7 +24,6 @@ export const rosterColumns = [
   "COLLEGE",
   "COURSE",
   "CURRICULUM",
-  "SUBJECT",
   "SECTION",
   "EMAIL",
 ] as const;
