@@ -71,6 +71,7 @@ Do not decide these on your own. Ask in the ticket's "Open questions".
 - Hours for an early arrival (within the 30-minute window): suggested, count from the scheduled start.
 - Overtime request: who approves (suggested: the supervisor), how it is requested, whether it needs a reason. Needs a mockup.
 - Swapped day: suggested, a one-time exception requested by the student and approved by the supervisor; permanent changes are the supervisor editing the schedule. To ask the coordinator.
+- Data retention: how long student data, resumes, and files are kept, and what happens when a batch closes (Data Privacy Act). Ask the school; tracked in `to-confirm.md`.
 - Reminder timing for stale pending entries.
 - Can the coordinator override a supervisor's approval decision? Default: no.
 - Lunch-break rule for hours (default: none deducted).
@@ -181,7 +182,7 @@ Domains: roster, companies, listings, applications, deployments, logs, evaluatio
 Add a `work_schedules` table per deployment (days, start and end time, effective-from), set only by the supervisor and audited. Daily logs read the schedule to assign the log date, enforce the time out rule, and detect forgotten time outs. Details are under "Daily logs and schedules" in Decisions.
 
 
-### Plan: core schema (ticket-08) [draft]
+### Plan: core schema (ticket-08) [approved]
 
 #### What and why
 
@@ -260,11 +261,57 @@ The pilot (one coordinator, BSIT only) is just one `coordinator_assignments` row
 
 **Deferred on purpose** (waiting on open decisions, added as later migrations): overtime requests, swapped-day exceptions, roster import staging (added with the roster ticket), stale reminders.
 
+#### Status values and transitions
+
+Enums are listed here so migrations, server code, and tests agree. Transitions not listed are rejected by the database.
+
+| Enum                   | Values                                   | Allowed transitions                                                                                          |
+| ---------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| user_role              | admin, coordinator, supervisor, student  | none (a user keeps one role)                                                                                 |
+| company_status         | active, inactive                         | either way (audited)                                                                                         |
+| listing_status         | open, closed                             | open to closed, closed to open                                                                               |
+| application_status     | applied, accepted, rejected, withdrawn   | applied to accepted, rejected, or withdrawn. The other three are final.                                       |
+| deployment_status      | active, completed, ended                 | active to completed (evaluation submitted) or ended (supervisor or admin ends it early). Both are final.     |
+| daily_log_status       | open, pending, approved, rejected        | open to pending (time out and journal); pending to approved or rejected; rejected to pending (resubmit); approved to pending (audited reopen) |
+| ojt_batch_status       | planned, active, closed                  | planned to active to closed                                                                                  |
+| invitation_status      | pending, used, expired, revoked          | pending to used, expired, or revoked                                                                         |
+| evaluation_form_status | draft, published, archived               | draft to published to archived; published forms are immutable                                                |
+
+"Ready for evaluation" and "stale pending" are computed, not stored statuses. The reopen target (`pending`) is a design choice: after a reopen the supervisor corrects the entry and approves it again.
+
+#### Hours calculation
+
+- Entry minutes = (`time_out` minus `time_in`) minus `break_minutes`, never below 0. The exact interval is used; there is no per-entry rounding.
+- A deployment's approved hours = the sum of entry minutes of its approved logs, divided by 60. Rounding happens only for display (two decimals).
+- Hours are exposed through a database view (`deployment_hours`), so the dashboard, the evaluation gate, and the DTR export all read the same number.
+- Which start counts for an early arrival is an open decision (see Open decisions). Until decided, the actual `time_in` is used and the view is the one place to change it.
+
+#### Writes and the audit actor
+
+- The Supabase JS client sends each request as its own transaction, so a setting made in one call is gone in the next. The audit actor therefore cannot be set from separate calls.
+- **Rule:** every state-changing action is a Postgres function called with `rpc`, taking the actor's user id as a parameter. Inside one transaction the function sets the actor (`set_config('app.actor', ..., true)`), does the change, and lets the audit trigger read it.
+- Server code still validates with Zod and checks role and scope first. The functions for hour-related and approval actions (time in, time out, approve, reject, correct, reopen, accept application, submit evaluation) also verify the actor's role and scope, so a server bug alone cannot skip a rule.
+- Execute on these functions is revoked from `anon` and `authenticated`; only the service role can call them. A wrapper in `lib/db/` is the single place server code calls them.
+- An edit made outside the app (for example the dashboard SQL editor) has no actor set, so the audit row is recorded with source `database` and no actor.
+
+#### File storage
+
+- Two private buckets: `resumes` and `certificates`. No policies for user sessions, so files can only be read through signed links.
+- Paths: `resumes/{student_id}/{uuid}.pdf` and `certificates/{deployment_id}/{certification_id}.pdf`.
+- A signed link is issued by the server, only after the same role and scope check as the data, and lasts 60 seconds.
+- Resumes: PDF only, 5 MB maximum (design choice, adjustable). Replacing a resume adds a new row and marks the old one not current; the old file is kept until the retention rule is decided.
+
+#### Other constraints and seed data
+
+- A supervisor belongs to exactly one company (unique `user_id` in `supervisor_memberships`).
+- `log_date` is computed by a database function from `time_in` and `school_settings.timezone`; it is never sent by the client.
+- `school_settings` is seeded by a migration (it is required for the system to run). Development data (CITE, BSIT, a 2026-2027 batch, sample users) is in `supabase/seed.sql` and is never applied to production. Test fixtures are built inside the tests.
+
 #### Guard rails in the database
 
 - Unique (deployment, log_date); one active deployment per student; one owner per company; one evaluation per deployment.
 - Time out must be after time in. Hours are computed from approved logs, never stored as a running total.
-- Audit trigger on daily_logs, evaluations, deployments, work_schedules, ojt_batches (required hours), companies (status), and supervisor_memberships. It reads the acting user from a transaction-local setting that server code sets, so edits made outside the app are recorded as `database`.
+- Audit trigger on daily_logs, evaluations, deployments, work_schedules, ojt_batches (required hours), companies (status), and supervisor_memberships. It reads the actor set by the write functions (see "Writes and the audit actor"), so edits made outside the app are recorded as `database`.
 - `audit_log` rejects update and delete. Approved logs reject update and delete except through the audited reopen function.
 - Accept-application is one Postgres function (create the deployment, withdraw the other open applications). It is all or nothing.
 - Evaluation insert is rejected unless approved hours are at least the batch's required hours.
@@ -304,9 +351,9 @@ Each migration ships with database tests for its guard rails.
 2. ANSWERED, OJT batches as the home of required hours: yes. OJT runs once per school year, only for 4th years, and a batch shares the same required hours. Renamed `ojt_terms` to `ojt_batches`.
 3. ANSWERED, companies shared across departments: yes. One school-wide company list; `listing_courses` says which courses a listing is open to.
 4. ANSWERED, Docker: not available on any developer machine. Database tests use PGlite (see Testing).
-5. TO CONFIRM with the school: does it need anything beyond one coordinator per course, such as a department head with read-only access? Tracked in `to-confirm.md`. The model already allows several coordinators.
+5. TO CONFIRM with the school (does not block the build): does it need anything beyond one coordinator per course, such as a department head with read-only access? Tracked in `to-confirm.md`. The model already allows several coordinators.
 
-- [ ] Plan approved by a human
+- [x] Plan approved by a human (approved by the developer in session)
 
 ### Plan: test framework (ticket-07) [done]
 

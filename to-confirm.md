@@ -18,6 +18,9 @@ Questions we still need to ask the coordinator or supervisors. When you get an a
 - [ ] **Extra coordinator roles.** The system allows several coordinators, each assigned to courses. Does the school need anything beyond one coordinator, such as a department head with read-only access, or a second coordinator per course?
   - Affects: `coordinator_assignments` and RLS in the core schema (ticket-08).
 
+- [ ] **Data retention.** How long should student data, resumes, and certificates be kept, and what should happen when a batch closes (archive, delete, anonymize)? Ask the school, and its data privacy officer if there is one.
+  - Affects: deletion jobs, file storage, the consent notice text.
+
 ## Ask the supervisors and the coordinator
 
 - [ ] **Early time out approval.** The reason is free text and the daily approval covers it, because supervisors may be busy. Do they want a separate approval step for early outs?
