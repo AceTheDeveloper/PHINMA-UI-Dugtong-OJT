@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
 import { useSignIn } from "@clerk/nextjs";
 import { Eye, EyeOff } from "lucide-react";
 import {
@@ -25,7 +24,6 @@ import {
 import { cn } from "@/lib/utils";
 
 export function SignInForm({ notice }: { notice?: string }) {
-  const router = useRouter();
   const { signIn, fetchStatus } = useSignIn();
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState<string | undefined>(notice);
@@ -33,13 +31,13 @@ export function SignInForm({ notice }: { notice?: string }) {
   const [codeFor, setCodeFor] = useState<string | null>(null);
   const busy = fetchStatus === "fetching";
 
-  // Decorated URLs can be absolute (they refresh the session cookie on Safari).
+  // Always a full page load, never a client-side router push. The browser keeps
+  // visited pages in memory across a sign-out and sign-in, and "/after-sign-in"
+  // answers differently for each role. A push could replay the previous
+  // person's answer (a student sent to /supervisor) and leave their pages in
+  // memory. A fresh load starts clean.
   function go(url: string) {
-    if (url.startsWith("http")) {
-      window.location.href = url;
-    } else {
-      router.push(url);
-    }
+    window.location.assign(url);
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {

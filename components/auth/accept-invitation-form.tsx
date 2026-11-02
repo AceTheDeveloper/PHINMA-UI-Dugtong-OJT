@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useSignUp } from "@clerk/nextjs";
 import { Eye, EyeOff } from "lucide-react";
 import {
@@ -60,7 +60,6 @@ function SignInLink() {
 }
 
 function InvitationForm() {
-  const router = useRouter();
   const params = useSearchParams();
   const { signUp, fetchStatus } = useSignUp();
   const [start, setStart] = useState<Start>({ state: "checking" });
@@ -73,13 +72,13 @@ function InvitationForm() {
   const ticket = params.get("__clerk_ticket");
   const hasAccount = params.get("__clerk_status") === "sign_in";
 
-  // Decorated URLs can be absolute (they refresh the session cookie on Safari).
+  // Always a full page load, never a client-side router push. The browser keeps
+  // visited pages in memory across a sign-out and sign-in, and "/after-sign-in"
+  // answers differently for each role. A push could replay the previous
+  // person's answer (a student sent to /supervisor) and leave their pages in
+  // memory. A fresh load starts clean.
   function go(url: string) {
-    if (url.startsWith("http")) {
-      window.location.href = url;
-    } else {
-      router.push(url);
-    }
+    window.location.assign(url);
   }
 
   // Once per page load: Clerk would otherwise open a second sign-up attempt.

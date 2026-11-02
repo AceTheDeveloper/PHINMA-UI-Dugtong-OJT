@@ -10,12 +10,13 @@ import { afterSignInPath } from "@/lib/auth/sign-in-flow";
 export default function SsoCallbackPage() {
   const router = useRouter();
 
+  // Always a full page load, never a client-side router push. The browser keeps
+  // visited pages in memory across a sign-out and sign-in, and "/after-sign-in"
+  // answers differently for each role. A push could replay the previous
+  // person's answer (a student sent to /supervisor) and leave their pages in
+  // memory. A fresh load starts clean.
   function go(url: string) {
-    if (url.startsWith("http")) {
-      window.location.href = url;
-    } else {
-      router.push(url);
-    }
+    window.location.assign(url);
   }
 
   return (
