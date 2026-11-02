@@ -34,9 +34,10 @@ describe("links per role", () => {
 
   it("keeps links with no screen yet as rows without a link", () => {
     const soon = linksFor("coordinator").filter((item) => item.href === null);
-    expect(soon.map((item) => item.label)).toEqual(expect.arrayContaining(["Companies", "Reports", "Audit log"]));
+    expect(soon.map((item) => item.label)).toEqual(expect.arrayContaining(["Reports", "Audit log"]));
     expect(soon.map((item) => item.label)).not.toContain("Students");
     expect(soon.map((item) => item.label)).not.toContain("Daily logs");
+    expect(soon.map((item) => item.label)).not.toContain("Companies");
     expect(linksFor("supervisor").every((item) => item.href !== null)).toBe(true);
   });
 });
