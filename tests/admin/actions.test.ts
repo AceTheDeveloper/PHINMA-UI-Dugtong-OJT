@@ -21,6 +21,7 @@ const rpc = {
   setOjtRequiredHours: vi.fn(),
   createCompany: vi.fn(),
   setCompanyStatus: vi.fn(),
+  setUserActive: vi.fn(),
 };
 vi.mock("@/lib/db/rpc", () => rpc);
 
@@ -82,7 +83,9 @@ const calls: { name: string; run: () => Promise<{ ok: boolean }> }[] = [
   },
   { name: "inviteAdmin", run: () => actions.inviteAdmin({ email: "a@example.test" }) },
   { name: "revokeInvitation", run: () => actions.revokeInvitation({ invitationId: uuid }) },
+  { name: "toggleUserActive", run: () => actions.toggleUserActive({ userId: uuid, active: false }) },
 ];
+
 
 function nothingWasWritten() {
   for (const fn of [...Object.values(rpc), ...Object.values(invitations)]) {
@@ -164,6 +167,12 @@ describe("Admin actions with an admin", () => {
     });
   });
 
+  it("toggles a user active status", async () => {
+    await actions.toggleUserActive({ userId: uuid, active: false });
+    expect(rpc.setUserActive).toHaveBeenCalledWith(userId, uuid, false);
+  });
+
+
   it("passes a database refusal on as a typed result", async () => {
     rpc.createDepartment.mockResolvedValue(
       fail("conflict", "A department with this code already exists."),
@@ -213,8 +222,11 @@ describe("Admin actions with an admin", () => {
       "a status other than active or inactive",
       () => actions.changeCompanyStatus({ companyId: uuid, status: "deleted" }),
     ],
+    ["an invalid user id to toggle", () => actions.toggleUserActive({ userId: "not-a-uuid", active: true })],
+    ["a missing active flag", () => actions.toggleUserActive({ userId: uuid })],
     ["a missing body", () => actions.addCompany(undefined)],
   ];
+
 
   for (const [label, run] of bad) {
     it(`refuses ${label} before any write`, async () => {

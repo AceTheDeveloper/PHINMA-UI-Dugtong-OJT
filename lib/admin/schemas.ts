@@ -89,6 +89,10 @@ export const inviteSupervisorSchema = z.object({ companyId: uuid, email });
 export const inviteCoordinatorSchema = z.object({ courseId: uuid, email });
 export const inviteAdminSchema = z.object({ email });
 export const revokeInvitationSchema = z.object({ invitationId: uuid });
+export const toggleUserActiveSchema = z.object({
+  userId: uuid,
+  active: z.boolean(),
+});
 
 export type DepartmentInput = z.infer<typeof departmentSchema>;
 export type CourseInput = z.infer<typeof courseSchema>;
@@ -98,3 +102,5 @@ export type CompanyInput = z.infer<typeof companySchema>;
 export type InviteSupervisorInput = z.infer<typeof inviteSupervisorSchema>;
 export type InviteCoordinatorInput = z.infer<typeof inviteCoordinatorSchema>;
 export type InviteAdminInput = z.infer<typeof inviteAdminSchema>;
+export type ToggleUserActiveInput = z.infer<typeof toggleUserActiveSchema>;
+

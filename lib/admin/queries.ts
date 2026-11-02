@@ -361,6 +361,108 @@ export async function getClerkInvitationId(invitationId: string): Promise<Result
   return ok(found.data[0]?.clerk_invitation_id ?? null);
 }
 
+// --------------------------------------------------------------- accounts
+
+const registeredUserRow = z.object({
+  id: z.string(),
+  email: z.string(),
+  full_name: z.string(),
+  role: z.enum(["admin", "coordinator", "supervisor", "student"]),
+  is_active: z.boolean(),
+  created_at: z.string(),
+});
+
+export type RegisteredUserSummary = {
+  id: string;
+  email: string;
+  fullName: string;
+  role: "admin" | "coordinator" | "supervisor" | "student";
+  isActive: boolean;
+  affiliation: string | null;
+  createdAt: string;
+};
+
+export async function getRegisteredUsers(): Promise<Result<RegisteredUserSummary[]>> {
+  const [users, memberships, companies, assignments, students, courses] = await Promise.all([
+    read(z.array(registeredUserRow), () =>
+      db()
+        .from("users")
+        .select("id, email, full_name, role, is_active, created_at")
+        .order("created_at", { ascending: false }),
+    ),
+    read(z.array(membershipRow), () =>
+      db().from("supervisor_memberships").select("user_id, company_id, is_owner"),
+    ),
+    read(z.array(companyRow), () =>
+      db().from("companies").select("id, name, address, status"),
+    ),
+    read(
+      z.array(z.object({ user_id: z.string(), course_id: z.string() })),
+      () => db().from("coordinator_assignments").select("user_id, course_id"),
+    ),
+    read(
+      z.array(
+        z.object({
+          user_id: z.string().nullable(),
+          course_id: z.string(),
+          student_number: z.string(),
+        }),
+      ),
+      () => db().from("students").select("user_id, course_id, student_number"),
+    ),
+    read(z.array(courseRow), () =>
+      db().from("courses").select("id, department_id, code, name, is_active"),
+    ),
+  ]);
+
+  if (!users.ok) return users;
+  if (!memberships.ok) return memberships;
+  if (!companies.ok) return companies;
+  if (!assignments.ok) return assignments;
+  if (!students.ok) return students;
+  if (!courses.ok) return courses;
+
+  return ok(
+    users.data.map((user) => {
+      let affiliation: string | null = null;
+      if (user.role === "supervisor") {
+        const membership = memberships.data.find((m) => m.user_id === user.id);
+        const company = membership
+          ? companies.data.find((c) => c.id === membership.company_id)
+          : null;
+        affiliation = company
+          ? `${company.name}${membership?.is_owner ? " · Owner" : ""}`
+          : null;
+      } else if (user.role === "coordinator") {
+        const assignedCourses = assignments.data
+          .filter((a) => a.user_id === user.id)
+          .map((a) => courses.data.find((c) => c.id === a.course_id)?.code)
+          .filter(Boolean);
+        affiliation = assignedCourses.length > 0 ? assignedCourses.join(", ") : null;
+      } else if (user.role === "student") {
+        const student = students.data.find((s) => s.user_id === user.id);
+        const course = student ? courses.data.find((c) => c.id === student.course_id) : null;
+        affiliation = student
+          ? `${student.student_number}${course ? ` · ${course.code}` : ""}`
+          : null;
+      } else if (user.role === "admin") {
+        affiliation = "Platform admin";
+      }
+
+      return {
+        id: user.id,
+        email: user.email,
+        fullName: user.full_name,
+        role: user.role,
+        isActive: user.is_active,
+        affiliation,
+        createdAt: user.created_at,
+      };
+    }),
+  );
+}
+
+
 // ----------------------------------------------------------------- overview
 
 export type Overview = {

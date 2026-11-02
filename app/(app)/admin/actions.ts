@@ -13,6 +13,7 @@ import {
   inviteSupervisorSchema,
   requiredHoursSchema,
   revokeInvitationSchema,
+  toggleUserActiveSchema,
 } from "@/lib/admin/schemas";
 import { inviteUser, revokeInvitationEverywhere } from "@/lib/auth/invitations";
 import { authorize } from "@/lib/auth/server";
@@ -24,6 +25,7 @@ import {
   createOjtBatch,
   setCompanyStatus,
   setOjtRequiredHours,
+  setUserActive,
 } from "@/lib/db/rpc";
 import { fail, ok, type Result } from "@/lib/result";
 
@@ -136,3 +138,10 @@ export async function revokeInvitation(raw: unknown): Promise<ActionResult> {
     revokeInvitationEverywhere(session.userId, input.invitationId),
   );
 }
+
+export async function toggleUserActive(raw: unknown): Promise<ActionResult> {
+  return run(toggleUserActiveSchema, raw, people, (session, input) =>
+    setUserActive(session.userId, input.userId, input.active),
+  );
+}
+
