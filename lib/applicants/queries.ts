@@ -91,6 +91,11 @@ export async function getApplicantsForCompany(
 export async function getSupervisorSummary(
   companyId: string,
 ): Promise<Result<SupervisorSummary>> {
+  const company = await read(z.array(z.object({ name: z.string() })), () =>
+    db().from("companies").select("name").eq("id", companyId),
+  );
+  if (!company.ok) return company;
+  if (company.data.length === 0) return fail("not_found", "Your company was not found.");
   const listings = await read(z.array(z.object({ status: z.enum(["open", "closed"]) })), () =>
     db().from("listings").select("status").eq("company_id", companyId),
   );
@@ -102,6 +107,7 @@ export async function getSupervisorSummary(
   );
   if (!deployments.ok) return deployments;
   return ok({
+    companyName: company.data[0].name,
     openListings: listings.data.filter((listing) => listing.status === "open").length,
     waitingApplicants: applicants.data.filter((applicant) => applicant.status === "applied").length,
     activeStudents: deployments.data.length,

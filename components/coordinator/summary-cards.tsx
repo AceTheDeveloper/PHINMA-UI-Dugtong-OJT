@@ -22,15 +22,15 @@ export function SummaryCards({ summary }: { summary: Summary }) {
       {cards.map((card) => (
         <Card key={card.label}>
           <CardHeader>
-            <CardTitle className="text-sm font-semibold text-muted-foreground">
+            <CardTitle className="text-[15px] font-semibold text-copy-muted">
               {card.label}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="font-heading text-3xl font-bold tabular-nums text-ink">
+            <p className="font-mono text-4xl font-semibold leading-none tracking-[-0.04em] tabular-nums text-ink">
               {card.value}
             </p>
-            <p className="mt-1 text-xs text-muted-foreground">{card.note}</p>
+            <p className="mt-2 text-sm text-muted-foreground">{card.note}</p>
           </CardContent>
         </Card>
       ))}

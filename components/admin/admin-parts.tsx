@@ -13,12 +13,14 @@ export function PageHeader({
   actions?: ReactNode;
 }) {
   return (
-    <div className="flex flex-wrap items-start justify-between gap-4">
-      <div>
-        <h1 className="font-heading text-2xl font-extrabold tracking-[-0.02em] text-ink">
+    <div className="flex flex-wrap items-end justify-between gap-4">
+      <div className="min-w-0">
+        <h1 className="font-heading text-[28px] font-extrabold leading-[1.1] tracking-[-0.03em] text-ink sm:text-[32px]">
           {title}
         </h1>
-        <p className="mt-1 max-w-prose text-sm text-muted-foreground">{description}</p>
+        <p className="mt-2 max-w-[62ch] text-[15px] leading-[1.6] text-copy-muted">
+          {description}
+        </p>
       </div>
       {actions ? <div className="flex flex-wrap gap-2">{actions}</div> : null}
     </div>
@@ -50,11 +52,20 @@ export function Section({
   );
 }
 
-export function EmptyState({ children }: { children: ReactNode }) {
+// An empty screen points to the next step: say what is missing and, when there
+// is something to do, give the action.
+export function EmptyState({
+  children,
+  action,
+}: {
+  children: ReactNode;
+  action?: ReactNode;
+}) {
   return (
-    <p className="rounded-lg border border-dashed border-border-strong bg-surface px-4 py-6 text-center text-sm text-muted-foreground">
-      {children}
-    </p>
+    <div className="grid justify-items-center gap-4 rounded-2xl border border-dashed border-border-strong bg-surface px-6 py-10 text-center">
+      <p className="max-w-[46ch] text-[15px] leading-[1.6] text-copy-muted">{children}</p>
+      {action}
+    </div>
   );
 }
 

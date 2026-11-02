@@ -20,7 +20,13 @@ export type StudentApplication = {
 };
 
 export type StudentSummary = {
+  fullName: string;
   hasResume: boolean;
   openApplications: number;
   totalApplications: number;
+  // Approved hours so far and the batch's required hours (0 when not known).
+  approvedHours: number;
+  requiredHours: number;
+  // The company of the student's active deployment, if any.
+  placement: string | null;
 };

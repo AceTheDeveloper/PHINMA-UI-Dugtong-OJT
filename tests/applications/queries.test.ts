@@ -112,18 +112,56 @@ describe("getApplicationsForStudent and getStudentSummary", () => {
     expect(calls[0]).toEqual({ table: "applications", filters: [["student_id", "student-1"]] });
   });
 
-  it("counts applications and notes whether a resume exists", async () => {
+  it("counts applications, hours, and the placement for the student", async () => {
+    results.students = [{ full_name: "Ana Reyes", ojt_batch_id: "batch-1" }];
     results.resumes = [{ student_id: "student-1" }];
     results.applications = [{ status: "applied" }, { status: "withdrawn" }, { status: "applied" }];
+    results.ojt_batches = [{ required_hours: 486 }];
+    results.deployment_hours = [{ approved_hours: "100.50" }, { approved_hours: 20 }];
+    results.deployments = [{ company: { name: "Acme" } }];
     expect(await queries.getStudentSummary("student-1")).toEqual({
       ok: true,
-      data: { hasResume: true, openApplications: 2, totalApplications: 3 },
+      data: {
+        fullName: "Ana Reyes",
+        hasResume: true,
+        openApplications: 2,
+        totalApplications: 3,
+        approvedHours: 120.5,
+        requiredHours: 486,
+        placement: "Acme",
+      },
     });
-    results.resumes = [];
+    for (const table of ["resumes", "applications", "deployment_hours", "deployments"]) {
+      const call = calls.find((c) => c.table === table);
+      expect(call?.filters).toEqual(expect.arrayContaining([["student_id", "student-1"]]));
+    }
+    expect(calls.find((c) => c.table === "deployments")?.filters).toEqual(
+      expect.arrayContaining([["status", "active"]]),
+    );
+  });
+
+  it("shows an empty summary for a student with no resume, hours, or placement", async () => {
+    results.students = [{ full_name: "Ben", ojt_batch_id: "batch-1" }];
     results.applications = [];
+    results.ojt_batches = [{ required_hours: 486 }];
     expect(await queries.getStudentSummary("student-1")).toEqual({
       ok: true,
-      data: { hasResume: false, openApplications: 0, totalApplications: 0 },
+      data: {
+        fullName: "Ben",
+        hasResume: false,
+        openApplications: 0,
+        totalApplications: 0,
+        approvedHours: 0,
+        requiredHours: 486,
+        placement: null,
+      },
+    });
+  });
+
+  it("reports an unknown student as not found", async () => {
+    expect(await queries.getStudentSummary("nobody")).toMatchObject({
+      ok: false,
+      error: { code: "not_found" },
     });
   });
 });

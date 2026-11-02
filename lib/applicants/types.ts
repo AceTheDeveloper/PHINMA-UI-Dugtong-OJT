@@ -13,6 +13,7 @@ export type Applicant = {
 };
 
 export type SupervisorSummary = {
+  companyName: string;
   openListings: number;
   waitingApplicants: number;
   activeStudents: number;

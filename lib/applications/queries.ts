@@ -117,6 +117,13 @@ export async function getApplicationsForStudent(
 }
 
 export async function getStudentSummary(studentId: string): Promise<Result<StudentSummary>> {
+  const student = await read(
+    z.array(z.object({ full_name: z.string(), ojt_batch_id: z.string() })),
+    () => db().from("students").select("full_name, ojt_batch_id").eq("id", studentId),
+  );
+  if (!student.ok) return student;
+  if (student.data.length === 0) return fail("not_found", "That student was not found.");
+
   const resume = await read(z.array(z.object({ student_id: z.string() })), () =>
     db().from("resumes").select("student_id").eq("student_id", studentId),
   );
@@ -125,9 +132,33 @@ export async function getStudentSummary(studentId: string): Promise<Result<Stude
     db().from("applications").select("status").eq("student_id", studentId),
   );
   if (!applications.ok) return applications;
+
+  const batch = await read(z.array(z.object({ required_hours: z.coerce.number() })), () =>
+    db().from("ojt_batches").select("required_hours").eq("id", student.data[0].ojt_batch_id),
+  );
+  if (!batch.ok) return batch;
+  const hours = await read(z.array(z.object({ approved_hours: z.coerce.number() })), () =>
+    db().from("deployment_hours").select("approved_hours").eq("student_id", studentId),
+  );
+  if (!hours.ok) return hours;
+  const deployment = await read(
+    z.array(z.object({ company: one(z.object({ name: z.string() })) })),
+    () =>
+      db()
+        .from("deployments")
+        .select("company:companies(name)")
+        .eq("student_id", studentId)
+        .eq("status", "active"),
+  );
+  if (!deployment.ok) return deployment;
+
   return ok({
+    fullName: student.data[0].full_name,
     hasResume: resume.data.length > 0,
     openApplications: applications.data.filter((row) => row.status === "applied").length,
     totalApplications: applications.data.length,
+    approvedHours: hours.data.reduce((total, row) => total + row.approved_hours, 0),
+    requiredHours: batch.data[0]?.required_hours ?? 0,
+    placement: deployment.data[0]?.company.name ?? null,
   });
 }

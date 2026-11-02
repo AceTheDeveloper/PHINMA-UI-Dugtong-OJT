@@ -1,3 +1,4 @@
+import { HoursChain } from "@/components/ui/hours-chain";
 import type { ReactNode } from "react";
 import { Award } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -57,7 +58,7 @@ function Card({
 
 function Eyebrow({ children }: { children: ReactNode }) {
   return (
-    <span className="text-xs font-semibold uppercase tracking-[0.06em] text-faint">
+    <span className="text-sm font-semibold text-copy-muted">
       {children}
     </span>
   );
@@ -113,10 +114,8 @@ export function HoursCard({ className }: { className?: string }) {
           / 300 h
         </span>
       </div>
-      <div className="mt-3.5 h-2 overflow-hidden rounded-full bg-primary-track">
-        <div className="h-full w-[71%] rounded-full bg-primary" />
-      </div>
-      <p className="mt-2.5 text-[13px] text-copy-muted">88 hours to go</p>
+      <HoursChain approvedHours={212} requiredHours={300} size="sm" className="mt-3" />
+      <p className="mt-1 text-sm text-copy-muted">88 hours to go</p>
     </Card>
   );
 }

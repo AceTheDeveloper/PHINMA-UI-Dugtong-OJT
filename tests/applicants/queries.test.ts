@@ -101,12 +101,13 @@ describe("getApplicantsForCompany", () => {
 
 describe("getSupervisorSummary", () => {
   it("counts open listings, waiting applicants, and active students for the company", async () => {
+    results.companies = [{ name: "Acme" }];
     results.listings = [{ status: "open" }, { status: "closed" }, { status: "open" }];
     results.applications = [row("a1", "applied", "s1"), row("a2", "accepted", "s2")];
     results.deployments = [{ id: "d1" }];
     expect(await queries.getSupervisorSummary("company-1")).toEqual({
       ok: true,
-      data: { openListings: 2, waitingApplicants: 1, activeStudents: 1 },
+      data: { companyName: "Acme", openListings: 2, waitingApplicants: 1, activeStudents: 1 },
     });
     for (const table of ["listings", "deployments"]) {
       expect(calls.find((call) => call.table === table)?.filters).toEqual(

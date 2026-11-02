@@ -1,4 +1,5 @@
-import { RoleHeader, type NavLink } from "@/components/layout/role-header";
+import { RoleHeader } from "@/components/layout/role-header";
+import type { NavLink } from "@/lib/nav";
 
 const links: readonly NavLink[] = [
   { href: "/supervisor", label: "Home", exact: true },

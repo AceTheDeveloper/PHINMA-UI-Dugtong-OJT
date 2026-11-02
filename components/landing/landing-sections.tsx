@@ -21,8 +21,6 @@ import { cn } from "@/lib/utils";
 
 const container =
   "mx-auto w-[min(100%_-_64px,1200px)] max-md:w-[calc(100%_-_48px)]";
-const eyebrow =
-  "mb-3 text-xs font-semibold uppercase tracking-[0.06em] text-faint";
 const sectionHeading =
   "font-heading text-[clamp(32px,3.5vw,44px)] font-bold leading-[1.15] tracking-[-0.02em]";
 const primaryButton = cn(
@@ -91,9 +89,6 @@ export function Hero() {
         )}
       >
         <div className="min-w-0 max-w-[560px] flex-[1_1_460px]" data-reveal>
-          <span className="mb-6 inline-flex h-6 items-center rounded-full border border-teal-border bg-teal-tint px-2.5 text-xs font-semibold text-teal-text">
-            Online training, tracked end to end
-          </span>
           <h1 className="mb-6 font-heading text-[clamp(42px,5.2vw,68px)] font-extrabold leading-[1.05] tracking-[-0.05em]">
             Your OJT, from application to certification.
           </h1>
@@ -199,7 +194,6 @@ export function Journey() {
   return (
     <section id="how-it-works" className="py-24 max-sm:py-16" data-reveal>
       <div className={container}>
-        <p className={eyebrow}>How it works</p>
         <h2 className={cn(sectionHeading, "max-w-[640px]")}>
           One journey, six steps.
         </h2>
@@ -258,7 +252,6 @@ export function Roles() {
       data-reveal
     >
       <div className={container}>
-        <p className={eyebrow}>Who it&apos;s for</p>
         <h2 className={cn(sectionHeading, "max-w-[640px]")}>
           Built for everyone in the OJT.
         </h2>
@@ -304,7 +297,6 @@ export function Trust() {
     <section className="py-24 max-sm:py-16" data-reveal>
       <div className={cn(container, "flex flex-wrap items-start gap-14")}>
         <div className="max-w-[430px] flex-[1_1_360px]">
-          <p className={eyebrow}>Trust</p>
           <h2 className={sectionHeading}>Records you can rely on.</h2>
         </div>
         <ul className="grid min-w-0 flex-[1_1_520px] list-none grid-cols-2 gap-x-7 gap-y-5 p-0 max-sm:grid-cols-1">
@@ -333,7 +325,6 @@ export function Team() {
       data-reveal
     >
       <div className={cn(container, "text-center")}>
-        <p className={eyebrow}>The team</p>
         <h2 className="font-heading text-[clamp(36px,5.5vw,60px)] font-extrabold leading-[1.08] tracking-[-0.025em] text-balance">
           Built by <span className="text-primary">Nerds of a Feather</span>.
         </h2>

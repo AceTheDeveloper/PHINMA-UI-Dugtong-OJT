@@ -10,7 +10,7 @@ export default async function SupervisorLayout({
       <SupervisorHeader />
       <main
         id="main"
-        className="mx-auto flex w-[min(100%_-_32px,1100px)] flex-1 flex-col gap-6 py-6"
+        className="mx-auto flex w-[min(100%-32px,1100px)] flex-1 flex-col gap-6 pb-10 pt-6 sm:pt-8"
       >
         {children}
       </main>

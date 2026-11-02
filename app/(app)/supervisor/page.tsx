@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Briefcase, Users } from "lucide-react";
-import { LoadError, PageHeader } from "@/components/admin/admin-parts";
+import { Briefcase, ChevronRight, Users } from "lucide-react";
+import { LoadError } from "@/components/admin/admin-parts";
+import { buttonVariants } from "@/components/ui/button";
 import { focusStyle } from "@/components/brand-link";
 import { RoleBadge } from "@/components/coordinator/status-badge";
-import { Card, CardContent } from "@/components/ui/card";
 import { getSupervisorSummary } from "@/lib/applicants/queries";
 import { requireRole } from "@/lib/auth/server";
 import { cn } from "@/lib/utils";
@@ -14,77 +14,117 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-function CardLink({ href, children }: { href: string; children: React.ReactNode }) {
+function Row({
+  href,
+  icon,
+  title,
+  note,
+  badge,
+}: {
+  href: string;
+  icon: React.ReactNode;
+  title: string;
+  note: string;
+  badge: React.ReactNode;
+}) {
   return (
     <Link
       href={href}
       className={cn(
-        "inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline",
+        "flex min-h-[72px] items-center gap-4 px-5 py-4 transition-colors hover:bg-surface sm:px-6",
         focusStyle,
       )}
     >
-      {children}
-      <ArrowRight aria-hidden="true" className="size-4" />
+      <span
+        aria-hidden="true"
+        className="grid size-11 shrink-0 place-items-center rounded-xl bg-primary-tint text-primary"
+      >
+        {icon}
+      </span>
+      <span className="grid min-w-0 flex-1 gap-0.5">
+        <span className="font-heading text-[17px] font-bold leading-tight text-ink">{title}</span>
+        <span className="text-[15px] leading-snug text-copy-muted">{note}</span>
+      </span>
+      {badge}
+      <ChevronRight aria-hidden="true" className="size-5 shrink-0 text-faint" />
     </Link>
   );
 }
 
 export default async function SupervisorHomePage() {
   const session = await requireRole(["supervisor"]);
-  const summary = session.companyId ? await getSupervisorSummary(session.companyId) : null;
+  const result = session.companyId ? await getSupervisorSummary(session.companyId) : null;
+
+  if (!result) return <LoadError message="This account has no company. Contact the admin." />;
+  if (!result.ok) return <LoadError message={result.error.message} />;
+  const summary = result.data;
+  const waiting = summary.waitingApplicants;
 
   return (
     <>
-      <PageHeader
-        title="Supervisor home"
-        description="Post listings for your company and decide on applicants."
-      />
-      {!summary ? (
-        <LoadError message="This account has no company. Contact the admin." />
-      ) : !summary.ok ? (
-        <LoadError message={summary.error.message} />
-      ) : (
-        <div className="grid gap-4 md:grid-cols-2">
-          <Card>
-            <CardContent className="grid gap-3">
-              <div className="flex items-center justify-between gap-3">
-                <h2 className="inline-flex items-center gap-2 font-heading text-base font-bold text-ink">
-                  <Briefcase aria-hidden="true" className="size-4" />
-                  Listings
-                </h2>
-                <RoleBadge role={summary.data.openListings > 0 ? "success" : "neutral"}>
-                  <span className="tabular-nums">{summary.data.openListings}</span>
-                  &nbsp;open
-                </RoleBadge>
-              </div>
-              <p className="text-sm leading-[1.6] text-copy-muted">
-                Students see your open listings when they browse. Close one when it is full.
-              </p>
-              <CardLink href="/supervisor/listings">Manage listings</CardLink>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="grid gap-3">
-              <div className="flex items-center justify-between gap-3">
-                <h2 className="inline-flex items-center gap-2 font-heading text-base font-bold text-ink">
-                  <Users aria-hidden="true" className="size-4" />
-                  Applicants
-                </h2>
-                <RoleBadge role={summary.data.waitingApplicants > 0 ? "warning" : "neutral"}>
-                  <span className="tabular-nums">{summary.data.waitingApplicants}</span>
-                  &nbsp;waiting
-                </RoleBadge>
-              </div>
-              <p className="text-sm leading-[1.6] text-copy-muted">
-                <span className="tabular-nums">{summary.data.activeStudents}</span>{" "}
-                {summary.data.activeStudents === 1 ? "student is" : "students are"} deployed
-                with your company.
-              </p>
-              <CardLink href="/supervisor/applicants">Review applicants</CardLink>
-            </CardContent>
-          </Card>
+      <section
+        aria-labelledby="supervisor-heading"
+        className="rounded-3xl border border-border bg-card p-6 shadow-panel sm:p-10"
+      >
+        <h1
+          id="supervisor-heading"
+          className="font-heading text-[28px] font-extrabold leading-[1.1] tracking-[-0.03em] text-ink sm:text-[40px]"
+        >
+          {summary.companyName}
+        </h1>
+        <div className="mt-8 flex flex-wrap items-end gap-x-3 gap-y-1">
+          <p className="font-mono text-[56px] font-semibold leading-none tabular-nums tracking-[-0.04em] text-ink sm:text-[72px]">
+            {waiting}
+          </p>
+          <p className="pb-1.5 text-[15px] text-copy-muted sm:pb-2.5 sm:text-base">
+            {waiting === 1 ? "applicant is" : "applicants are"} waiting for your decision
+          </p>
         </div>
-      )}
+        <div className="mt-6">
+          <Link
+            href="/supervisor/applicants"
+            className={cn(buttonVariants({ size: "lg" }), "h-11 px-5 text-[15px]", focusStyle)}
+          >
+            {waiting > 0 ? "Review applicants" : "See applicants"}
+          </Link>
+        </div>
+      </section>
+
+      <section
+        aria-label="Your company"
+        className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card shadow-panel"
+      >
+        <Row
+          href="/supervisor/listings"
+          icon={<Briefcase className="size-5" />}
+          title="Listings"
+          note="Students see your open listings when they browse. Close one when it is full."
+          badge={
+            <RoleBadge role={summary.openListings > 0 ? "success" : "neutral"}>
+              <span className="tabular-nums">{summary.openListings}</span>&nbsp;open
+            </RoleBadge>
+          }
+        />
+        <Row
+          href="/supervisor/applicants"
+          icon={<Users className="size-5" />}
+          title="Students"
+          note={
+            summary.activeStudents === 0
+              ? "No student is deployed with your company yet."
+              : `${summary.activeStudents} ${
+                  summary.activeStudents === 1 ? "student is" : "students are"
+                } deployed with your company.`
+          }
+          badge={
+            summary.activeStudents > 0 ? (
+              <RoleBadge role="success">
+                <span className="tabular-nums">{summary.activeStudents}</span>&nbsp;active
+              </RoleBadge>
+            ) : null
+          }
+        />
+      </section>
     </>
   );
 }
