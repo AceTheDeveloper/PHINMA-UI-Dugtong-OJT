@@ -152,8 +152,7 @@ These are standing rules, kept in the database so a future bug cannot break them
 
 ## 9. UI and copy
 
-- Build from approved mockups. Do not invent screens. If there is no mockup, ask.
-- Exception: Platform Admin screens (the admin's own pages for departments, courses, companies, and invitations) and the Coordinator roster import screens (upload, preview, commit, invitations) need no mockup. The agent designs them from the design tokens, the fonts, and the patterns already in the repo, and the plan describes each screen in words. Every other screen still needs a mockup.
+- Build from an approved mockup when one exists. When there is no mockup, the agent may design the screen itself, from the design tokens, the fonts, and the patterns already in the repo, and the plan describes each screen in words. Design only the screens the ticket's scope asks for. A mockup, once provided, replaces the agent's design.
 - Support light and dark themes. Follow the system preference until the user chooses a theme, and remember explicit choices.
 - Use the design tokens for both themes; do not add raw color values in components.
 - Sentence case everywhere. Verb-first buttons ("Time in", "Reject entry", "Approve all").
@@ -359,12 +358,12 @@ Do not:
 - Write to tables from the client, or use the service-role key outside server-only code.
 - Edit applied migrations, generated files, or audit rows.
 - Add public routes, public storage, or guest access.
-- Invent UI without a mockup (except Platform Admin screens and the Coordinator roster import screens, see section 9), or invent business rules. Add them to the open decisions in `plan.md` instead.
+- Invent screens that are not in the ticket's scope, or invent business rules. Add them to the open decisions in `plan.md` instead. Designing the in-scope screens without a mockup is allowed (section 9).
 - Add dependencies without a clear reason.
 
 ### Definition of done
 
-- Matches the mockup (or, for Platform Admin and roster import screens, the plan) and the rules in this file.
+- Matches the mockup (or, when there is none, the plan's description of the screen) and the rules in this file.
 - Permission checks and tests exist for every new action or table.
 - Zod validation on every new input.
 - Audit coverage for any new change to hours, evaluations, or deployments.
