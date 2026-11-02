@@ -167,3 +167,19 @@ export async function getStudentDetail(
     schedules: schedules.data.map(toSchedule),
   });
 }
+
+// Every schedule of one deployment, newest first. The caller has already
+// established that the deployment is the signed-in student's own.
+export async function getSchedulesForDeployment(
+  deploymentId: string,
+): Promise<Result<WorkSchedule[]>> {
+  const schedules = await read(z.array(scheduleRow), () =>
+    db()
+      .from("work_schedules")
+      .select(scheduleSelect)
+      .eq("deployment_id", deploymentId)
+      .order("effective_from", { ascending: false }),
+  );
+  if (!schedules.ok) return schedules;
+  return ok(schedules.data.map(toSchedule));
+}

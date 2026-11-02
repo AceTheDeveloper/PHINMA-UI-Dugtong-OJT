@@ -676,3 +676,76 @@ export async function setWorkSchedule(
     ? ok(created.data)
     : fail("unexpected", "Something went wrong. Try again in a moment.");
 }
+
+// A student starts the day's entry. The database clock sets the time; nothing
+// about the time comes from the browser. Returns the entry id.
+export async function timeIn(actorId: string): Promise<Result<string>> {
+  const parsed = uuid.safeParse(actorId);
+  if (!parsed.success) return invalid("The account details are not valid.");
+  const result = await call("time_in", { p_actor: parsed.data });
+  if (!result.ok) return result;
+  const created = idResult.safeParse(result.data);
+  return created.success
+    ? ok(created.data)
+    : fail("unexpected", "Something went wrong. Try again in a moment.");
+}
+
+// A student saves a draft of the journal while the entry is open or rejected.
+export async function saveJournal(
+  actorId: string,
+  logId: string,
+  journal: string,
+): Promise<Result<null>> {
+  const parsed = z.object({ actorId: uuid, logId: uuid, journal: z.string() }).safeParse({
+    actorId,
+    logId,
+    journal,
+  });
+  if (!parsed.success) return invalid("The journal details are not valid.");
+  const result = await call("save_journal", {
+    p_actor: parsed.data.actorId,
+    p_log_id: parsed.data.logId,
+    p_journal: parsed.data.journal,
+  });
+  return result.ok ? ok(null) : result;
+}
+
+// A student times out and submits the journal: the entry becomes pending.
+export async function timeOut(
+  actorId: string,
+  logId: string,
+  journal: string,
+  earlyOutReason: string | null,
+): Promise<Result<null>> {
+  const parsed = z
+    .object({ actorId: uuid, logId: uuid, journal: z.string(), reason: z.string().nullable() })
+    .safeParse({ actorId, logId, journal, reason: earlyOutReason });
+  if (!parsed.success) return invalid("The entry details are not valid.");
+  const result = await call("time_out", {
+    p_actor: parsed.data.actorId,
+    p_log_id: parsed.data.logId,
+    p_journal: parsed.data.journal,
+    p_early_reason: parsed.data.reason,
+  });
+  return result.ok ? ok(null) : result;
+}
+
+// A student sends a rejected entry back to pending with a fixed journal.
+export async function resubmitLog(
+  actorId: string,
+  logId: string,
+  journal: string,
+): Promise<Result<null>> {
+  const parsed = z.object({ actorId: uuid, logId: uuid, journal: z.string() }).safeParse({
+    actorId,
+    logId,
+    journal,
+  });
+  if (!parsed.success) return invalid("The journal details are not valid.");
+  const result = await call("resubmit_log", {
+    p_actor: parsed.data.actorId,
+    p_log_id: parsed.data.logId,
+    p_journal: parsed.data.journal,
+  });
+  return result.ok ? ok(null) : result;
+}

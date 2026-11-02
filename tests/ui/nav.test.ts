@@ -22,9 +22,10 @@ describe("links per role", () => {
     }
   });
 
-  it("lists the student's four tabs in order", () => {
+  it("lists the student's five tabs in order", () => {
     expect(linksFor("student").map((item) => item.label)).toEqual([
       "Home",
+      "Daily log",
       "Listings",
       "Applications",
       "Resume",

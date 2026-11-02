@@ -4,9 +4,11 @@ import { ChevronRight, FileText, Send } from "lucide-react";
 import { LoadError } from "@/components/admin/admin-parts";
 import { focusStyle } from "@/components/brand-link";
 import { RoleBadge } from "@/components/coordinator/status-badge";
+import { TodayCard } from "@/components/student/today-card";
 import { HoursChain } from "@/components/ui/hours-chain";
 import { getStudentSummary } from "@/lib/applications/queries";
 import { requireRole } from "@/lib/auth/server";
+import { getTodayForStudent } from "@/lib/logs/queries";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -68,7 +70,12 @@ function Row({
 
 export default async function StudentHomePage() {
   const session = await requireRole(["student"]);
-  const result = session.studentId ? await getStudentSummary(session.studentId) : null;
+  const [result, today] = session.studentId
+    ? await Promise.all([
+        getStudentSummary(session.studentId),
+        getTodayForStudent(session.studentId),
+      ])
+    : [null, null];
 
   if (!result) {
     return <LoadError message="This account has no student record. Contact your coordinator." />;
@@ -115,6 +122,8 @@ export default async function StudentHomePage() {
           className="mt-5"
         />
       </section>
+
+      {today?.ok ? <TodayCard view={today.data.view} /> : null}
 
       <section
         aria-label="Next steps"

@@ -55,6 +55,7 @@ export const roleLabels: Record<Role, string> = {
 const links: Record<Role, readonly ShellLink[]> = {
   student: [
     link("Home", "home", "/student", true),
+    link("Daily log", "logs", "/student/logs"),
     link("Listings", "listings", "/student/listings"),
     link("Applications", "applications", "/student/applications"),
     link("Resume", "resume", "/student/resume"),
