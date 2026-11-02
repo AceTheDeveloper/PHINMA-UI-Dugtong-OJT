@@ -98,6 +98,33 @@ export const transferOwnershipSchema = z.object({
   newOwnerId: uuid,
 });
 
+export const createListingSchema = z.object({
+  companyId: uuid,
+  title: z
+    .string()
+    .trim()
+    .min(1, "Title is required.")
+    .max(150, "Title is too long."),
+  description: z.string().trim().max(2000, "Description is too long.").optional(),
+  courseIds: z.array(uuid).min(1, "Select at least one course."),
+});
+
+export const updateListingSchema = z.object({
+  listingId: uuid,
+  title: z
+    .string()
+    .trim()
+    .min(1, "Title is required.")
+    .max(150, "Title is too long."),
+  description: z.string().trim().max(2000, "Description is too long.").optional(),
+  courseIds: z.array(uuid).min(1, "Select at least one course."),
+});
+
+export const setListingStatusSchema = z.object({
+  listingId: uuid,
+  status: z.enum(["open", "closed"]),
+});
+
 export type DepartmentInput = z.infer<typeof departmentSchema>;
 export type CourseInput = z.infer<typeof courseSchema>;
 export type BatchInput = z.infer<typeof batchSchema>;
@@ -108,5 +135,8 @@ export type InviteCoordinatorInput = z.infer<typeof inviteCoordinatorSchema>;
 export type InviteAdminInput = z.infer<typeof inviteAdminSchema>;
 export type ToggleUserActiveInput = z.infer<typeof toggleUserActiveSchema>;
 export type TransferOwnershipInput = z.infer<typeof transferOwnershipSchema>;
+export type CreateListingInput = z.infer<typeof createListingSchema>;
+export type UpdateListingInput = z.infer<typeof updateListingSchema>;
+export type SetListingStatusInput = z.infer<typeof setListingStatusSchema>;
 
 

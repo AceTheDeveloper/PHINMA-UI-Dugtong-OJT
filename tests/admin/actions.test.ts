@@ -23,6 +23,9 @@ const rpc = {
   setCompanyStatus: vi.fn(),
   setUserActive: vi.fn(),
   transferCompanyOwnership: vi.fn(),
+  createListing: vi.fn(),
+  updateListing: vi.fn(),
+  setListingStatus: vi.fn(),
 };
 vi.mock("@/lib/db/rpc", () => rpc);
 
@@ -88,6 +91,18 @@ const calls: { name: string; run: () => Promise<{ ok: boolean }> }[] = [
   {
     name: "transferOwnership",
     run: () => actions.transferOwnership({ companyId: uuid, newOwnerId: uuid }),
+  },
+  {
+    name: "addListing",
+    run: () => actions.addListing({ companyId: uuid, title: "Intern", courseIds: [uuid] }),
+  },
+  {
+    name: "editListing",
+    run: () => actions.editListing({ listingId: uuid, title: "Intern", courseIds: [uuid] }),
+  },
+  {
+    name: "changeListingStatus",
+    run: () => actions.changeListingStatus({ listingId: uuid, status: "closed" }),
   },
 ];
 
@@ -183,6 +198,42 @@ describe("Admin actions with an admin", () => {
     expect(rpc.transferCompanyOwnership).toHaveBeenCalledWith(userId, uuid, newOwnerId);
   });
 
+  it("creates a listing", async () => {
+    await actions.addListing({
+      companyId: uuid,
+      title: "Backend Intern",
+      description: "Node.js",
+      courseIds: [uuid],
+    });
+    expect(rpc.createListing).toHaveBeenCalledWith(userId, {
+      companyId: uuid,
+      title: "Backend Intern",
+      description: "Node.js",
+      courseIds: [uuid],
+    });
+  });
+
+  it("edits a listing", async () => {
+    await actions.editListing({
+      listingId: uuid,
+      title: "Backend Intern Updated",
+      description: "Node.js & Postgres",
+      courseIds: [uuid],
+    });
+    expect(rpc.updateListing).toHaveBeenCalledWith(userId, {
+      listingId: uuid,
+      title: "Backend Intern Updated",
+      description: "Node.js & Postgres",
+      courseIds: [uuid],
+    });
+  });
+
+  it("changes listing status", async () => {
+    await actions.changeListingStatus({ listingId: uuid, status: "closed" });
+    expect(rpc.setListingStatus).toHaveBeenCalledWith(userId, uuid, "closed");
+  });
+
+
 
   it("passes a database refusal on as a typed result", async () => {
     rpc.createDepartment.mockResolvedValue(
@@ -237,6 +288,9 @@ describe("Admin actions with an admin", () => {
     ["a missing active flag", () => actions.toggleUserActive({ userId: uuid })],
     ["an invalid company id for transfer", () => actions.transferOwnership({ companyId: "not-a-uuid", newOwnerId: uuid })],
     ["an invalid new owner id for transfer", () => actions.transferOwnership({ companyId: uuid, newOwnerId: "not-a-uuid" })],
+    ["a listing with no courses", () => actions.addListing({ companyId: uuid, title: "Intern", courseIds: [] })],
+    ["a listing with blank title", () => actions.addListing({ companyId: uuid, title: "   ", courseIds: [uuid] })],
+    ["an invalid listing status", () => actions.changeListingStatus({ listingId: uuid, status: "archived" })],
     ["a missing body", () => actions.addCompany(undefined)],
   ];
 

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SignOutButton } from "@clerk/nextjs";
 import {
+  Briefcase,
   Building2,
   GraduationCap,
   History,
@@ -31,6 +32,7 @@ const navItems: { label: string; href: string; Icon: LucideIcon }[] = [
   { label: "Overview", href: "/admin", Icon: LayoutDashboard },
   { label: "Academics", href: "/admin/academics", Icon: GraduationCap },
   { label: "Companies", href: "/admin/companies", Icon: Building2 },
+  { label: "Listings", href: "/admin/listings", Icon: Briefcase },
   { label: "People", href: "/admin/people", Icon: Users },
   { label: "Audit log", href: "/admin/audit", Icon: History },
 ];

@@ -337,6 +337,79 @@ export async function transferCompanyOwnership(
   });
 }
 
+export async function createListing(
+  actorId: string,
+  input: {
+    companyId: string;
+    title: string;
+    description?: string | null;
+    courseIds: string[];
+  },
+): Promise<Result<string>> {
+  const parsed = z
+    .object({
+      actorId: uuid,
+      companyId: uuid,
+      title: z.string().trim().min(1),
+      description: z.string().trim().nullable().optional(),
+      courseIds: z.array(uuid).min(1),
+    })
+    .safeParse({ actorId, ...input });
+  if (!parsed.success) return invalid("The listing details are not valid.");
+  return createdId("create_listing", {
+    p_actor: parsed.data.actorId,
+    p_company_id: parsed.data.companyId,
+    p_title: parsed.data.title,
+    p_description: parsed.data.description ?? null,
+    p_course_ids: parsed.data.courseIds,
+  });
+}
+
+export async function updateListing(
+  actorId: string,
+  input: {
+    listingId: string;
+    title: string;
+    description?: string | null;
+    courseIds: string[];
+  },
+): Promise<Result<null>> {
+  const parsed = z
+    .object({
+      actorId: uuid,
+      listingId: uuid,
+      title: z.string().trim().min(1),
+      description: z.string().trim().nullable().optional(),
+      courseIds: z.array(uuid).min(1),
+    })
+    .safeParse({ actorId, ...input });
+  if (!parsed.success) return invalid("The listing details are not valid.");
+  return changed("update_listing", {
+    p_actor: parsed.data.actorId,
+    p_listing_id: parsed.data.listingId,
+    p_title: parsed.data.title,
+    p_description: parsed.data.description ?? null,
+    p_course_ids: parsed.data.courseIds,
+  });
+}
+
+export async function setListingStatus(
+  actorId: string,
+  listingId: string,
+  status: "open" | "closed",
+): Promise<Result<null>> {
+  const parsed = z
+    .object({ actorId: uuid, listingId: uuid, status: z.enum(["open", "closed"]) })
+    .safeParse({ actorId, listingId, status });
+  if (!parsed.success) return invalid("The listing status details are not valid.");
+  return changed("set_listing_status", {
+    p_actor: parsed.data.actorId,
+    p_listing_id: parsed.data.listingId,
+    p_status: parsed.data.status,
+  });
+}
+
+
 
 export async function importRoster(
   actorId: string,

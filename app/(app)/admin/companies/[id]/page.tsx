@@ -27,8 +27,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatDateTime } from "@/lib/admin/format";
-import { getCompany } from "@/lib/admin/queries";
+import { getAcademics, getCompany } from "@/lib/admin/queries";
 import { requireRole } from "@/lib/auth/server";
+import { AddListingSheet } from "@/components/admin/listing-forms";
+import { ListingsTable } from "@/components/admin/listings-table";
 
 export const metadata: Metadata = {
   title: "Company | Dugtong OJT",
@@ -42,11 +44,24 @@ export default async function CompanyPage({
 }) {
   await requireRole(["admin"]);
   const { id } = await params;
-  const result = await getCompany(id);
+  const [result, academics] = await Promise.all([getCompany(id), getAcademics()]);
   if (!result.ok) return <LoadError message={result.error.message} />;
   if (result.data === null) notFound();
 
-  const { company, supervisors, invitations, historyRowIds } = result.data;
+  const { company, supervisors, invitations, listings, historyRowIds } = result.data;
+
+  const courseOptions = academics.ok
+    ? academics.data.flatMap((department) =>
+        department.courses
+          .filter((course) => course.isActive)
+          .map((course) => ({
+            value: course.id,
+            label: `${course.code} · ${department.code}`,
+          })),
+      )
+    : [];
+
+  const companyOptions = [{ value: company.id, label: company.name }];
 
   return (
     <>
@@ -172,9 +187,30 @@ export default async function CompanyPage({
         )}
       </Section>
 
+      <Section
+        title="Listings"
+        description="OJT opportunities offered by this company."
+        actions={
+          company.status === "active" ? (
+            <AddListingSheet
+              companies={companyOptions}
+              courses={courseOptions}
+              companyId={company.id}
+              companyName={company.name}
+            />
+          ) : null
+        }
+      >
+        <ListingsTable
+          listings={listings}
+          courses={courseOptions}
+          hideCompanyColumn
+        />
+      </Section>
+
       <HistorySection
         filter={{ rowIds: historyRowIds }}
-        description="Changes to this company, its supervisors, and its invitations."
+        description="Changes to this company, its supervisors, its listings, and its invitations."
       />
     </>
   );

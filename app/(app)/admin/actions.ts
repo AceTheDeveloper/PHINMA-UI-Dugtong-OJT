@@ -7,14 +7,17 @@ import {
   companySchema,
   companyStatusSchema,
   courseSchema,
+  createListingSchema,
   departmentSchema,
   inviteAdminSchema,
   inviteCoordinatorSchema,
   inviteSupervisorSchema,
   requiredHoursSchema,
   revokeInvitationSchema,
+  setListingStatusSchema,
   toggleUserActiveSchema,
   transferOwnershipSchema,
+  updateListingSchema,
 } from "@/lib/admin/schemas";
 import { inviteUser, revokeInvitationEverywhere } from "@/lib/auth/invitations";
 import { authorize } from "@/lib/auth/server";
@@ -23,11 +26,14 @@ import {
   createCompany,
   createCourse,
   createDepartment,
+  createListing,
   createOjtBatch,
   setCompanyStatus,
+  setListingStatus,
   setOjtRequiredHours,
   setUserActive,
   transferCompanyOwnership,
+  updateListing,
 } from "@/lib/db/rpc";
 import { fail, ok, type Result } from "@/lib/result";
 
@@ -60,6 +66,7 @@ async function run<S extends z.ZodType>(
 
 const academics = ["/admin", "/admin/academics", "/admin/audit"];
 const companies = ["/admin", "/admin/companies", "/admin/audit"];
+const listings = ["/admin", "/admin/listings", "/admin/companies", "/admin/audit"];
 const people = ["/admin", "/admin/people", "/admin/audit"];
 
 export async function addDepartment(raw: unknown): Promise<ActionResult> {
@@ -153,5 +160,25 @@ export async function transferOwnership(raw: unknown): Promise<ActionResult> {
     return transferCompanyOwnership(session.userId, input.companyId, input.newOwnerId);
   });
 }
+
+export async function addListing(raw: unknown): Promise<ActionResult> {
+  return run(createListingSchema, raw, listings, (session, input) => {
+    revalidatePath(`/admin/companies/${input.companyId}`);
+    return createListing(session.userId, input);
+  });
+}
+
+export async function editListing(raw: unknown): Promise<ActionResult> {
+  return run(updateListingSchema, raw, listings, (session, input) =>
+    updateListing(session.userId, input),
+  );
+}
+
+export async function changeListingStatus(raw: unknown): Promise<ActionResult> {
+  return run(setListingStatusSchema, raw, listings, (session, input) =>
+    setListingStatus(session.userId, input.listingId, input.status),
+  );
+}
+
 
 
