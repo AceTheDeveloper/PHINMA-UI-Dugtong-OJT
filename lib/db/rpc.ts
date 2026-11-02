@@ -952,3 +952,46 @@ export async function discardEvaluationDraft(
   });
   return result.ok ? ok(null) : result;
 }
+
+// A supervisor submits the final evaluation of a student at their company: one
+// transaction stores the scores and completes the deployment. Returns the
+// evaluation id.
+export async function submitEvaluation(
+  actorId: string,
+  input: {
+    deploymentId: string;
+    scores: { criterionId: string; score: number; comment: string | null }[];
+    overallComment: string | null;
+  },
+): Promise<Result<string>> {
+  const parsed = z
+    .object({
+      actorId: uuid,
+      deploymentId: uuid,
+      scores: z.array(
+        z.object({
+          criterionId: uuid,
+          score: z.number().int().min(1).max(5),
+          comment: z.string().nullable(),
+        }),
+      ),
+      overallComment: z.string().nullable(),
+    })
+    .safeParse({ actorId, ...input });
+  if (!parsed.success) return invalid("The evaluation details are not valid.");
+  const result = await call("submit_evaluation", {
+    p_actor: parsed.data.actorId,
+    p_deployment_id: parsed.data.deploymentId,
+    p_scores: parsed.data.scores.map((item) => ({
+      criterion_id: item.criterionId,
+      score: item.score,
+      comment: item.comment,
+    })),
+    p_overall_comment: parsed.data.overallComment,
+  });
+  if (!result.ok) return result;
+  const created = idResult.safeParse(result.data);
+  return created.success
+    ? ok(created.data)
+    : fail("unexpected", "Something went wrong. Try again in a moment.");
+}

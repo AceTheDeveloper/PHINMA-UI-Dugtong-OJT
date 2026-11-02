@@ -43,3 +43,36 @@ export const formIdSchema = z.object({ formId });
 export const publishSchema = saveDraftSchema.extend({
   criteria: saveDraftSchema.shape.criteria.min(1, "Add at least one criterion before you publish."),
 });
+
+// Input to the supervisor's submit-evaluation action. Every criterion of the
+// form needs a score from 1 to 5; the database checks the list against the
+// published form, the hours gate, and the company.
+export const maxScoreCommentLength = 500;
+export const maxOverallCommentLength = 2000;
+
+export const submitEvaluationSchema = z.object({
+  deploymentId: z.string().uuid("Choose a student."),
+  scores: z
+    .array(
+      z.object({
+        criterionId: z.string().uuid("Rate every criterion."),
+        score: z
+          .number("Rate every criterion from 1 to 5.")
+          .int("Rate every criterion from 1 to 5.")
+          .min(1, "Rate every criterion from 1 to 5.")
+          .max(5, "Rate every criterion from 1 to 5."),
+        comment: z
+          .string()
+          .trim()
+          .max(maxScoreCommentLength, "A comment can be up to 500 characters.")
+          .optional(),
+      }),
+    )
+    .min(1, "Rate every criterion.")
+    .max(30),
+  overallComment: z
+    .string()
+    .trim()
+    .max(maxOverallCommentLength, "The overall comment can be up to 2000 characters.")
+    .optional(),
+});
