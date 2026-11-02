@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { adminNavItems } from "@/components/admin/admin-sidebar";
 import { tableLabel } from "@/lib/admin/audit-format";
+import { linksFor } from "@/lib/nav";
 
 describe("admin navigation and sidebar", () => {
+  const items = linksFor("admin");
+
   it("includes all essential admin sections and roster import link", () => {
-    const labels = adminNavItems.map((item) => item.label);
+    const labels = items.map((item) => item.label);
     expect(labels).toContain("Overview");
     expect(labels).toContain("Academics");
     expect(labels).toContain("Companies");
@@ -15,18 +17,17 @@ describe("admin navigation and sidebar", () => {
     expect(labels).toContain("Settings");
   });
 
-  it("links Roster import to /admin/roster with valid icon", () => {
-    const rosterItem = adminNavItems.find((item) => item.label === "Roster import");
-    expect(rosterItem).toBeDefined();
+  it("links Roster import to /admin/roster", () => {
+    const rosterItem = items.find((item) => item.label === "Roster import");
     expect(rosterItem?.href).toBe("/admin/roster");
-    expect(rosterItem?.Icon).toBeDefined();
+    expect(rosterItem?.icon).toBe("import");
   });
 
   it("ensures all nav items have valid labels, hrefs, and icons", () => {
-    for (const item of adminNavItems) {
+    for (const item of items) {
       expect(item.label.trim().length).toBeGreaterThan(0);
-      expect(item.href.startsWith("/")).toBe(true);
-      expect(typeof item.Icon).toBe("object");
+      expect(item.href?.startsWith("/admin")).toBe(true);
+      expect(item.icon.length).toBeGreaterThan(0);
     }
   });
 

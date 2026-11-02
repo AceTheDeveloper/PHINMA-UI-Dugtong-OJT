@@ -46,11 +46,6 @@ export type MockActivity = {
   at: string;
 };
 
-export const mockCoordinator = {
-  name: "Coordinator Sample",
-  role: "Coordinator",
-};
-
 export const mockCourse = {
   school: "PHINMA University of Iloilo",
   department: "College of Information Technology Education",

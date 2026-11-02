@@ -1,0 +1,38 @@
+import {
+  Briefcase,
+  Building2,
+  ClipboardList,
+  FileCheck2,
+  FileText,
+  GraduationCap,
+  History,
+  House,
+  LayoutDashboard,
+  Send,
+  Settings,
+  Upload,
+  UserCheck,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
+import type { IconName } from "@/lib/nav";
+
+// Used only from client components (see IconName in lib/nav.ts).
+export const navIcons: Record<IconName, LucideIcon> = {
+  home: House,
+  listings: Briefcase,
+  applications: Send,
+  resume: FileText,
+  applicants: UserCheck,
+  dashboard: LayoutDashboard,
+  students: GraduationCap,
+  companies: Building2,
+  logs: ClipboardList,
+  evaluations: FileCheck2,
+  reports: FileText,
+  import: Upload,
+  audit: History,
+  academics: GraduationCap,
+  people: Users,
+  settings: Settings,
+};
