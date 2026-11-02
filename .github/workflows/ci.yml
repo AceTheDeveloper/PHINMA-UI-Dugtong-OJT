@@ -1,0 +1,73 @@
+name: CI Checks & Build Alerts
+
+on:
+  push:
+    branches:
+      
+'**'
+pull_request:
+  branches:
+dev
+test
+main
+
+jobs:
+  check-and-build:
+    name: Verification Pipeline
+    runs-on: ubuntu-latest
+
+    steps:
+      
+name: Checkout code
+      uses: actions/checkout@v4
+
+      
+name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+        cache: 'npm'
+
+      
+name: Install dependencies
+      run: npm ci
+
+      
+name: Lint
+      run: npm run lint
+
+      
+name: Typecheck
+      run: npx tsc --noEmit
+
+      
+name: Vitest Tests
+      run: npm run test
+
+      
+name: Build Next.js App
+      run: npm run build
+
+      # Sends an alert ONLY if lint, tsc, test, or build fails
+      
+name: Notify Discord on Failure
+      if: failure()
+      uses: sarisia/actions-status-discord@v1
+      with:
+        webhook: ${{ secrets.DISCORD_BUILD_WEBHOOK }}
+        status: failure
+        title: "🚨 Build / Checks Failed"
+        description: |Branch: ${{ github.ref_name }}Triggered By: @${{ github.actor }}Commit: ${{ github.sha }}Message: ${{ github.event.head_commit.message }}
+        color: 0xdc2626 # Error Red
+
+      # Sends an alert on clean merges/pushes to dev or main
+      
+name: Notify Discord on Branch Success
+      if: success() && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main')
+      uses: sarisia/actions-status-discord@v1
+      with:
+        webhook: ${{ secrets.DISCORD_BUILD_WEBHOOK }}
+        status: success
+        title: "✅ Build & Checks Passed"
+        description: |Branch: ${{ github.ref_name }}Commit: ${{ github.sha }}
+        color: 0x087a55 # Success Green
