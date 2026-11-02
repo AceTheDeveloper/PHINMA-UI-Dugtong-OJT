@@ -1,15 +1,10 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { Search } from "lucide-react";
 import { EmptyState, LoadError, PageHeader } from "@/components/admin/admin-parts";
 import { ListingList } from "@/components/student/listing-list";
-import { focusStyle } from "@/components/brand-link";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { ListingSearch } from "@/components/student/listing-search";
 import { getListingsForStudent, getStudentSummary } from "@/lib/applications/queries";
-import { cleanSearch, maxSearchLength } from "@/lib/applications/schemas";
+import { cleanSearch } from "@/lib/applications/schemas";
 import { requireRole } from "@/lib/auth/server";
-import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Listings · Dugtong OJT",
@@ -39,36 +34,7 @@ export default async function StudentListingsPage({
         title="Listings"
         description="Open positions at partner companies for your course."
       />
-      <form action="/student/listings" role="search" className="flex flex-wrap gap-2">
-        <label htmlFor="listing-search" className="sr-only">
-          Search by company or title
-        </label>
-        <Input
-          id="listing-search"
-          name="q"
-          type="search"
-          defaultValue={search}
-          maxLength={maxSearchLength}
-          placeholder="Search by company or title"
-          className="h-10 w-full max-w-sm"
-        />
-        <Button type="submit" variant="outline" className="h-10 gap-2">
-          <Search aria-hidden="true" className="size-4" />
-          Search
-        </Button>
-        {search ? (
-          <Link
-            href="/student/listings"
-            className={cn(
-              buttonVariants({ variant: "ghost" }),
-              "h-10",
-              focusStyle,
-            )}
-          >
-            Clear search
-          </Link>
-        ) : null}
-      </form>
+      <ListingSearch initial={search} />
 
       {!listings || !summary ? (
         <LoadError message="This account has no student record. Contact your coordinator." />
