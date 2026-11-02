@@ -10,6 +10,7 @@ import {
 } from "@/app/(app)/student/logs/actions";
 import { FormMessage, useAction } from "@/components/admin/form-parts";
 import { focusStyle } from "@/components/brand-link";
+import { LiveClock } from "@/components/student/live-clock";
 import { LogStatusBadge } from "@/components/student/log-status";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -49,7 +50,6 @@ function Label({ date, badge }: { date: string; badge?: ReactNode }) {
 
 const big =
   "font-heading text-[44px] font-bold leading-none tracking-[-0.04em] tabular-nums sm:text-[60px]";
-const title = "font-heading text-[28px] font-bold leading-tight tracking-[-0.02em] sm:text-[34px]";
 
 function Blocked({ date, heading, children }: { date: string; heading: string; children: ReactNode }) {
   return (
@@ -57,7 +57,8 @@ function Blocked({ date, heading, children }: { date: string; heading: string; c
       top={
         <>
           <Label date={date} />
-          <h2 className={title}>{heading}</h2>
+          <LiveClock className={big} />
+          <h2 className="font-heading text-[22px] font-bold leading-tight sm:text-[26px]">{heading}</h2>
           <p className="max-w-[56ch] text-base leading-[1.6] text-deep-muted">{children}</p>
         </>
       }
@@ -72,7 +73,8 @@ function TimeIn({ date, scheduleLabel }: { date: string; scheduleLabel: string }
       top={
         <>
           <Label date={date} />
-          <h2 className={title}>Ready when you are</h2>
+          <LiveClock className={big} />
+          <h2 className="font-heading text-[22px] font-bold leading-tight sm:text-[26px]">Ready when you are</h2>
           <p className="text-base leading-[1.6] text-deep-muted">
             Your schedule today is{" "}
             <span className="font-semibold text-deep-foreground">{scheduleLabel}</span>.
@@ -156,6 +158,9 @@ function Running({
         <>
           <Label date={date} badge={<LogStatusBadge status="open" />} />
           <div className="grid gap-2">
+            <p className="text-sm text-deep-muted">
+              Now <LiveClock className="inline font-semibold text-deep-foreground" />
+            </p>
             <p className="text-sm text-deep-muted">Timed in at</p>
             <p className={big}>{formatClock(entry.timeIn)}</p>
             <p className="min-h-7 text-lg font-semibold tabular-nums text-teal-text" aria-live="off">
