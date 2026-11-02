@@ -527,3 +527,43 @@ export const databaseSessionStore: SessionStore = {
   resolve: resolveSession,
   accept: acceptInvitation,
 };
+
+// Records that the student's own resume file was stored. Returns its path.
+export async function saveResume(
+  actorId: string,
+  sizeBytes: number,
+): Promise<Result<string>> {
+  const parsed = z
+    .object({ actorId: uuid, sizeBytes: z.number().int().positive() })
+    .safeParse({ actorId, sizeBytes });
+  if (!parsed.success) return invalid("The resume details are not valid.");
+  const result = await call("save_resume", {
+    p_actor: parsed.data.actorId,
+    p_size: parsed.data.sizeBytes,
+  });
+  if (!result.ok) return result;
+  const path = z.string().min(1).safeParse(result.data);
+  return path.success
+    ? ok(path.data)
+    : fail("unexpected", "Something went wrong. Try again in a moment.");
+}
+
+// The storage path of a student's resume, if the actor may read it.
+export async function getResumePath(
+  actorId: string,
+  studentId: string,
+): Promise<Result<string>> {
+  const parsed = z
+    .object({ actorId: uuid, studentId: uuid })
+    .safeParse({ actorId, studentId });
+  if (!parsed.success) return invalid("The resume details are not valid.");
+  const result = await call("resume_path_for", {
+    p_actor: parsed.data.actorId,
+    p_student_id: parsed.data.studentId,
+  });
+  if (!result.ok) return result;
+  const path = z.string().min(1).safeParse(result.data);
+  return path.success
+    ? ok(path.data)
+    : fail("unexpected", "Something went wrong. Try again in a moment.");
+}
