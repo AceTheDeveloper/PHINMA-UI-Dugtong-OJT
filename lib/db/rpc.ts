@@ -602,3 +602,39 @@ export async function withdrawApplication(
   });
   return result.ok ? ok(null) : result;
 }
+
+// A supervisor accepts an applicant: one transaction creates the deployment
+// and withdraws the student's other open applications. Returns the deployment id.
+export async function acceptApplication(
+  actorId: string,
+  applicationId: string,
+): Promise<Result<string>> {
+  const parsed = z
+    .object({ actorId: uuid, applicationId: uuid })
+    .safeParse({ actorId, applicationId });
+  if (!parsed.success) return invalid("The application details are not valid.");
+  const result = await call("accept_application", {
+    p_actor: parsed.data.actorId,
+    p_application_id: parsed.data.applicationId,
+  });
+  if (!result.ok) return result;
+  const created = idResult.safeParse(result.data);
+  return created.success
+    ? ok(created.data)
+    : fail("unexpected", "Something went wrong. Try again in a moment.");
+}
+
+export async function rejectApplication(
+  actorId: string,
+  applicationId: string,
+): Promise<Result<null>> {
+  const parsed = z
+    .object({ actorId: uuid, applicationId: uuid })
+    .safeParse({ actorId, applicationId });
+  if (!parsed.success) return invalid("The application details are not valid.");
+  const result = await call("reject_application", {
+    p_actor: parsed.data.actorId,
+    p_application_id: parsed.data.applicationId,
+  });
+  return result.ok ? ok(null) : result;
+}

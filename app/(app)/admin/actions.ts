@@ -22,6 +22,7 @@ import {
   updateListingSchema,
 } from "@/lib/admin/schemas";
 import { inviteUser, revokeInvitationEverywhere } from "@/lib/auth/invitations";
+import type { Role } from "@/lib/auth/roles";
 import { authorize } from "@/lib/auth/server";
 import type { Session } from "@/lib/auth/session";
 import {
@@ -52,8 +53,9 @@ async function run<S extends z.ZodType>(
   raw: unknown,
   paths: string[],
   work: (session: Session, input: z.infer<S>) => Promise<Result<unknown>>,
+  allowed: readonly Role[] = ["admin"],
 ): Promise<ActionResult> {
-  const access = await authorize(["admin"]);
+  const access = await authorize(allowed);
   if (!access.ok) return access;
   const parsed = schema.safeParse(raw);
   if (!parsed.success) {
@@ -166,22 +168,44 @@ export async function transferOwnership(raw: unknown): Promise<ActionResult> {
   });
 }
 
+// Listings are also managed by a company's own supervisors. A supervisor's
+// company always comes from their session, never from the browser, and the
+// database checks the company again.
+const listingManagers = ["admin", "supervisor"] as const;
+const listingPaths = [...listings, "/supervisor", "/supervisor/listings"];
+
 export async function addListing(raw: unknown): Promise<ActionResult> {
-  return run(createListingSchema, raw, listings, (session, input) => {
-    revalidatePath(`/admin/companies/${input.companyId}`);
-    return createListing(session.userId, input);
-  });
+  return run(
+    createListingSchema,
+    raw,
+    listingPaths,
+    (session, input) => {
+      const companyId = session.role === "supervisor" ? session.companyId : input.companyId;
+      if (!companyId) return Promise.resolve(fail("forbidden", "You do not have access to this."));
+      revalidatePath(`/admin/companies/${companyId}`);
+      return createListing(session.userId, { ...input, companyId });
+    },
+    listingManagers,
+  );
 }
 
 export async function editListing(raw: unknown): Promise<ActionResult> {
-  return run(updateListingSchema, raw, listings, (session, input) =>
-    updateListing(session.userId, input),
+  return run(
+    updateListingSchema,
+    raw,
+    listingPaths,
+    (session, input) => updateListing(session.userId, input),
+    listingManagers,
   );
 }
 
 export async function changeListingStatus(raw: unknown): Promise<ActionResult> {
-  return run(setListingStatusSchema, raw, listings, (session, input) =>
-    setListingStatus(session.userId, input.listingId, input.status),
+  return run(
+    setListingStatusSchema,
+    raw,
+    listingPaths,
+    (session, input) => setListingStatus(session.userId, input.listingId, input.status),
+    listingManagers,
   );
 }
 
