@@ -51,6 +51,7 @@ describe("current page", () => {
     expect(currentLabel("/supervisor/applicants/abc", supervisor)).toBe("Applicants");
     expect(currentLabel("/supervisor/approvals", supervisor)).toBe("Daily approval");
     expect(currentLabel("/supervisor/evaluations/abc", supervisor)).toBe("Evaluations");
+    expect(currentLabel("/coordinator/certifications", linksFor("coordinator"))).toBe("Certifications");
     expect(currentLabel("/supervisor/students", supervisor)).toBe("Students");
     expect(currentLabel("/supervisor/students/abc", supervisor)).toBe("Students");
     expect(isCurrentLink("/student/listings/abc", { href: "/student/listings", label: "Listings", exact: false })).toBe(true);

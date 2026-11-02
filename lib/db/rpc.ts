@@ -995,3 +995,37 @@ export async function submitEvaluation(
     ? ok(created.data)
     : fail("unexpected", "Something went wrong. Try again in a moment.");
 }
+
+// The coordinator of a course names the two signatories printed on its
+// certificates.
+export async function saveCertificateTemplate(
+  actorId: string,
+  input: {
+    courseId: string;
+    signatory1Name: string;
+    signatory1Title: string;
+    signatory2Name: string;
+    signatory2Title: string;
+  },
+): Promise<Result<null>> {
+  const parsed = z
+    .object({
+      actorId: uuid,
+      courseId: uuid,
+      signatory1Name: z.string(),
+      signatory1Title: z.string(),
+      signatory2Name: z.string(),
+      signatory2Title: z.string(),
+    })
+    .safeParse({ actorId, ...input });
+  if (!parsed.success) return invalid("The signatory details are not valid.");
+  const result = await call("save_certificate_template", {
+    p_actor: parsed.data.actorId,
+    p_course_id: parsed.data.courseId,
+    p_signatory_1_name: parsed.data.signatory1Name,
+    p_signatory_1_title: parsed.data.signatory1Title,
+    p_signatory_2_name: parsed.data.signatory2Name,
+    p_signatory_2_title: parsed.data.signatory2Title,
+  });
+  return result.ok ? ok(null) : result;
+}

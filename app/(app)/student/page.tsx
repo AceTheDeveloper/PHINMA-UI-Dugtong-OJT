@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ChevronRight, FileText, Send } from "lucide-react";
+import { Award, ChevronRight, FileText, Send } from "lucide-react";
 import { LoadError } from "@/components/admin/admin-parts";
 import { focusStyle } from "@/components/brand-link";
 import { RoleBadge } from "@/components/coordinator/status-badge";
@@ -8,6 +8,7 @@ import { TodayCard } from "@/components/student/today-card";
 import { HoursChain } from "@/components/ui/hours-chain";
 import { getStudentSummary } from "@/lib/applications/queries";
 import { requireRole } from "@/lib/auth/server";
+import { getStudentCertification } from "@/lib/certification/queries";
 import { getTodayForStudent } from "@/lib/logs/queries";
 import { cn } from "@/lib/utils";
 
@@ -70,12 +71,13 @@ function Row({
 
 export default async function StudentHomePage() {
   const session = await requireRole(["student"]);
-  const [result, today] = session.studentId
+  const [result, today, certification] = session.studentId
     ? await Promise.all([
         getStudentSummary(session.studentId),
         getTodayForStudent(session.studentId),
+        getStudentCertification(session.studentId),
       ])
-    : [null, null];
+    : [null, null, null];
 
   if (!result) {
     return <LoadError message="This account has no student record. Contact your coordinator." />;
@@ -129,6 +131,15 @@ export default async function StudentHomePage() {
         aria-label="Next steps"
         className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card shadow-panel"
       >
+        {certification?.ok && certification.data ? (
+          <Row
+            href="/student/certification"
+            icon={<Award className="size-5" />}
+            title="Certification"
+            note="Your supervisor evaluated you. Download your certificate."
+            badge={<RoleBadge role="teal">Ready</RoleBadge>}
+          />
+        ) : null}
         <Row
           href="/student/resume"
           icon={<FileText className="size-5" />}
