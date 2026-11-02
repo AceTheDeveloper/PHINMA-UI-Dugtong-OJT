@@ -88,6 +88,17 @@ describe("row level security", () => {
       ),
     ).rejects.toThrow(/permission denied/);
   });
+
+  it("keeps the deployment_hours view off the API", async () => {
+    await expect(
+      asRole(db, "authenticated", () =>
+        db.query("select * from deployment_hours"),
+      ),
+    ).rejects.toThrow(/permission denied/);
+    await expect(
+      asRole(db, "anon", () => db.query("select * from deployment_hours")),
+    ).rejects.toThrow(/permission denied/);
+  });
 });
 
 describe("migrations", () => {
