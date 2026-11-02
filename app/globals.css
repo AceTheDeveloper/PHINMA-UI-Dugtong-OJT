@@ -57,6 +57,7 @@
   --color-info-border: var(--info-border);
   --color-info-text: var(--info-text);
   --color-teal: var(--teal);
+  --color-teal-bright: var(--teal-bright);
   --color-teal-tint: var(--teal-tint);
   --color-teal-border: var(--teal-border);
   --color-teal-text: var(--teal-text);
@@ -64,35 +65,41 @@
   --color-neutral-tint: var(--neutral-tint);
   --color-neutral-border: var(--neutral-border);
   --color-neutral-text: var(--neutral-text);
-  --font-sans: var(--font-figtree), Figtree, system-ui, sans-serif;
-  --font-heading: var(--font-bricolage), "Bricolage Grotesque", system-ui, sans-serif;
+  --font-sans: var(--font-plex-sans), "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-heading: var(--font-plex-sans), "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: var(--font-plex-mono), "IBM Plex Mono", ui-monospace, Consolas, monospace;
   --shadow-panel: var(--elevation-panel);
   --shadow-lift: var(--elevation-lift);
-  --font-mono: var(--font-jetbrains-mono), "JetBrains Mono", Consolas, monospace;
+  /* Two radii by role. Controls (sm to xl) follow --radius; every large surface
+     (2xl and 3xl) is one panel radius, so panels no longer vary from 16 to 24 px. */
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-xl: var(--radius);
+  --radius-2xl: var(--radius-panel);
+  --radius-3xl: var(--radius-panel);
 }
 
 :root {
   color-scheme: light;
-  /* Elevation: a panel rests on the page; a lift is for things that float. */
-  --elevation-panel: 0 1px 2px rgb(15 23 42 / 0.05), 0 6px 20px rgb(15 23 42 / 0.05);
-  --elevation-lift: 0 2px 4px rgb(15 23 42 / 0.06), 0 14px 34px rgb(15 23 42 / 0.12);
-  --primary: #2563eb;
-  --primary-hover: #1d4ed8;
-  --primary-tint: #e6eefe;
-  --primary-track: #d4e0fb;
-  --ink: #0f172a;
-  --muted: #596579;
-  --faint: #6b7686;
-  --disabled: #98a2b3;
-  --border: #eceef2;
-  --border-strong: #d5dae2;
-  --surface: #f5f7fa;
-  --page-wash: #f8fafe;
-  --focus-ring: rgb(37 99 235 / 0.4);
+  /* The time card: paper under white panels, navy ink, ruled lines. A panel rests
+     on the page with a hairline and almost no shadow; a lift is for things that
+     float (menus, sheets). */
+  --elevation-panel: 0 1px 0 rgb(12 26 51 / 0.04), 0 1px 3px rgb(12 26 51 / 0.05);
+  --elevation-lift: 0 4px 8px rgb(12 26 51 / 0.06), 0 16px 36px rgb(12 26 51 / 0.14);
+  --primary: #2255f2;
+  --primary-hover: #1a45cc;
+  --primary-tint: #e8eefe;
+  --primary-track: #d3dffb;
+  --ink: #0c1a33;
+  --muted: #4a5876;
+  --faint: #5c6a85;
+  --disabled: #9aa6bd;
+  --border: #e1e6f0;
+  --border-strong: #c9d1e0;
+  --surface: #eff2f8;
+  --page-wash: #f4f6fb;
+  --focus-ring: rgb(34 85 242 / 0.4);
   --success-tint: #d9f5ea;
   --success-border: #a8e3cb;
   --success: #087a55;
@@ -108,22 +115,25 @@
   --error: #dc2626;
   --error-hover: #b91c1c;
   --error-text: #b91c1c;
-  --info-tint: #e6eefe;
-  --info-border: #bcd0fb;
-  --info: #2563eb;
-  --info-hover: #1d4ed8;
-  --info-text: #1e40af;
+  --info-tint: #e8eefe;
+  --info-border: #bfd0fb;
+  --info: #2255f2;
+  --info-hover: #1a45cc;
+  --info-text: #1b3fb8;
   --teal-tint: #ddf4f4;
   --teal-border: #a9dcdc;
   --teal: #086a6a;
   --teal-hover: #065454;
   --teal-text: #086a6a;
-  --neutral-tint: #eef1f5;
-  --neutral-border: #dfe3ea;
-  --neutral: #596579;
-  --neutral-hover: #475569;
-  --neutral-text: #596579;
-  --background: #ffffff;
+  /* The teal of the logo's dot, deepened to 3:1 on white so the live link reads.
+     For marks only: use --teal-text for words. */
+  --teal-bright: #0fa395;
+  --neutral-tint: #eceff6;
+  --neutral-border: #d9dfeb;
+  --neutral: #4a5876;
+  --neutral-hover: #36435e;
+  --neutral-text: #4a5876;
+  --background: #f4f6fb;
   --foreground: var(--ink);
   --card: #ffffff;
   --card-foreground: var(--ink);
@@ -136,9 +146,13 @@
   --accent: var(--primary-tint);
   --accent-foreground: var(--info-text);
   --destructive: var(--error);
-  --input: var(--border-strong);
+  /* The edge of a field: 3:1 against the panel and the page, so an empty field
+     can be found. (--border-strong is for dividers and is much lighter.) */
+  --input: #7d89a3;
   --ring: var(--primary);
-  --radius: 0.5rem;
+  /* Two radii, by role: controls (buttons, inputs, badges) and panels. */
+  --radius: 0.625rem;
+  --radius-panel: 1.25rem;
   --sidebar: var(--card);
   --sidebar-foreground: var(--foreground);
   --sidebar-primary: var(--primary);
@@ -150,24 +164,24 @@
 }
 
 .dark {
-  --elevation-panel: 0 1px 2px rgb(0 0 0 / 0.35), 0 8px 24px rgb(0 0 0 / 0.3);
-  --elevation-lift: 0 2px 4px rgb(0 0 0 / 0.4), 0 16px 38px rgb(0 0 0 / 0.5);
+  --elevation-panel: 0 1px 0 rgb(0 0 0 / 0.4), 0 8px 24px rgb(0 0 0 / 0.25);
+  --elevation-lift: 0 4px 8px rgb(0 0 0 / 0.4), 0 18px 40px rgb(0 0 0 / 0.55);
   color-scheme: dark;
-  --primary: #60a5fa;
-  --primary-hover: #93c5fd;
-  --primary-tint: #172b48;
-  --primary-track: #24456f;
-  --ink: #f1f5f9;
-  --muted: #a6b2c4;
-  --faint: #aab7ca;
-  --disabled: #64748b;
-  --border: #263449;
-  --border-strong: #3b4b63;
-  --surface: #152238;
-  --page-wash: #0b1220;
-  --focus-ring: rgb(96 165 250 / 0.4);
-  --success-tint: #12342e;
-  --success-border: #28604e;
+  --primary: #6e93ff;
+  --primary-hover: #93b0ff;
+  --primary-tint: #16254a;
+  --primary-track: #22386b;
+  --ink: #eaf0fb;
+  --muted: #a9b6cf;
+  --faint: #94a3bf;
+  --disabled: #5d6b86;
+  --border: #1f2d4b;
+  --border-strong: #324468;
+  --surface: #121e38;
+  --page-wash: #0a1224;
+  --focus-ring: rgb(110 147 255 / 0.45);
+  --success-tint: #0f3329;
+  --success-border: #1f6048;
   --success: #087a55;
   --success-hover: #066245;
   --success-text: #6ee7b7;
@@ -181,36 +195,37 @@
   --error: #dc2626;
   --error-hover: #b91c1c;
   --error-text: #fca5a5;
-  --info-tint: #172b48;
-  --info-border: #294c7e;
-  --info: #2563eb;
-  --info-hover: #1d4ed8;
-  --info-text: #93c5fd;
-  --teal-tint: #123536;
+  --info-tint: #16254a;
+  --info-border: #2a4586;
+  --info: #3b6cf5;
+  --info-hover: #5a85fb;
+  --info-text: #a9c0ff;
+  --teal-tint: #0f3536;
   --teal-border: #276466;
   --teal: #086a6a;
   --teal-hover: #065454;
   --teal-text: #5eead4;
-  --neutral-tint: #202c3e;
-  --neutral-border: #3a4a61;
-  --neutral: #596579;
-  --neutral-hover: #475569;
-  --neutral-text: #cbd5e1;
-  --background: #0b1220;
-  --foreground: #f1f5f9;
-  --card: #111b2e;
-  --card-foreground: #f1f5f9;
-  --popover: #111b2e;
-  --popover-foreground: #f1f5f9;
-  --primary-foreground: #0b1220;
-  --secondary: #123536;
+  --teal-bright: #2dd4bf;
+  --neutral-tint: #1a2742;
+  --neutral-border: #324468;
+  --neutral: #94a3bf;
+  --neutral-hover: #cbd5e6;
+  --neutral-text: #cbd5e6;
+  --background: #0a1224;
+  --foreground: #eaf0fb;
+  --card: #101b33;
+  --card-foreground: #eaf0fb;
+  --popover: #101b33;
+  --popover-foreground: #eaf0fb;
+  --primary-foreground: #08122a;
+  --secondary: #0f3536;
   --secondary-foreground: #5eead4;
-  --muted-foreground: #a6b2c4;
-  --accent: #172b48;
-  --accent-foreground: #93c5fd;
+  --muted-foreground: #a9b6cf;
+  --accent: #16254a;
+  --accent-foreground: #a9c0ff;
   --destructive: #f87171;
-  --input: #3b4b63;
-  --ring: #93c5fd;
+  --input: #5a6b92;
+  --ring: #93b0ff;
 }
 
 html {
@@ -218,7 +233,11 @@ html {
   scroll-padding-top: 104px;
 }
 
+/* The page is paper (light) or deep navy (dark); panels sit on it in white or
+   a lighter navy. Without this the page fell back to the browser's own colours. */
 body {
+  background-color: var(--background);
+  color: var(--foreground);
   font-variant-numeric: tabular-nums;
 }
 
@@ -291,6 +310,9 @@ html.reveal-enabled [data-reveal].is-visible {
 
 @media (prefers-reduced-motion: no-preference) {
   .dg-chain-link {
+    /* The links are SVG groups: scale from their own centre, not the drawing's. */
+    transform-box: fill-box;
+    transform-origin: center;
     animation: dg-link-in 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 }

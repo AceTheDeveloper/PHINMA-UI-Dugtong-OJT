@@ -52,3 +52,37 @@ export function computeChain(approvedHours: number, requiredHours: number): Hour
     label,
   };
 }
+
+// The drawing of the chain. One SVG, measured in its own units and scaled to fit
+// the space it is given, so a chain of any length stays on one line: 13 links on
+// a 390 px phone, or 3 links in a small card, without wrapping into a second row.
+export const linkSize = 26;
+export const linkStep = 19; // distance between the left edges of two links
+export const linkDrop = 5; // every other link sits a little lower: the chain zigzags
+export const linkRadius = 8;
+
+// Room around the drawing for the line width and the teal dot on the live link,
+// which sticks out past the top right corner of its square.
+const padX = 5;
+const padTop = 7;
+const padBottom = 3;
+
+export type ChainGeometry = {
+  width: number;
+  height: number;
+  links: { x: number; y: number }[];
+};
+
+export function chainGeometry(links: number): ChainGeometry {
+  const count = Math.max(0, Math.floor(links));
+  const placed = Array.from({ length: count }, (_, index) => ({
+    x: padX + index * linkStep,
+    y: padTop + (index % 2 === 1 ? linkDrop : 0),
+  }));
+  if (count === 0) return { width: 0, height: 0, links: [] };
+  return {
+    width: padX * 2 + (count - 1) * linkStep + linkSize,
+    height: padTop + padBottom + linkSize + (count > 1 ? linkDrop : 0),
+    links: placed,
+  };
+}

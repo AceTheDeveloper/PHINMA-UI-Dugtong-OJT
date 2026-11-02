@@ -46,7 +46,7 @@ for (const scheme of ["light", "dark"] as const) {
           await expect(heading).toBeVisible();
           // The heading font is the new one (next/font names it after the family).
           const family = await heading.evaluate((node) => getComputedStyle(node).fontFamily);
-          expect(family).toMatch(/Bricolage/i);
+          expect(family).toMatch(/IBM Plex Sans/i);
         }
 
         if (size.touch && screen.name === "sign-in") {

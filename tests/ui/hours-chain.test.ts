@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { computeChain, hoursPerLink, maxLinks } from "@/lib/hours-chain";
+import {
+  chainGeometry,
+  computeChain,
+  hoursPerLink,
+  linkDrop,
+  linkSize,
+  linkStep,
+  maxLinks,
+} from "@/lib/hours-chain";
 import { isCurrentLink } from "@/lib/nav";
 
 describe("computeChain", () => {
@@ -85,5 +93,47 @@ describe("isCurrentLink", () => {
     expect(isCurrentLink("/student/listings/abc", listings)).toBe(true);
     expect(isCurrentLink("/student/listings-old", listings)).toBe(false);
     expect(isCurrentLink("/student/applications", listings)).toBe(false);
+  });
+});
+
+describe("chainGeometry", () => {
+  it("draws nothing for no links", () => {
+    expect(chainGeometry(0)).toEqual({ width: 0, height: 0, links: [] });
+    expect(chainGeometry(-3).links).toEqual([]);
+  });
+
+  it("places one link with no zigzag", () => {
+    const one = chainGeometry(1);
+    expect(one.links).toHaveLength(1);
+    expect(one.height).toBe(7 + 3 + linkSize);
+    expect(one.width).toBe(5 * 2 + linkSize);
+  });
+
+  it("steps each link along by the same distance and lowers every other one", () => {
+    const geo = chainGeometry(13);
+    expect(geo.links).toHaveLength(13);
+    geo.links.forEach((link, index) => {
+      expect(link.x).toBe(5 + index * linkStep);
+      expect(link.y).toBe(7 + (index % 2 === 1 ? linkDrop : 0));
+    });
+  });
+
+  it("is as wide as its last link reaches, so the whole chain fits one line at any scale", () => {
+    for (const links of [2, 5, 13, maxLinks]) {
+      const geo = chainGeometry(links);
+      const last = geo.links.at(-1)!;
+      expect(geo.width).toBe(last.x + linkSize + 5);
+      expect(geo.height).toBe(7 + 3 + linkSize + linkDrop);
+    }
+  });
+
+  it("keeps the same height however many links there are (past one), so charts and cards line up", () => {
+    expect(chainGeometry(2).height).toBe(chainGeometry(60).height);
+  });
+
+  it("scales to a phone: a 486 hour chain drawn into 340 px has links of a usable size", () => {
+    const geo = chainGeometry(computeChain(0, 486).links);
+    const scale = 340 / geo.width;
+    expect(linkSize * scale).toBeGreaterThan(24);
   });
 });
