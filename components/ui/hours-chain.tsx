@@ -111,3 +111,32 @@ export function HoursChain({
     </svg>
   );
 }
+
+// Three empty links: the chain as a quiet mark for an empty page. Decorative; it
+// says nothing to a screen reader, because the words beside it do.
+export function ChainMark({ className }: { className?: string }) {
+  const geometry = chainGeometry(3);
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox={`0 0 ${geometry.width} ${geometry.height}`}
+      style={{ width: geometry.width * 1.1, aspectRatio: `${geometry.width} / ${geometry.height}` }}
+      className={cn("block overflow-visible", className)}
+    >
+      {geometry.links.map(({ x, y }, index) => (
+        <rect
+          key={index}
+          x={x}
+          y={y}
+          width={linkSize}
+          height={linkSize}
+          rx={linkRadius}
+          strokeWidth={2.5}
+          vectorEffect="non-scaling-stroke"
+          className="stroke-border-strong"
+          style={{ fill: surface }}
+        />
+      ))}
+    </svg>
+  );
+}

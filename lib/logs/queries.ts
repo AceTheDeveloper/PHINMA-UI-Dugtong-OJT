@@ -2,6 +2,7 @@ import "server-only";
 import { z } from "zod";
 import { adminClient } from "@/lib/db/admin";
 import { isoWeekday, todayView } from "@/lib/logs/logic";
+import { buildWeek, weekDates, type WeekDay } from "@/lib/logs/week";
 import type { LogEntry, TodayView } from "@/lib/logs/types";
 import { errorFromDatabase, fail, ok, type Result } from "@/lib/result";
 import { manilaToday, scheduleInForce } from "@/lib/schedules/logic";
@@ -139,4 +140,56 @@ export async function getTodayForStudent(
       windowMinutes: settings.data[0]?.time_in_window_minutes ?? 30,
     }),
   });
+}
+
+const weekEntryRow = z.object({
+  log_date: z.string(),
+  time_in: z.string(),
+  time_out: z.string().nullable(),
+  break_minutes: z.number(),
+  status: z.enum(["open", "pending", "approved", "rejected"]),
+});
+
+export type WeekView = { days: WeekDay[]; approvedMinutes: number };
+
+// The student's current week as seven days: what each one stamped, and the week's
+// approved minutes. Null when the student has no active deployment. A day is a
+// working day when the schedule in force on that date lists its weekday.
+export async function getWeekForStudent(studentId: string): Promise<Result<WeekView | null>> {
+  const deployments = await read(z.array(z.object({ id: z.string() })), () =>
+    db().from("deployments").select("id").eq("student_id", studentId).eq("status", "active").limit(1),
+  );
+  if (!deployments.ok) return deployments;
+  const deployment = deployments.data[0];
+  if (!deployment) return ok(null);
+
+  const today = manilaToday();
+  const dates = weekDates(today);
+
+  const schedules = await getSchedulesForDeployment(deployment.id);
+  if (!schedules.ok) return schedules;
+  const entries = await read(z.array(weekEntryRow), () =>
+    db()
+      .from("daily_logs")
+      .select("log_date, time_in, time_out, break_minutes, status")
+      .eq("deployment_id", deployment.id)
+      .gte("log_date", dates[0])
+      .lte("log_date", dates[6]),
+  );
+  if (!entries.ok) return entries;
+
+  return ok(
+    buildWeek({
+      today,
+      entries: entries.data.map((row) => ({
+        logDate: row.log_date,
+        timeIn: row.time_in,
+        timeOut: row.time_out,
+        breakMinutes: row.break_minutes,
+        status: row.status,
+      })),
+      isWorkday: (date) =>
+        scheduleInForce(schedules.data, date)?.days.some((day) => day.weekday === isoWeekday(date)) ?? false,
+    }),
+  );
 }

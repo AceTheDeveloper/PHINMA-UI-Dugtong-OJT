@@ -5,11 +5,14 @@ import { LoadError } from "@/components/admin/admin-parts";
 import { focusStyle } from "@/components/brand-link";
 import { RoleBadge } from "@/components/coordinator/status-badge";
 import { TodayCard } from "@/components/student/today-card";
+import { WeekStrip } from "@/components/student/week-strip";
 import { HoursChain } from "@/components/ui/hours-chain";
 import { getStudentSummary } from "@/lib/applications/queries";
 import { requireRole } from "@/lib/auth/server";
 import { getStudentCertification } from "@/lib/certification/queries";
-import { getTodayForStudent } from "@/lib/logs/queries";
+import { formatLogDate } from "@/lib/logs/logic";
+import { getTodayForStudent, getWeekForStudent } from "@/lib/logs/queries";
+import { manilaToday } from "@/lib/schedules/logic";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -71,13 +74,14 @@ function Row({
 
 export default async function StudentHomePage() {
   const session = await requireRole(["student"]);
-  const [result, today, certification] = session.studentId
+  const [result, today, certification, week] = session.studentId
     ? await Promise.all([
         getStudentSummary(session.studentId),
         getTodayForStudent(session.studentId),
         getStudentCertification(session.studentId),
+        getWeekForStudent(session.studentId),
       ])
-    : [null, null, null];
+    : [null, null, null, null];
 
   if (!result) {
     return <LoadError message="This account has no student record. Contact your coordinator." />;
@@ -96,7 +100,7 @@ export default async function StudentHomePage() {
       >
         <h1
           id="home-heading"
-          className="font-heading text-[28px] font-extrabold leading-[1.1] tracking-[-0.03em] text-ink sm:text-[40px]"
+          className="font-heading text-[30px] font-bold leading-[1.1] tracking-[-0.03em] text-ink sm:text-[40px]"
         >
           {greeting(new Date())}, {firstName(summary.fullName)}
         </h1>
@@ -107,12 +111,12 @@ export default async function StudentHomePage() {
         </p>
 
         <div className="mt-8 flex flex-wrap items-end gap-x-3 gap-y-1">
-          <p className="font-mono text-[56px] font-semibold leading-none tabular-nums tracking-[-0.04em] text-ink sm:text-[72px]">
+          <p className="font-heading text-[56px] font-bold leading-none tabular-nums tracking-[-0.04em] text-ink sm:text-[72px]">
             {hours}
           </p>
           <p className="pb-1.5 text-[15px] text-copy-muted sm:pb-2.5 sm:text-base">
             of{" "}
-            <span className="font-mono font-semibold tabular-nums text-ink">
+            <span className="font-semibold tabular-nums text-ink">
               {summary.requiredHours}
             </span>{" "}
             approved hours
@@ -125,7 +129,11 @@ export default async function StudentHomePage() {
         />
       </section>
 
-      {today?.ok ? <TodayCard view={today.data.view} /> : null}
+      {today?.ok ? <TodayCard view={today.data.view} dateLabel={formatLogDate(manilaToday())} /> : null}
+
+      {week?.ok && week.data ? (
+        <WeekStrip days={week.data.days} approvedMinutes={week.data.approvedMinutes} />
+      ) : null}
 
       <section
         aria-label="Next steps"

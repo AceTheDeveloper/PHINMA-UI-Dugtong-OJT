@@ -9,8 +9,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { formatClock, formatDuration, formatLogDate, workedMinutes } from "@/lib/logs/logic";
 import { maxJournalLength } from "@/lib/logs/schemas";
 import type { LogEntry } from "@/lib/logs/types";
+import { groupByWeek } from "@/lib/logs/week";
 
-// The student's entries, newest first. A rejected entry shows the supervisor's
+// The student's entries, newest first, in weeks with each week's approved hours. A rejected entry shows the supervisor's
 // reason and lets the student fix the journal and resubmit it. Times are the
 // server's; the student never edits them.
 
@@ -56,7 +57,7 @@ function Row({ entry }: { entry: LogEntry }) {
             {formatLogDate(entry.logDate)}
           </p>
           <p className="text-[15px] tabular-nums text-copy-muted">
-            <span className="font-mono">
+            <span>
               {formatClock(entry.timeIn)}
               {entry.timeOut ? ` to ${formatClock(entry.timeOut)}` : ""}
             </span>
@@ -113,18 +114,23 @@ export function LogHistory({ entries }: { entries: LogEntry[] }) {
           </ul>
         </section>
       ) : null}
-      {rest.length > 0 ? (
-        <section aria-label="All entries" className="grid gap-2">
-          {fix.length > 0 ? (
-            <h2 className="px-1 text-[15px] font-semibold text-copy-muted">Other entries</h2>
-          ) : null}
+      {groupByWeek(rest).map((week) => (
+        <section key={week.weekStart} aria-label={week.label} className="grid gap-2">
+          <div className="flex flex-wrap items-baseline justify-between gap-x-4 px-1">
+            <h2 className="font-heading text-lg font-bold text-ink">{week.label}</h2>
+            <p className="text-[15px] tabular-nums text-copy-muted">
+              <span className="font-semibold text-ink">{formatDuration(week.approvedMinutes)}</span>{" "}
+              approved
+              {week.pendingCount > 0 ? `, ${week.pendingCount} waiting` : ""}
+            </p>
+          </div>
           <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card shadow-panel">
-            {rest.map((entry) => (
+            {week.entries.map((entry) => (
               <Row key={entry.id} entry={entry} />
             ))}
           </ul>
         </section>
-      ) : null}
+      ))}
     </div>
   );
 }

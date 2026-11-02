@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { RoleBadge, type StatusRole } from "@/components/coordinator/status-badge";
+import { ChainMark } from "@/components/ui/hours-chain";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { InvitationSummary } from "@/lib/admin/queries";
 
@@ -62,8 +63,9 @@ export function EmptyState({
   action?: ReactNode;
 }) {
   return (
-    <div className="grid justify-items-center gap-4 rounded-2xl border border-dashed border-border-strong bg-surface px-6 py-10 text-center">
-      <p className="max-w-[46ch] text-[15px] leading-[1.6] text-copy-muted">{children}</p>
+    <div className="grid justify-items-center gap-5 rounded-2xl border border-border bg-card px-6 py-12 text-center shadow-panel">
+      <ChainMark />
+      <p className="max-w-[46ch] text-base leading-[1.6] text-copy-muted">{children}</p>
       {action}
     </div>
   );

@@ -58,6 +58,12 @@
   --color-info-text: var(--info-text);
   --color-teal: var(--teal);
   --color-teal-bright: var(--teal-bright);
+  --color-deep: var(--deep);
+  --color-deep-foreground: var(--deep-foreground);
+  --color-deep-muted: var(--deep-muted);
+  --color-deep-border: var(--deep-border);
+  --color-deep-action: var(--deep-action);
+  --color-deep-action-foreground: var(--deep-action-foreground);
   --color-teal-tint: var(--teal-tint);
   --color-teal-border: var(--teal-border);
   --color-teal-text: var(--teal-text);
@@ -128,6 +134,15 @@
   /* The teal of the logo's dot, deepened to 3:1 on white so the live link reads.
      For marks only: use --teal-text for words. */
   --teal-bright: #0fa395;
+  /* The deep surface: the one dark panel that leads a page (the student's punch
+     card). Navy in both themes, a little lighter in dark so it stands off the page.
+     Its action button is white so it reads at once against the navy. */
+  --deep: #0c1a33;
+  --deep-foreground: #eaf0fb;
+  --deep-muted: #a9b6cf;
+  --deep-border: #22335a;
+  --deep-action: #ffffff;
+  --deep-action-foreground: #0c1a33;
   --neutral-tint: #eceff6;
   --neutral-border: #d9dfeb;
   --neutral: #4a5876;
@@ -208,6 +223,12 @@
   --teal-hover: #065454;
   --teal-text: #5eead4;
   --teal-bright: #2dd4bf;
+  --deep: #172a55;
+  --deep-foreground: #f1f5ff;
+  --deep-muted: #b3bfd6;
+  --deep-border: #2a3f73;
+  --deep-action: #ffffff;
+  --deep-action-foreground: #0c1a33;
   --neutral-tint: #1a2742;
   --neutral-border: #324468;
   --neutral: #94a3bf;

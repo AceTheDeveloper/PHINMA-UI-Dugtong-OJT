@@ -41,48 +41,47 @@ export function ListingList({
   return (
     <div className="grid gap-4">
       <FormMessage message={message} />
-      <ul className="grid gap-4 md:grid-cols-2">
+      <ul className="divide-y divide-border overflow-hidden rounded-3xl border border-border bg-card shadow-panel">
         {listings.map((listing) => (
           <li key={listing.id}>
-            <article className="grid h-full content-between gap-5 rounded-2xl border border-border bg-card p-5 shadow-panel sm:p-6">
-              <div className="grid gap-2">
+            <article className="grid gap-4 p-5 sm:grid-cols-[1fr_auto] sm:items-center sm:gap-8 sm:p-6">
+              <div className="grid gap-1.5">
                 <p className="inline-flex items-center gap-1.5 text-[15px] font-semibold text-teal-text">
-                    <Building2 aria-hidden="true" className="size-4 shrink-0" />
-                    <span className="wrap-break-word">{listing.companyName}</span>
+                  <Building2 aria-hidden="true" className="size-4 shrink-0" />
+                  <span className="wrap-break-word">{listing.companyName}</span>
+                </p>
+                <h2 className="font-heading text-xl font-bold leading-snug tracking-[-0.01em] text-ink">
+                  {listing.title}
+                </h2>
+                {listing.description ? (
+                  <p className="line-clamp-3 max-w-[64ch] whitespace-pre-line text-[15px] leading-[1.6] text-copy-muted">
+                    {listing.description}
                   </p>
-                  <h2 className="font-heading text-xl font-bold leading-snug tracking-[-0.01em] text-ink">
-                    {listing.title}
-                  </h2>
-                  {listing.description ? (
-                    <p className="line-clamp-4 whitespace-pre-line text-[15px] leading-[1.6] text-copy-muted">
-                      {listing.description}
-                    </p>
-                  ) : null}
-                </div>
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <p className="text-sm text-muted-foreground tabular-nums">
-                    Posted {formatDate(listing.postedAt)}
-                  </p>
-                  {listing.applicationStatus ? (
-                    <ApplicationStatusBadge status={listing.applicationStatus} />
-                  ) : (
-                    <div className="grid justify-items-end gap-1">
-                      <Button
-                        type="button"
-                        size="lg"
-                        disabled={!hasResume || pending}
-                        onClick={() => apply(listing.id)}
-                      >
-                        {workingOn === listing.id ? "Applying" : "Apply"}
-                      </Button>
-                      {!hasResume ? (
-                        <p className="text-sm text-muted-foreground">
-                          Upload your resume to apply.
-                        </p>
-                      ) : null}
-                    </div>
-                  )}
-                </div>
+                ) : null}
+                <p className="text-sm tabular-nums text-muted-foreground">
+                  Posted {formatDate(listing.postedAt)}
+                </p>
+              </div>
+              <div className="grid justify-items-start gap-1 sm:justify-items-end">
+                {listing.applicationStatus ? (
+                  <ApplicationStatusBadge status={listing.applicationStatus} />
+                ) : (
+                  <>
+                    <Button
+                      type="button"
+                      size="lg"
+                      disabled={!hasResume || pending}
+                      onClick={() => apply(listing.id)}
+                      className="h-11 px-6"
+                    >
+                      {workingOn === listing.id ? "Applying" : "Apply"}
+                    </Button>
+                    {!hasResume ? (
+                      <p className="text-sm text-muted-foreground">Upload your resume to apply.</p>
+                    ) : null}
+                  </>
+                )}
+              </div>
             </article>
           </li>
         ))}

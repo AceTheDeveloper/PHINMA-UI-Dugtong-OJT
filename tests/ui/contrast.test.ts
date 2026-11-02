@@ -74,6 +74,10 @@ const textPairs: [string, string][] = [
   ["sidebar-accent-foreground", "sidebar-accent"],
   ["sidebar-foreground", "sidebar-accent"],
   ["sidebar-primary", "sidebar"],
+  ["deep-foreground", "deep"],
+  ["deep-muted", "deep"],
+  ["deep-action-foreground", "deep-action"],
+  ["teal-bright", "deep"],
 ];
 
 // Marks and edges a person must be able to see: 3:1.
@@ -84,6 +88,7 @@ const markPairs: [string, string][] = [
   ["input", "background"],
   ["ring", "card"],
   ["teal-bright", "sidebar"],
+  ["deep-action", "deep"],
 ];
 
 describe.each(Object.entries(themes))("%s theme", (_name, theme) => {
