@@ -72,7 +72,7 @@ const links: Record<Role, readonly ShellLink[]> = {
     link("Students", "students", null),
     link("Companies", "companies", null),
     link("Daily logs", "logs", null),
-    link("Evaluations", "evaluations", null),
+    link("Evaluations", "evaluations", "/coordinator/evaluations"),
     link("Reports", "reports", null),
     link("Roster import", "import", "/coordinator/roster"),
     link("Audit log", "audit", null),

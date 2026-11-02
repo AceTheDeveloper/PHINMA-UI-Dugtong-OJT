@@ -888,3 +888,67 @@ export async function addMissedDay(
     ? ok(created.data)
     : fail("unexpected", "Something went wrong. Try again in a moment.");
 }
+
+// A coordinator starts a new draft of their course's evaluation form, copied
+// from the newest form. Returns the draft id.
+export async function createEvaluationDraft(
+  actorId: string,
+  courseId: string,
+): Promise<Result<string>> {
+  const parsed = z.object({ actorId: uuid, courseId: uuid }).safeParse({ actorId, courseId });
+  if (!parsed.success) return invalid("The course details are not valid.");
+  const result = await call("create_evaluation_draft", {
+    p_actor: parsed.data.actorId,
+    p_course_id: parsed.data.courseId,
+  });
+  if (!result.ok) return result;
+  const created = idResult.safeParse(result.data);
+  return created.success
+    ? ok(created.data)
+    : fail("unexpected", "Something went wrong. Try again in a moment.");
+}
+
+// Replaces the draft's criteria with this list, in this order.
+export async function saveEvaluationDraft(
+  actorId: string,
+  formId: string,
+  criteria: string[],
+): Promise<Result<null>> {
+  const parsed = z
+    .object({ actorId: uuid, formId: uuid, criteria: z.array(z.string()) })
+    .safeParse({ actorId, formId, criteria });
+  if (!parsed.success) return invalid("The form details are not valid.");
+  const result = await call("save_evaluation_draft", {
+    p_actor: parsed.data.actorId,
+    p_form_id: parsed.data.formId,
+    p_criteria: parsed.data.criteria,
+  });
+  return result.ok ? ok(null) : result;
+}
+
+// Publishes the draft; the form it replaces is archived.
+export async function publishEvaluationForm(
+  actorId: string,
+  formId: string,
+): Promise<Result<null>> {
+  const parsed = z.object({ actorId: uuid, formId: uuid }).safeParse({ actorId, formId });
+  if (!parsed.success) return invalid("The form details are not valid.");
+  const result = await call("publish_evaluation_form", {
+    p_actor: parsed.data.actorId,
+    p_form_id: parsed.data.formId,
+  });
+  return result.ok ? ok(null) : result;
+}
+
+export async function discardEvaluationDraft(
+  actorId: string,
+  formId: string,
+): Promise<Result<null>> {
+  const parsed = z.object({ actorId: uuid, formId: uuid }).safeParse({ actorId, formId });
+  if (!parsed.success) return invalid("The form details are not valid.");
+  const result = await call("discard_evaluation_draft", {
+    p_actor: parsed.data.actorId,
+    p_form_id: parsed.data.formId,
+  });
+  return result.ok ? ok(null) : result;
+}
