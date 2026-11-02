@@ -1,15 +1,14 @@
 import type { Metadata } from "next";
-import { SignUp } from "@clerk/nextjs";
+import { AcceptInvitationForm } from "@/components/auth/accept-invitation-form";
 import { AuthShell } from "@/components/auth/auth-shell";
-import { clerkAppearance } from "@/components/auth/clerk-appearance";
 
 export const metadata: Metadata = {
   title: "Accept invitation · Dugtong OJT",
 };
 
-// Clerk reads the invitation from the link (__clerk_ticket), shows the invited
-// email, and offers Google or a password. Invite-only mode in Clerk means this
-// is the only way to create an account.
+// Our own form reads the invitation from the link (__clerk_ticket), shows the
+// invited email, and offers Google or a password. Invite-only mode in Clerk
+// means this is the only way to create an account.
 export default function AcceptInvitationPage() {
   return (
     <AuthShell>
@@ -23,12 +22,7 @@ export default function AcceptInvitationPage() {
         Create your account to accept your invitation. Use the email the
         invitation was sent to.
       </p>
-      <SignUp
-        routing="hash"
-        signInUrl="/sign-in"
-        forceRedirectUrl="/after-sign-in"
-        appearance={clerkAppearance}
-      />
+      <AcceptInvitationForm />
       <p className="mt-6 text-center text-[13px] text-faint">
         This invitation expires in 7 days.
       </p>

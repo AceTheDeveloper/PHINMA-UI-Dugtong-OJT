@@ -11,10 +11,17 @@ import {
   OrDivider,
   primaryAction,
 } from "@/components/auth/auth-parts";
+import { CodeStep } from "@/components/auth/code-step";
 import { focusStyle } from "@/components/brand-link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { signInWithGoogle, signInWithPassword } from "@/lib/auth/sign-in-flow";
+import {
+  cancelSignIn,
+  resendSignInCode,
+  signInWithGoogle,
+  signInWithPassword,
+  verifySignInCode,
+} from "@/lib/auth/sign-in-flow";
 import { cn } from "@/lib/utils";
 
 export function SignInForm({ notice }: { notice?: string }) {
@@ -22,6 +29,8 @@ export function SignInForm({ notice }: { notice?: string }) {
   const { signIn, fetchStatus } = useSignIn();
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState<string | undefined>(notice);
+  // Set when Clerk wants an emailed code first (a sign-in from a new device).
+  const [codeFor, setCodeFor] = useState<string | null>(null);
   const busy = fetchStatus === "fetching";
 
   // Decorated URLs can be absolute (they refresh the session cookie on Safari).
@@ -37,15 +46,14 @@ export function SignInForm({ notice }: { notice?: string }) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     try {
+      const email = String(form.get("email") ?? "").trim();
       const outcome = await signInWithPassword(
         signIn,
-        {
-          email: String(form.get("email") ?? ""),
-          password: String(form.get("password") ?? ""),
-        },
+        { email, password: String(form.get("password") ?? "") },
         go,
       );
       setMessage(outcome.ok ? undefined : outcome.message);
+      if (outcome.ok && outcome.step === "email_code") setCodeFor(email);
     } catch {
       setMessage("Sign-in did not work. Refresh the page and try again.");
     }
@@ -58,6 +66,25 @@ export function SignInForm({ notice }: { notice?: string }) {
     } catch {
       setMessage("Google sign-in did not start. Refresh the page and try again.");
     }
+  }
+
+  async function backToSignIn() {
+    const outcome = await cancelSignIn(signIn);
+    setMessage(outcome.ok ? undefined : outcome.message);
+    setCodeFor(null);
+  }
+
+  if (codeFor !== null) {
+    return (
+      <CodeStep
+        email={codeFor}
+        busy={busy}
+        onVerify={(code) => verifySignInCode(signIn, code, go)}
+        onResend={() => resendSignInCode(signIn)}
+        onBack={() => void backToSignIn()}
+        backLabel="Use a different account"
+      />
+    );
   }
 
   return (

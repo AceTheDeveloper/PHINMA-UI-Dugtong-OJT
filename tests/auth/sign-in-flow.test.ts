@@ -1,7 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 import {
+  cancelSignIn,
+  resendSignInCode,
   signInWithGoogle,
   signInWithPassword,
+  verifySignInCode,
   type SignInApi,
 } from "@/lib/auth/sign-in-flow";
 
@@ -11,6 +14,10 @@ function fakeApi(overrides: Partial<SignInApi> = {}) {
     reset: vi.fn<SignInApi["reset"]>().mockResolvedValue({ error: null }),
     password: vi.fn<SignInApi["password"]>().mockResolvedValue({ error: null }),
     sso: vi.fn<SignInApi["sso"]>().mockResolvedValue({ error: null }),
+    mfa: {
+      sendEmailCode: vi.fn<SignInApi["mfa"]["sendEmailCode"]>().mockResolvedValue({ error: null }),
+      verifyEmailCode: vi.fn<SignInApi["mfa"]["verifyEmailCode"]>().mockResolvedValue({ error: null }),
+    },
     finalize: vi.fn<SignInApi["finalize"]>(async ({ navigate }) => {
       navigate({ decorateUrl: (url) => `${url}?decorated` });
       return { error: null };
@@ -149,5 +156,147 @@ describe("signInWithGoogle", () => {
       sso: vi.fn().mockResolvedValue({ error: { message: "Google is unavailable." } }),
     });
     expect(await signInWithGoogle(api)).toEqual({ ok: false, message: "Google is unavailable." });
+  });
+});
+
+describe("a sign-in from a new device (needs_client_trust)", () => {
+  it("emails a code and asks for the code step instead of failing", async () => {
+    const api = fakeApi({ status: "needs_client_trust" });
+    const go = vi.fn();
+    const outcome = await signInWithPassword(api, values, go);
+    expect(outcome).toEqual({ ok: true, step: "email_code" });
+    expect(api.mfa.sendEmailCode).toHaveBeenCalledTimes(1);
+    expect(api.finalize).not.toHaveBeenCalled();
+    expect(go).not.toHaveBeenCalled();
+  });
+
+  it("stops with a message if the code cannot be sent", async () => {
+    const api = fakeApi({
+      status: "needs_client_trust",
+      mfa: {
+        sendEmailCode: vi.fn().mockResolvedValue({
+          error: { message: "Too many requests.", longMessage: "Too many requests. Try again in a minute." },
+        }),
+        verifyEmailCode: vi.fn(),
+      },
+    });
+    expect(await signInWithPassword(api, values, vi.fn())).toEqual({
+      ok: false,
+      message: "Too many requests. Try again in a minute.",
+    });
+  });
+
+  it("does not send a code for any other unsupported status", async () => {
+    const api = fakeApi({ status: "needs_second_factor" });
+    await signInWithPassword(api, values, vi.fn());
+    expect(api.mfa.sendEmailCode).not.toHaveBeenCalled();
+  });
+});
+
+describe("verifySignInCode", () => {
+  it("checks the code, finalizes the session, and goes to the post-sign-in router", async () => {
+    const api = fakeApi();
+    const go = vi.fn();
+    expect(await verifySignInCode(api, " 123456 ", go)).toEqual({ ok: true });
+    expect(api.mfa.verifyEmailCode).toHaveBeenCalledWith({ code: "123456" });
+    expect(go).toHaveBeenCalledWith("/after-sign-in?decorated");
+  });
+
+  it.each(["", "12345", "1234567", "12345a", "abcdef", "12 456"])(
+    "never sends %j to Clerk",
+    async (code) => {
+      const api = fakeApi();
+      const go = vi.fn();
+      expect(await verifySignInCode(api, code, go)).toEqual({
+        ok: false,
+        message: "Enter the 6-digit code from your email.",
+      });
+      expect(api.mfa.verifyEmailCode).not.toHaveBeenCalled();
+      expect(go).not.toHaveBeenCalled();
+    },
+  );
+
+  it("says a wrong code is wrong and does not sign in", async () => {
+    const api = fakeApi({
+      mfa: {
+        sendEmailCode: vi.fn(),
+        verifyEmailCode: vi.fn().mockResolvedValue({
+          error: { message: "Incorrect code", code: "form_code_incorrect" },
+        }),
+      },
+    });
+    const go = vi.fn();
+    expect(await verifySignInCode(api, "123456", go)).toEqual({
+      ok: false,
+      message: "That code is not correct. Check it and try again.",
+    });
+    expect(api.finalize).not.toHaveBeenCalled();
+    expect(go).not.toHaveBeenCalled();
+  });
+
+  it("says an expired code is expired", async () => {
+    const api = fakeApi({
+      mfa: {
+        sendEmailCode: vi.fn(),
+        verifyEmailCode: vi.fn().mockResolvedValue({
+          error: { message: "Expired", code: "verification_expired" },
+        }),
+      },
+    });
+    expect(await verifySignInCode(api, "123456", vi.fn())).toEqual({
+      ok: false,
+      message: "That code has expired. Send a new code.",
+    });
+  });
+
+  it("does not sign in when the status is still not complete after the code", async () => {
+    const api = fakeApi({ status: "needs_client_trust" });
+    const go = vi.fn();
+    expect(await verifySignInCode(api, "123456", go)).toMatchObject({ ok: false });
+    expect(api.finalize).not.toHaveBeenCalled();
+    expect(go).not.toHaveBeenCalled();
+  });
+
+  it("reports a failure to finalize the session", async () => {
+    const api = fakeApi({
+      finalize: vi.fn().mockResolvedValue({ error: { message: "Session could not start." } }),
+    });
+    const go = vi.fn();
+    expect(await verifySignInCode(api, "123456", go)).toEqual({
+      ok: false,
+      message: "Session could not start.",
+    });
+    expect(go).not.toHaveBeenCalled();
+  });
+});
+
+describe("resendSignInCode and cancelSignIn", () => {
+  it("sends a new code", async () => {
+    const api = fakeApi();
+    expect(await resendSignInCode(api)).toEqual({ ok: true, step: "email_code" });
+    expect(api.mfa.sendEmailCode).toHaveBeenCalledTimes(1);
+  });
+
+  it("reports a resend failure", async () => {
+    const api = fakeApi({
+      mfa: {
+        sendEmailCode: vi.fn().mockResolvedValue({ error: { message: "Could not send." } }),
+        verifyEmailCode: vi.fn(),
+      },
+    });
+    expect(await resendSignInCode(api)).toEqual({ ok: false, message: "Could not send." });
+  });
+
+  it("clears the attempt so the next sign-in starts clean", async () => {
+    const api = fakeApi();
+    expect(await cancelSignIn(api)).toEqual({ ok: true });
+    expect(api.reset).toHaveBeenCalledTimes(1);
+  });
+
+  it("reports a failure to clear the attempt", async () => {
+    const api = fakeApi({
+      reset: vi.fn().mockResolvedValue({ error: { message: "Could not reset." } }),
+    });
+    expect(await cancelSignIn(api)).toEqual({ ok: false, message: "Could not reset." });
   });
 });
