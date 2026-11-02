@@ -14,11 +14,13 @@ const tableLabels: Record<string, string> = {
   courses: "Course",
   ojt_batches: "OJT batch",
   companies: "Company",
+  listings: "Listing",
   supervisor_memberships: "Supervisor membership",
   coordinator_assignments: "Coordinator assignment",
   invitations: "Invitation",
   students: "Student",
   users: "Account",
+  school_settings: "School settings",
 };
 
 const actionLabels = { insert: "Created", update: "Changed", delete: "Deleted" } as const;

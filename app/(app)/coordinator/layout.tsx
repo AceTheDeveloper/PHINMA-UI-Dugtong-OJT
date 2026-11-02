@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { requireRole } from "@/lib/auth/server";
+import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { AppSidebar } from "@/components/coordinator/app-sidebar";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -18,11 +19,11 @@ export const metadata: Metadata = {
 export default async function CoordinatorLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  await requireRole(["coordinator", "admin"]);
+  const session = await requireRole(["coordinator", "admin"]);
   return (
     <TooltipProvider>
       <SidebarProvider>
-        <AppSidebar />
+        {session.role === "admin" ? <AdminSidebar /> : <AppSidebar />}
         <SidebarInset className="bg-page-wash">
           <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border bg-background px-4">
             <SidebarTrigger className="-ml-1" aria-label="Toggle navigation" />
