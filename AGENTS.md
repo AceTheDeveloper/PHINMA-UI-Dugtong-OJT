@@ -152,7 +152,12 @@ These are standing rules, kept in the database so a future bug cannot break them
 
 ## 9. UI and copy
 
-- Build from an approved mockup when one exists. When there is no mockup, the agent may design the screen itself, from the design tokens, the fonts, and the patterns already in the repo, and the plan describes each screen in words. Design only the screens the ticket's scope asks for. A mockup, once provided, replaces the agent's design.
+- There are no mockups. The agent designs every screen in the ticket's scope from the design direction below, the design tokens, the fonts, and the patterns already in the repo, and the plan describes each screen in words. Design only the screens the ticket's scope asks for.
+- Design direction: "Connected". The Dugtong mark is two linked rounded squares and a teal dot, so connection and progress are the theme. The signature element is the hours chain: a row of linked rounded squares, one link per 40 approved hours, filled with the primary color, with a teal dot on the current link. Use it where hours are shown; spend boldness there and keep everything else quiet.
+- Give every page one focal point (the number or action that matters most) and vary the surfaces: one large panel, then rows with dividers, instead of a stack of identical cards. Page titles are at least 28px; body text is at least 14px; use 12px only for secondary notes.
+- Students use phones first. Interactive targets are at least 44px high on touch screens, the student navigation is a bottom tab bar on phones, and the daily action (time in) must be reachable in one tap.
+- Do not use all-caps tracked labels above headings, and use motion sparingly: one deliberate moment per page at most (for example the chain filling on load), plus feedback to a person's own action. Respect reduced motion.
+- Before finishing UI work, check it at 390 px and 1440 px in light and dark: no horizontal scroll, visible keyboard focus, text and badge contrast at or above 4.5:1. Take screenshots when the environment allows it.
 - Support light and dark themes. Follow the system preference until the user chooses a theme, and remember explicit choices.
 - Use the design tokens for both themes; do not add raw color values in components.
 - Sentence case everywhere. Verb-first buttons ("Time in", "Reject entry", "Approve all").
@@ -333,9 +338,9 @@ In dark mode, use `--primary-foreground` on the primary fill; do not assume whit
 
 Use the error solid fill only for destructive actions. Everything else that is wrong stays in the tint, so a table with several problems does not turn red.
 
-## 11. Fonts (proposed, confirm)
+## 11. Fonts
 
-Plus Jakarta Sans for headings (700 and 800), Inter for body and UI (400 and 600), JetBrains Mono for times and IDs. Always include system font fallbacks.
+Bricolage Grotesque for headings (700 and 800), Figtree for body and UI (400 and 600), JetBrains Mono for times, hours, and IDs. Keep tabular numerals on for hours, times, and totals. Always include system font fallbacks.
 
 ## 12. Plans and decisions
 
@@ -358,12 +363,12 @@ Do not:
 - Write to tables from the client, or use the service-role key outside server-only code.
 - Edit applied migrations, generated files, or audit rows.
 - Add public routes, public storage, or guest access.
-- Invent screens that are not in the ticket's scope, or invent business rules. Add them to the open decisions in `plan.md` instead. Designing the in-scope screens without a mockup is allowed (section 9).
+- Invent screens that are not in the ticket's scope, or invent business rules. Add them to the open decisions in `plan.md` instead. The agent designs the in-scope screens itself (section 9).
 - Add dependencies without a clear reason.
 
 ### Definition of done
 
-- Matches the mockup (or, when there is none, the plan's description of the screen) and the rules in this file.
+- Matches the plan's description of the screen, the design direction in section 9, and the rules in this file, checked at 390 px and 1440 px in light and dark.
 - Permission checks and tests exist for every new action or table.
 - Zod validation on every new input.
 - Audit coverage for any new change to hours, evaluations, or deployments.
@@ -371,7 +376,7 @@ Do not:
 
 ## 14. Working on tickets
 
-- Work only from a ticket file in `tickets/`. No ticket, no coding. Read `AGENTS.md`, the ticket, and the mockup first.
+- Work only from a ticket file in `tickets/`. No ticket, no coding. Read `AGENTS.md` and the ticket first.
 - If anything needed is missing or unclear, write the question under "Open questions" in the ticket and stop. Do not guess.
 - Plan first. Before adding a new feature, the developer writes the plan in `plan.md` (one section per feature) and the ticket links to it. Wait until a human marks the plan approved. A small change needs no plan.
 - Do only what "In scope" says. New ideas go under "Suggested new tickets", never into the code.
@@ -412,5 +417,4 @@ TODO (project owner): add environment variables once Clerk and Supabase are wire
 <!-- ## 16. Reference
 
 - Final Development Plan (Claude Doc): link to be added.
-- Mockups: link or folder to be added.
 - Existing landing page (visual reference): https://dugtong-ojt.vercel.app/ -->
