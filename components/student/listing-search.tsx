@@ -27,7 +27,7 @@ export function ListingSearch({ initial }: { initial: string }) {
   }, [value, pathname, router]);
 
   return (
-    <div role="search" className="relative w-full max-w-sm">
+    <div role="search" className="relative w-full sm:max-w-sm">
       <label htmlFor="listing-search" className="sr-only">
         Search by company or title
       </label>
