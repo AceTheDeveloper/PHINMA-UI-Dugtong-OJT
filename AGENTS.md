@@ -354,6 +354,7 @@ Do:
 - Enforce the business rules in section 6 on the server, not only in the UI.
 - Add or update tests with the code.
 - Ask when a requirement is unclear or missing, in the ticket's "Open questions". A human records the answer in `plan.md`.
+- Think ahead about what can go wrong for real users and look for a way out, not only for the happy path: a forgotten step, no signal, a wrong entry, a day that did not go to plan. When you find such a case, name it, propose a fix, and write both under the ticket's "Open questions" (or "Suggested new tickets" when it is a separate piece of work). Propose, do not decide: a fix that adds or changes a business rule waits until a human records it in `plan.md`.
 - Test, commit, and push every logical change automatically, following section 14.
 
 Do not:
