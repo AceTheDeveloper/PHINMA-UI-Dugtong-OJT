@@ -255,6 +255,7 @@ export async function getDashboard(courseIds: readonly string[]): Promise<Dashbo
       name: student.full_name,
       studentNumber: student.student_number,
       companyId: current?.company_id ?? null,
+      deploymentId: current?.id ?? null,
       status: studentStatus({
         deployments: own,
         openApplications: openApplications.get(student.id) ?? 0,

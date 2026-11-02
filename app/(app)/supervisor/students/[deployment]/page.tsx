@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { LoadError } from "@/components/admin/admin-parts";
+import { DownloadButton } from "@/components/export/download-link";
 import { focusStyle } from "@/components/brand-link";
 import { MissedDayForm } from "@/components/supervisor/missed-day-form";
 import { ReviewEntryCard } from "@/components/supervisor/review-entry";
@@ -95,6 +96,9 @@ export default async function SupervisorStudentPage({
             </p>
           </div>
           <DeploymentStatusBadge status={student.status} />
+        </div>
+        <div>
+          <DownloadButton href={`/dtr/${student.deploymentId}/pdf`}>Download DTR</DownloadButton>
         </div>
 
         <div className="grid gap-2">

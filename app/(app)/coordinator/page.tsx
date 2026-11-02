@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Upload } from "lucide-react";
 import { EmptyState, LoadError, PageHeader } from "@/components/admin/admin-parts";
+import { DownloadButton } from "@/components/export/download-link";
 import { AttentionPanel } from "@/components/coordinator/attention-panel";
 import { CompaniesOverview } from "@/components/coordinator/companies-overview";
 import { DashboardCharts } from "@/components/coordinator/dashboard-charts";
@@ -53,10 +54,13 @@ export default async function CoordinatorDashboardPage() {
         title="Dashboard"
         description={`${course.courseShort} · ${course.departmentShort} · ${course.school}. Batch ${course.batchLabel}, ${course.requiredHours} required hours, as of ${formatDate(course.asOf)}.${data.otherCourses > 0 ? ` You have ${data.otherCourses} more ${data.otherCourses === 1 ? "course" : "courses"}; this page shows the first.` : ""}`}
         actions={
-          <Button variant="outline" nativeButton={false} render={<Link href="/coordinator/roster" />}>
-            <Upload aria-hidden="true" data-icon="inline-start" />
-            Import roster
-          </Button>
+          <>
+            <Button variant="outline" nativeButton={false} render={<Link href="/coordinator/roster" />}>
+              <Upload aria-hidden="true" data-icon="inline-start" />
+              Import roster
+            </Button>
+            <DownloadButton href="/coordinator/export">Export CSV</DownloadButton>
+          </>
         }
       />
 

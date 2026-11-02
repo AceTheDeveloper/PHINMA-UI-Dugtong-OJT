@@ -70,6 +70,7 @@ function student(id: string, status: StudentStatus, hours = 0, companyId: string
     name: `Student ${id}`,
     studentNumber: `SN-${id}`,
     companyId,
+    deploymentId: null,
     status,
     approvedHours: hours,
     pendingEntries: 0,

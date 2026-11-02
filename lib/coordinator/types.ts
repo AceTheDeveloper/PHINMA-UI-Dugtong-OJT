@@ -14,6 +14,8 @@ export type DashboardStudent = {
   name: string;
   studentNumber: string;
   companyId: string | null;
+  // The deployment the DTR is for: the active one, else a completed one, else the latest.
+  deploymentId: string | null;
   status: StudentStatus;
   approvedHours: number;
   pendingEntries: number;

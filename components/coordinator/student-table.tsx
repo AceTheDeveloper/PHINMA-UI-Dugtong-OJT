@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { DtrLink } from "@/components/export/download-link";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import {
@@ -205,6 +206,9 @@ export function StudentTable({
                     <TableHead>Approved hours</TableHead>
                     <TableHead className="text-right">Pending</TableHead>
                     <TableHead>Last entry</TableHead>
+                    <TableHead>
+                      <span className="sr-only">Daily time record</span>
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -228,6 +232,11 @@ export function StudentTable({
                       </TableCell>
                       <TableCell className="tabular-nums">
                         {student.lastEntryDate ? formatDate(student.lastEntryDate) : "None yet"}
+                      </TableCell>
+                      <TableCell>
+                        {student.deploymentId ? (
+                          <DtrLink deploymentId={student.deploymentId} name={student.name} />
+                        ) : null}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -267,6 +276,11 @@ export function StudentTable({
                       </dd>
                     </div>
                   </dl>
+                  {student.deploymentId ? (
+                    <div>
+                      <DtrLink deploymentId={student.deploymentId} name={student.name} />
+                    </div>
+                  ) : null}
                 </li>
               ))}
             </ul>

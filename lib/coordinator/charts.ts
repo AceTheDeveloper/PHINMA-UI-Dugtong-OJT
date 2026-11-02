@@ -1,3 +1,4 @@
+import { statusLabels } from "@/lib/coordinator/status";
 import type {
   DashboardCompany,
   DashboardStudent,
@@ -11,18 +12,18 @@ import type {
 export type Bar = { label: string; value: number };
 
 // The path a student takes, in the order they take it.
-const stages: { status: StudentStatus; label: string }[] = [
-  { status: "no-application", label: "No application" },
-  { status: "applying", label: "Applying" },
-  { status: "active", label: "Active" },
-  { status: "ready", label: "Ready for evaluation" },
-  { status: "completed", label: "Completed" },
-  { status: "ended", label: "Ended" },
+const stageOrder: StudentStatus[] = [
+  "no-application",
+  "applying",
+  "active",
+  "ready",
+  "completed",
+  "ended",
 ];
 
 export function stageCounts(students: readonly DashboardStudent[]): Bar[] {
-  return stages.map(({ status, label }) => ({
-    label,
+  return stageOrder.map((status) => ({
+    label: statusLabels[status],
     value: students.filter((student) => student.status === status).length,
   }));
 }

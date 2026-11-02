@@ -26,3 +26,13 @@ export function studentStatus(input: StatusInput): StudentStatus {
   if (input.deployments.some((deployment) => deployment.status === "ended")) return "ended";
   return "no-application";
 }
+
+// The words for each stage, in one place for the table, the charts, and the CSV.
+export const statusLabels: Record<StudentStatus, string> = {
+  "no-application": "No application",
+  applying: "Applying",
+  active: "Active",
+  ready: "Ready for evaluation",
+  completed: "Completed",
+  ended: "Ended",
+};
