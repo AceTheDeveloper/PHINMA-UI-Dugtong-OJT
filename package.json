@@ -10,7 +10,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "bootstrap:admin": "node --env-file=.env.local scripts/bootstrap-admin.mts",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "merge-dev": "git switch dev && git merge ace && git push && git switch ace"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
