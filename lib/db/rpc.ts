@@ -495,6 +495,33 @@ export async function adminReopenDailyLog(
   });
 }
 
+export async function adminReopenEvaluation(
+  actorId: string,
+  evaluationId: string,
+  reason: string,
+): Promise<Result<null>> {
+  const parsed = z
+    .object({
+      actorId: uuid,
+      evaluationId: uuid,
+      reason: z
+        .string()
+        .trim()
+        .min(1, "Give a reason for reopening the evaluation.")
+        .max(500, "The reason is too long."),
+    })
+    .safeParse({ actorId, evaluationId, reason });
+  if (!parsed.success) {
+    const errorMsg = parsed.error.issues[0]?.message ?? "The support reason is not valid.";
+    return invalid(errorMsg);
+  }
+  return changed("admin_reopen_evaluation", {
+    p_actor: parsed.data.actorId,
+    p_evaluation_id: parsed.data.evaluationId,
+    p_reason: parsed.data.reason,
+  });
+}
+
 export async function createDeployment(
   actorId: string,
   input: {

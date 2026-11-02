@@ -13,6 +13,7 @@ import {
   inviteCoordinatorSchema,
   inviteSupervisorSchema,
   reopenDailyLogSchema,
+  reopenEvaluationSchema,
   requiredHoursSchema,
   revokeInvitationSchema,
   schoolSettingsSchema,
@@ -27,6 +28,7 @@ import { authorize } from "@/lib/auth/server";
 import type { Session } from "@/lib/auth/session";
 import {
   adminReopenDailyLog,
+  adminReopenEvaluation,
   createCompany,
   createCourse,
   createDepartment,
@@ -221,6 +223,15 @@ export async function reopenDailyLog(raw: unknown): Promise<ActionResult> {
     raw,
     ["/admin", "/admin/audit", "/admin/logs", "/coordinator"],
     (session, input) => adminReopenDailyLog(session.userId, input.logId, input.reason),
+  );
+}
+
+export async function reopenEvaluation(raw: unknown): Promise<ActionResult> {
+  return run(
+    reopenEvaluationSchema,
+    raw,
+    ["/admin", "/admin/audit", "/admin/evaluations", "/coordinator", "/supervisor/evaluations"],
+    (session, input) => adminReopenEvaluation(session.userId, input.evaluationId, input.reason),
   );
 }
 

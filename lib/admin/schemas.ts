@@ -161,5 +161,16 @@ export const reopenDailyLogSchema = z.object({
 
 export type ReopenDailyLogInput = z.infer<typeof reopenDailyLogSchema>;
 
+export const reopenEvaluationSchema = z.object({
+  evaluationId: uuid,
+  reason: z
+    .string()
+    .trim()
+    .min(1, "Support reason is required.")
+    .max(500, "Support reason is too long."),
+});
+
+export type ReopenEvaluationInput = z.infer<typeof reopenEvaluationSchema>;
+
 
 

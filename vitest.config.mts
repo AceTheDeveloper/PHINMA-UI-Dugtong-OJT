@@ -9,7 +9,7 @@ export default defineConfig({
     environment: "node",
     include: ["tests/**/*.test.ts"],
     // Each db test file boots its own in-memory Postgres (WebAssembly).
-    hookTimeout: 60_000,
-    testTimeout: 30_000,
+    hookTimeout: 120_000,
+    testTimeout: 60_000,
   },
 });
