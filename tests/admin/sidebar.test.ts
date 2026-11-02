@@ -15,10 +15,10 @@ describe("admin navigation and sidebar", () => {
     expect(labels).toContain("Settings");
   });
 
-  it("links Roster import to /coordinator/roster with valid icon", () => {
+  it("links Roster import to /admin/roster with valid icon", () => {
     const rosterItem = adminNavItems.find((item) => item.label === "Roster import");
     expect(rosterItem).toBeDefined();
-    expect(rosterItem?.href).toBe("/coordinator/roster");
+    expect(rosterItem?.href).toBe("/admin/roster");
     expect(rosterItem?.Icon).toBeDefined();
   });
 

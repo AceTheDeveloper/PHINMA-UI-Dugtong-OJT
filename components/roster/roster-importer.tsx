@@ -43,9 +43,13 @@ function sendable(rows: PreviewRow[]) {
 export function RosterImporter({
   batches,
   selectedBatchId,
+  basePath = "/coordinator/roster",
+  templateHref = "/coordinator/roster/template",
 }: {
   batches: BatchOption[];
   selectedBatchId: string;
+  basePath?: string;
+  templateHref?: string;
 }) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -229,7 +233,7 @@ export function RosterImporter({
                 onChange={(event) => {
                   reset();
                   setNotice(null);
-                  router.replace(`/coordinator/roster?batch=${event.target.value}`);
+                  router.replace(`${basePath}?batch=${event.target.value}`);
                 }}
               >
                 {batches.map((batch) => (
@@ -269,7 +273,7 @@ export function RosterImporter({
               </p>
             ) : null}
             <a
-              href="/coordinator/roster/template"
+              href={templateHref}
               className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
             >
               <Download aria-hidden="true" className="size-4" />

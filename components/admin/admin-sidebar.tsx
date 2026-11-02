@@ -35,7 +35,7 @@ export const adminNavItems: { label: string; href: string; Icon: LucideIcon }[] 
   { label: "Academics", href: "/admin/academics", Icon: GraduationCap },
   { label: "Companies", href: "/admin/companies", Icon: Building2 },
   { label: "Listings", href: "/admin/listings", Icon: Briefcase },
-  { label: "Roster import", href: "/coordinator/roster", Icon: Upload },
+  { label: "Roster import", href: "/admin/roster", Icon: Upload },
   { label: "People", href: "/admin/people", Icon: Users },
   { label: "Audit log", href: "/admin/audit", Icon: History },
   { label: "Settings", href: "/admin/settings", Icon: Settings },
