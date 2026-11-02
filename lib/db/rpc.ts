@@ -321,6 +321,23 @@ export async function setCompanyStatus(
   });
 }
 
+export async function transferCompanyOwnership(
+  actorId: string,
+  companyId: string,
+  newOwnerId: string,
+): Promise<Result<null>> {
+  const parsed = z
+    .object({ actorId: uuid, companyId: uuid, newOwnerId: uuid })
+    .safeParse({ actorId, companyId, newOwnerId });
+  if (!parsed.success) return invalid("The ownership transfer details are not valid.");
+  return changed("transfer_company_ownership", {
+    p_actor: parsed.data.actorId,
+    p_company_id: parsed.data.companyId,
+    p_new_owner_id: parsed.data.newOwnerId,
+  });
+}
+
+
 export async function importRoster(
   actorId: string,
   batchId: string,

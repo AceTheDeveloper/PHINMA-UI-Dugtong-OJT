@@ -93,6 +93,10 @@ export const toggleUserActiveSchema = z.object({
   userId: uuid,
   active: z.boolean(),
 });
+export const transferOwnershipSchema = z.object({
+  companyId: uuid,
+  newOwnerId: uuid,
+});
 
 export type DepartmentInput = z.infer<typeof departmentSchema>;
 export type CourseInput = z.infer<typeof courseSchema>;
@@ -103,4 +107,6 @@ export type InviteSupervisorInput = z.infer<typeof inviteSupervisorSchema>;
 export type InviteCoordinatorInput = z.infer<typeof inviteCoordinatorSchema>;
 export type InviteAdminInput = z.infer<typeof inviteAdminSchema>;
 export type ToggleUserActiveInput = z.infer<typeof toggleUserActiveSchema>;
+export type TransferOwnershipInput = z.infer<typeof transferOwnershipSchema>;
+
 

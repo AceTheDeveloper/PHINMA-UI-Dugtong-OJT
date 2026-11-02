@@ -14,6 +14,7 @@ import {
   requiredHoursSchema,
   revokeInvitationSchema,
   toggleUserActiveSchema,
+  transferOwnershipSchema,
 } from "@/lib/admin/schemas";
 import { inviteUser, revokeInvitationEverywhere } from "@/lib/auth/invitations";
 import { authorize } from "@/lib/auth/server";
@@ -26,6 +27,7 @@ import {
   setCompanyStatus,
   setOjtRequiredHours,
   setUserActive,
+  transferCompanyOwnership,
 } from "@/lib/db/rpc";
 import { fail, ok, type Result } from "@/lib/result";
 
@@ -144,4 +146,12 @@ export async function toggleUserActive(raw: unknown): Promise<ActionResult> {
     setUserActive(session.userId, input.userId, input.active),
   );
 }
+
+export async function transferOwnership(raw: unknown): Promise<ActionResult> {
+  return run(transferOwnershipSchema, raw, companies, (session, input) => {
+    revalidatePath(`/admin/companies/${input.companyId}`);
+    return transferCompanyOwnership(session.userId, input.companyId, input.newOwnerId);
+  });
+}
+
 

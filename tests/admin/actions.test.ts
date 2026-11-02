@@ -22,6 +22,7 @@ const rpc = {
   createCompany: vi.fn(),
   setCompanyStatus: vi.fn(),
   setUserActive: vi.fn(),
+  transferCompanyOwnership: vi.fn(),
 };
 vi.mock("@/lib/db/rpc", () => rpc);
 
@@ -84,6 +85,10 @@ const calls: { name: string; run: () => Promise<{ ok: boolean }> }[] = [
   { name: "inviteAdmin", run: () => actions.inviteAdmin({ email: "a@example.test" }) },
   { name: "revokeInvitation", run: () => actions.revokeInvitation({ invitationId: uuid }) },
   { name: "toggleUserActive", run: () => actions.toggleUserActive({ userId: uuid, active: false }) },
+  {
+    name: "transferOwnership",
+    run: () => actions.transferOwnership({ companyId: uuid, newOwnerId: uuid }),
+  },
 ];
 
 
@@ -172,6 +177,12 @@ describe("Admin actions with an admin", () => {
     expect(rpc.setUserActive).toHaveBeenCalledWith(userId, uuid, false);
   });
 
+  it("transfers company ownership", async () => {
+    const newOwnerId = "00000000-0000-4000-8000-000000000002";
+    await actions.transferOwnership({ companyId: uuid, newOwnerId });
+    expect(rpc.transferCompanyOwnership).toHaveBeenCalledWith(userId, uuid, newOwnerId);
+  });
+
 
   it("passes a database refusal on as a typed result", async () => {
     rpc.createDepartment.mockResolvedValue(
@@ -224,6 +235,8 @@ describe("Admin actions with an admin", () => {
     ],
     ["an invalid user id to toggle", () => actions.toggleUserActive({ userId: "not-a-uuid", active: true })],
     ["a missing active flag", () => actions.toggleUserActive({ userId: uuid })],
+    ["an invalid company id for transfer", () => actions.transferOwnership({ companyId: "not-a-uuid", newOwnerId: uuid })],
+    ["an invalid new owner id for transfer", () => actions.transferOwnership({ companyId: uuid, newOwnerId: "not-a-uuid" })],
     ["a missing body", () => actions.addCompany(undefined)],
   ];
 

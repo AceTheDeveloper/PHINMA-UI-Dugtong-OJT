@@ -14,6 +14,7 @@ import {
   CompanyStatusButton,
   InviteSupervisorSheet,
   RevokeButton,
+  TransferOwnershipButton,
 } from "@/components/admin/forms";
 import { HistorySection } from "@/components/admin/history-section";
 import { RoleBadge } from "@/components/coordinator/status-badge";
@@ -90,6 +91,9 @@ export default async function CompanyPage({
                 <TableHead>Email</TableHead>
                 <TableHead>Role</TableHead>
                 <TableHead>Account</TableHead>
+                <TableHead className="text-right">
+                  <span className="sr-only">Actions</span>
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -110,6 +114,15 @@ export default async function CompanyPage({
                     ) : (
                       <RoleBadge role="neutral">Deactivated</RoleBadge>
                     )}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {!supervisor.isOwner && supervisor.isActive ? (
+                      <TransferOwnershipButton
+                        companyId={company.id}
+                        newOwnerId={supervisor.userId}
+                        name={supervisor.name}
+                      />
+                    ) : null}
                   </TableCell>
                 </TableRow>
               ))}
