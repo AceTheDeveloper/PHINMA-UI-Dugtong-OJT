@@ -409,6 +409,32 @@ export async function setListingStatus(
   });
 }
 
+export async function updateSchoolSettings(
+  actorId: string,
+  input: {
+    name: string;
+    timezone: string;
+    consentNoticeVersion: string;
+  },
+): Promise<Result<null>> {
+  const parsed = z
+    .object({
+      actorId: uuid,
+      name: z.string().trim().min(1),
+      timezone: z.string().trim().min(1),
+      consentNoticeVersion: z.string().trim().min(1),
+    })
+    .safeParse({ actorId, ...input });
+  if (!parsed.success) return invalid("The school settings are not valid.");
+  return changed("update_school_settings", {
+    p_actor: parsed.data.actorId,
+    p_name: parsed.data.name,
+    p_timezone: parsed.data.timezone,
+    p_consent_notice_version: parsed.data.consentNoticeVersion,
+  });
+}
+
+
 
 
 export async function importRoster(

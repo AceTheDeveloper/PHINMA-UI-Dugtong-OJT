@@ -14,6 +14,7 @@ import {
   inviteSupervisorSchema,
   requiredHoursSchema,
   revokeInvitationSchema,
+  schoolSettingsSchema,
   setListingStatusSchema,
   toggleUserActiveSchema,
   transferOwnershipSchema,
@@ -34,6 +35,7 @@ import {
   setUserActive,
   transferCompanyOwnership,
   updateListing,
+  updateSchoolSettings,
 } from "@/lib/db/rpc";
 import { fail, ok, type Result } from "@/lib/result";
 
@@ -68,6 +70,7 @@ const academics = ["/admin", "/admin/academics", "/admin/audit"];
 const companies = ["/admin", "/admin/companies", "/admin/audit"];
 const listings = ["/admin", "/admin/listings", "/admin/companies", "/admin/audit"];
 const people = ["/admin", "/admin/people", "/admin/audit"];
+const settings = ["/admin", "/admin/settings", "/admin/audit"];
 
 export async function addDepartment(raw: unknown): Promise<ActionResult> {
   return run(departmentSchema, raw, academics, (session, input) =>
@@ -179,6 +182,13 @@ export async function changeListingStatus(raw: unknown): Promise<ActionResult> {
     setListingStatus(session.userId, input.listingId, input.status),
   );
 }
+
+export async function saveSchoolSettings(raw: unknown): Promise<ActionResult> {
+  return run(schoolSettingsSchema, raw, settings, (session, input) =>
+    updateSchoolSettings(session.userId, input),
+  );
+}
+
 
 
 

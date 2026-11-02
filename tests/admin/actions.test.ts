@@ -26,6 +26,7 @@ const rpc = {
   createListing: vi.fn(),
   updateListing: vi.fn(),
   setListingStatus: vi.fn(),
+  updateSchoolSettings: vi.fn(),
 };
 vi.mock("@/lib/db/rpc", () => rpc);
 
@@ -103,6 +104,15 @@ const calls: { name: string; run: () => Promise<{ ok: boolean }> }[] = [
   {
     name: "changeListingStatus",
     run: () => actions.changeListingStatus({ listingId: uuid, status: "closed" }),
+  },
+  {
+    name: "saveSchoolSettings",
+    run: () =>
+      actions.saveSchoolSettings({
+        name: "PHINMA UI",
+        timezone: "Asia/Manila",
+        consentNoticeVersion: "v1",
+      }),
   },
 ];
 
@@ -233,6 +243,19 @@ describe("Admin actions with an admin", () => {
     expect(rpc.setListingStatus).toHaveBeenCalledWith(userId, uuid, "closed");
   });
 
+  it("saves school settings", async () => {
+    await actions.saveSchoolSettings({
+      name: "PHINMA UI",
+      timezone: "Asia/Manila",
+      consentNoticeVersion: "v2",
+    });
+    expect(rpc.updateSchoolSettings).toHaveBeenCalledWith(userId, {
+      name: "PHINMA UI",
+      timezone: "Asia/Manila",
+      consentNoticeVersion: "v2",
+    });
+  });
+
 
 
   it("passes a database refusal on as a typed result", async () => {
@@ -291,6 +314,9 @@ describe("Admin actions with an admin", () => {
     ["a listing with no courses", () => actions.addListing({ companyId: uuid, title: "Intern", courseIds: [] })],
     ["a listing with blank title", () => actions.addListing({ companyId: uuid, title: "   ", courseIds: [uuid] })],
     ["an invalid listing status", () => actions.changeListingStatus({ listingId: uuid, status: "archived" })],
+    ["blank school name", () => actions.saveSchoolSettings({ name: " ", timezone: "Asia/Manila", consentNoticeVersion: "v1" })],
+    ["blank timezone", () => actions.saveSchoolSettings({ name: "School", timezone: " ", consentNoticeVersion: "v1" })],
+    ["blank consent version", () => actions.saveSchoolSettings({ name: "School", timezone: "Asia/Manila", consentNoticeVersion: " " })],
     ["a missing body", () => actions.addCompany(undefined)],
   ];
 

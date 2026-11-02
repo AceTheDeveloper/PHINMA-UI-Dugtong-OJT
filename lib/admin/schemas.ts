@@ -125,6 +125,16 @@ export const setListingStatusSchema = z.object({
   status: z.enum(["open", "closed"]),
 });
 
+export const schoolSettingsSchema = z.object({
+  name: z.string().trim().min(1, "School name is required.").max(150, "School name is too long."),
+  timezone: z.string().trim().min(1, "Timezone is required.").max(50, "Timezone is too long."),
+  consentNoticeVersion: z
+    .string()
+    .trim()
+    .min(1, "Consent notice version is required.")
+    .max(50, "Version is too long."),
+});
+
 export type DepartmentInput = z.infer<typeof departmentSchema>;
 export type CourseInput = z.infer<typeof courseSchema>;
 export type BatchInput = z.infer<typeof batchSchema>;
@@ -138,5 +148,7 @@ export type TransferOwnershipInput = z.infer<typeof transferOwnershipSchema>;
 export type CreateListingInput = z.infer<typeof createListingSchema>;
 export type UpdateListingInput = z.infer<typeof updateListingSchema>;
 export type SetListingStatusInput = z.infer<typeof setListingStatusSchema>;
+export type SchoolSettingsInput = z.infer<typeof schoolSettingsSchema>;
+
 
 

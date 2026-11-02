@@ -367,6 +367,43 @@ export async function getListings(
   );
 }
 
+// ----------------------------------------------------------------- settings
+
+const schoolSettingsRow = z.object({
+  name: z.string(),
+  timezone: z.string(),
+  consent_notice_version: z.string(),
+  updated_at: z.string(),
+});
+
+export type SchoolSettingsDetail = {
+  name: string;
+  timezone: string;
+  consentNoticeVersion: string;
+  updatedAt: string;
+};
+
+export async function getSchoolSettings(): Promise<Result<SchoolSettingsDetail>> {
+  const settings = await read(z.array(schoolSettingsRow), () =>
+    db()
+      .from("school_settings")
+      .select("name, timezone, consent_notice_version, updated_at")
+      .eq("id", true),
+  );
+  if (!settings.ok) return settings;
+  if (settings.data.length === 0) {
+    return fail("not_found", "School settings not found.");
+  }
+  const row = settings.data[0];
+  return ok({
+    name: row.name,
+    timezone: row.timezone,
+    consentNoticeVersion: row.consent_notice_version,
+    updatedAt: row.updated_at,
+  });
+}
+
+
 
 // -------------------------------------------------------------- invitations
 
@@ -781,6 +818,11 @@ async function subjectNames(rows: z.infer<typeof auditRow>[]): Promise<Map<strin
         const user = users.data.find((candidate) => candidate.id === id.split(":")[0]);
         if (user) names.set(`coordinator_assignments:${id}`, user.full_name);
       }
+    }
+  }
+  for (const row of rows) {
+    if (row.table_name === "school_settings") {
+      names.set(`school_settings:${row.row_id}`, "School settings");
     }
   }
   return names;

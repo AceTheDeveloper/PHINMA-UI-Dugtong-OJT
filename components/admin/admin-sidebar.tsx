@@ -11,6 +11,7 @@ import {
   History,
   LayoutDashboard,
   LogOut,
+  Settings,
   Users,
   type LucideIcon,
 } from "lucide-react";
@@ -35,6 +36,7 @@ const navItems: { label: string; href: string; Icon: LucideIcon }[] = [
   { label: "Listings", href: "/admin/listings", Icon: Briefcase },
   { label: "People", href: "/admin/people", Icon: Users },
   { label: "Audit log", href: "/admin/audit", Icon: History },
+  { label: "Settings", href: "/admin/settings", Icon: Settings },
 ];
 
 export function AdminSidebar() {
