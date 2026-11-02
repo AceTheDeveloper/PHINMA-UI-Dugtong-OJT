@@ -48,6 +48,8 @@ describe("current page", () => {
 
   it("matches pages below a section", () => {
     expect(currentLabel("/supervisor/applicants/abc", supervisor)).toBe("Applicants");
+    expect(currentLabel("/supervisor/students", supervisor)).toBe("Students");
+    expect(currentLabel("/supervisor/students/abc", supervisor)).toBe("Students");
     expect(isCurrentLink("/student/listings/abc", { href: "/student/listings", label: "Listings", exact: false })).toBe(true);
   });
 

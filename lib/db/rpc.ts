@@ -638,3 +638,41 @@ export async function rejectApplication(
   });
   return result.ok ? ok(null) : result;
 }
+
+// A supervisor sets the work schedule of a student at their company. Returns
+// the new schedule id. The database checks the company, the dates, and the days.
+export async function setWorkSchedule(
+  actorId: string,
+  input: {
+    deploymentId: string;
+    effectiveFrom: string;
+    days: { weekday: number; start: string; end: string }[];
+  },
+): Promise<Result<string>> {
+  const parsed = z
+    .object({
+      actorId: uuid,
+      deploymentId: uuid,
+      effectiveFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+      days: z.array(
+        z.object({
+          weekday: z.number().int().min(1).max(7),
+          start: z.string().regex(/^\d{2}:\d{2}$/),
+          end: z.string().regex(/^\d{2}:\d{2}$/),
+        }),
+      ),
+    })
+    .safeParse({ actorId, ...input });
+  if (!parsed.success) return invalid("The schedule details are not valid.");
+  const result = await call("set_work_schedule", {
+    p_actor: parsed.data.actorId,
+    p_deployment_id: parsed.data.deploymentId,
+    p_effective_from: parsed.data.effectiveFrom,
+    p_days: parsed.data.days,
+  });
+  if (!result.ok) return result;
+  const created = idResult.safeParse(result.data);
+  return created.success
+    ? ok(created.data)
+    : fail("unexpected", "Something went wrong. Try again in a moment.");
+}
