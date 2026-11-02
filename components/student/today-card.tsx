@@ -18,7 +18,7 @@ import { maxJournalLength, maxReasonLength } from "@/lib/logs/schemas";
 import type { LogEntry, TodayView } from "@/lib/logs/types";
 import { cn } from "@/lib/utils";
 
-// The punch card: the one thing on the student's home page. A deep navy top says
+// The punch card: the one thing on the student's home page. A tinted top (navy in dark mode) says
 // where the day stands in one big figure and carries the action; a white bottom,
 // when there is something to write or read, holds the journal. Times come from the
 // server: the clock shown here is only a reminder of how long the entry has been
@@ -158,7 +158,7 @@ function Running({
           <div className="grid gap-2">
             <p className="text-sm text-deep-muted">Timed in at</p>
             <p className={big}>{formatClock(entry.timeIn)}</p>
-            <p className="min-h-7 text-lg font-semibold tabular-nums text-teal-bright" aria-live="off">
+            <p className="min-h-7 text-lg font-semibold tabular-nums text-teal-text" aria-live="off">
               {elapsed === null ? "" : `${formatDuration(elapsed)} so far`}
             </p>
           </div>

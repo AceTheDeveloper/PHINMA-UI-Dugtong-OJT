@@ -137,12 +137,12 @@
   /* The deep surface: the one dark panel that leads a page (the student's punch
      card). Navy in both themes, a little lighter in dark so it stands off the page.
      Its action button is white so it reads at once against the navy. */
-  --deep: #0c1a33;
-  --deep-foreground: #eaf0fb;
-  --deep-muted: #a9b6cf;
-  --deep-border: #22335a;
-  --deep-action: #ffffff;
-  --deep-action-foreground: #0c1a33;
+  --deep: #e8eefe;
+  --deep-foreground: #0c1a33;
+  --deep-muted: #4a5876;
+  --deep-border: #c3d1f5;
+  --deep-action: #2255f2;
+  --deep-action-foreground: #ffffff;
   --neutral-tint: #eceff6;
   --neutral-border: #d9dfeb;
   --neutral: #4a5876;

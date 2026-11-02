@@ -77,7 +77,7 @@ const textPairs: [string, string][] = [
   ["deep-foreground", "deep"],
   ["deep-muted", "deep"],
   ["deep-action-foreground", "deep-action"],
-  ["teal-bright", "deep"],
+  ["teal-text", "deep"],
 ];
 
 // Marks and edges a person must be able to see: 3:1.
