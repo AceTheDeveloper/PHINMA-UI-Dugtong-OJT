@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 // for assistive technology, with the hours as its text.
 const sizes = {
   md: { link: "size-9 border-[3px] rounded-[11px]", overlap: "-ml-2", drop: "translate-y-1.5", dot: "size-3 -right-1 -top-1" },
-  sm: { link: "size-5 border-2 rounded-[7px]", overlap: "-ml-1", drop: "translate-y-1", dot: "size-2 -right-0.5 -top-0.5" },
+  sm: { link: "size-6 border-2 rounded-lg", overlap: "-ml-[5px]", drop: "translate-y-[3px]", dot: "size-2 -right-0.5 -top-0.5" },
 } as const;
 
 export function HoursChain({
