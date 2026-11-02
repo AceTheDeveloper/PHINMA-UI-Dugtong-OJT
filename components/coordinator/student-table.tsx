@@ -29,12 +29,7 @@ import {
   type SortKey,
   type StatusFilter,
 } from "@/lib/coordinator/metrics";
-import {
-  mockCompanies,
-  mockCourse,
-  mockStudents,
-  type MockStudent,
-} from "@/lib/mock/coordinator";
+import type { DashboardCompany, DashboardStudent } from "@/lib/coordinator/types";
 import { StudentStatusBadge, studentStatuses } from "./status-badge";
 
 type Option = { value: string; label: string };
@@ -47,19 +42,11 @@ const statusOptions: Option[] = [
   })),
 ];
 
-const companyOptions: Option[] = [
-  { value: "all", label: "All companies" },
-  ...mockCompanies.map((c) => ({ value: c.id, label: c.name })),
-  { value: "none", label: "No company" },
-];
-
 const sortOptions: Option[] = [
   { value: "progress-desc", label: "Most hours first" },
   { value: "progress-asc", label: "Fewest hours first" },
   { value: "name", label: "Name" },
 ];
-
-const companyNames = new Map(mockCompanies.map((c) => [c.id, c.name]));
 
 function FilterSelect({
   label,
@@ -97,35 +84,54 @@ function FilterSelect({
   );
 }
 
-function Hours({ student }: { student: MockStudent }) {
-  const percent = progressPercent(student.approvedHours, mockCourse.requiredHours);
+function Hours({ student, requiredHours }: { student: DashboardStudent; requiredHours: number }) {
+  const percent = progressPercent(student.approvedHours, requiredHours);
   return (
     <div className="grid min-w-36 gap-1.5">
       <span className="text-sm tabular-nums">
-        {formatHours(student.approvedHours)} / {mockCourse.requiredHours} h
+        {formatHours(student.approvedHours)} / {requiredHours} h
       </span>
       <Progress
         value={percent}
-        aria-label={`${student.name}: ${formatHours(student.approvedHours)} of ${mockCourse.requiredHours} hours`}
+        aria-label={`${student.name}: ${formatHours(student.approvedHours)} of ${requiredHours} hours`}
         className="gap-0"
       />
     </div>
   );
 }
 
-function companyOf(student: MockStudent) {
-  return student.companyId ? (companyNames.get(student.companyId) ?? "Unknown") : "No company";
-}
+export function StudentTable({
+  students,
+  companies,
+  requiredHours,
+}: {
+  students: DashboardStudent[];
+  companies: DashboardCompany[];
+  requiredHours: number;
+}) {
+  const companyNames = useMemo(
+    () => new Map(companies.map((company) => [company.id, company.name])),
+    [companies],
+  );
+  const companyOptions: Option[] = useMemo(
+    () => [
+      { value: "all", label: "All companies" },
+      ...companies.map((company) => ({ value: company.id, label: company.name })),
+      { value: "none", label: "No company" },
+    ],
+    [companies],
+  );
+  const companyOf = (student: DashboardStudent) =>
+    student.companyId ? (companyNames.get(student.companyId) ?? "Unknown") : "No company";
 
-export function StudentTable() {
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<StatusFilter>("all");
   const [company, setCompany] = useState<CompanyFilter>("all");
   const [sort, setSort] = useState<SortKey>("progress-desc");
 
   const rows = useMemo(
-    () => filterStudents(mockStudents, { query, status, company, sort }),
-    [query, status, company, sort],
+    () => filterStudents(students, { query, status, company, sort }),
+    [students, query, status, company, sort],
   );
 
   return (
@@ -135,7 +141,7 @@ export function StudentTable() {
           Student progress
         </CardTitle>
         <CardDescription>
-          Approved hours toward {mockCourse.requiredHours} required hours. Read-only.
+          Approved hours toward {requiredHours} required hours. Read-only.
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-4">
@@ -180,7 +186,7 @@ export function StudentTable() {
         </div>
 
         <p className="text-sm text-muted-foreground" role="status" aria-live="polite">
-          Showing {rows.length} of {mockStudents.length} students.
+          Showing {rows.length} of {students.length} students.
         </p>
 
         {rows.length === 0 ? (
@@ -215,7 +221,7 @@ export function StudentTable() {
                         <StudentStatusBadge status={student.status} />
                       </TableCell>
                       <TableCell>
-                        <Hours student={student} />
+                        <Hours student={student} requiredHours={requiredHours} />
                       </TableCell>
                       <TableCell className="text-right tabular-nums">
                         {student.pendingEntries}
@@ -244,7 +250,7 @@ export function StudentTable() {
                     </div>
                     <StudentStatusBadge status={student.status} />
                   </div>
-                  <Hours student={student} />
+                  <Hours student={student} requiredHours={requiredHours} />
                   <dl className="grid grid-cols-3 gap-2 text-xs">
                     <div>
                       <dt className="text-muted-foreground">Company</dt>

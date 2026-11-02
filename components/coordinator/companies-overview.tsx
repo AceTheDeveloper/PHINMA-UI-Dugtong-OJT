@@ -8,10 +8,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { companyRows, formatHours } from "@/lib/coordinator/metrics";
-import { mockCompanies, mockStudents } from "@/lib/mock/coordinator";
+import type { DashboardCompany, DashboardStudent } from "@/lib/coordinator/types";
 
-export function CompaniesOverview() {
-  const rows = companyRows(mockCompanies, mockStudents);
+export function CompaniesOverview({
+  companies,
+  students,
+}: {
+  companies: DashboardCompany[];
+  students: DashboardStudent[];
+}) {
+  const rows = companyRows(companies, students);
 
   return (
     <Card>
@@ -32,6 +38,13 @@ export function CompaniesOverview() {
             </TableRow>
           </TableHeader>
           <TableBody>
+            {rows.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={4} className="py-6 text-center text-sm text-muted-foreground">
+                  No partner companies yet. The admin adds them.
+                </TableCell>
+              </TableRow>
+            ) : null}
             {rows.map(({ company, activeStudents, approvedHours }) => (
               <TableRow key={company.id}>
                 <TableCell className="font-semibold text-ink">{company.name}</TableCell>

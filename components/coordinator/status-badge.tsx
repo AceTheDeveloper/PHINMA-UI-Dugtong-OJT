@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import type { StudentStatus } from "@/lib/mock/coordinator";
+import type { StudentStatus } from "@/lib/coordinator/types";
 
 export type StatusRole =
   | "info"

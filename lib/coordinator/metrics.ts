@@ -1,10 +1,10 @@
 import type {
-  MockCompany,
-  MockOpenEntry,
-  MockPendingEntry,
-  MockStudent,
+  DashboardCompany,
+  DashboardStudent,
+  OpenEntry,
+  PendingEntry,
   StudentStatus,
-} from "@/lib/mock/coordinator";
+} from "@/lib/coordinator/types";
 
 export type StatusFilter = StudentStatus | "all";
 export type CompanyFilter = string | "all" | "none";
@@ -30,7 +30,7 @@ export function progressPercent(approvedHours: number, requiredHours: number) {
   return Math.min(100, Math.round((approvedHours / requiredHours) * 100));
 }
 
-export function summarize(students: MockStudent[]): Summary {
+export function summarize(students: DashboardStudent[]): Summary {
   return {
     total: students.length,
     active: students.filter((s) => s.status === "active").length,
@@ -43,9 +43,9 @@ export function summarize(students: MockStudent[]): Summary {
 }
 
 export function filterStudents(
-  students: MockStudent[],
+  students: DashboardStudent[],
   filters: StudentFilters,
-): MockStudent[] {
+): DashboardStudent[] {
   const query = filters.query.trim().toLowerCase();
 
   const matches = students.filter((student) => {
@@ -74,30 +74,30 @@ export function filterStudents(
 }
 
 export function staleEntries(
-  entries: MockPendingEntry[],
+  entries: PendingEntry[],
   thresholdDays: number,
-): MockPendingEntry[] {
+): PendingEntry[] {
   return entries
     .filter((entry) => entry.daysWaiting > thresholdDays)
     .sort((a, b) => b.daysWaiting - a.daysWaiting);
 }
 
 export function openEntriesBefore(
-  entries: MockOpenEntry[],
+  entries: OpenEntry[],
   today: string,
-): MockOpenEntry[] {
+): OpenEntry[] {
   return entries.filter((entry) => entry.date < today);
 }
 
 export type CompanyRow = {
-  company: MockCompany;
+  company: DashboardCompany;
   activeStudents: number;
   approvedHours: number;
 };
 
 export function companyRows(
-  companies: MockCompany[],
-  students: MockStudent[],
+  companies: DashboardCompany[],
+  students: DashboardStudent[],
 ): CompanyRow[] {
   return companies.map((company) => {
     const mine = students.filter((s) => s.companyId === company.id);

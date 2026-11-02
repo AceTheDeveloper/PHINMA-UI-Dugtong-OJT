@@ -5,21 +5,14 @@ import {
   openEntriesBefore,
   staleEntries,
 } from "@/lib/coordinator/metrics";
-import {
-  mockCompanies,
-  mockCourse,
-  mockOpenEntries,
-  mockPendingEntries,
-  mockStudents,
-} from "@/lib/mock/coordinator";
+import type {
+  CourseInfo,
+  DashboardCompany,
+  DashboardStudent,
+  OpenEntry,
+  PendingEntry,
+} from "@/lib/coordinator/types";
 import { RoleBadge } from "./status-badge";
-
-const studentsById = new Map(mockStudents.map((s) => [s.id, s]));
-const companiesById = new Map(mockCompanies.map((c) => [c.id, c]));
-
-function companyName(companyId: string | null) {
-  return companyId ? (companiesById.get(companyId)?.name ?? "Unknown") : "No company";
-}
 
 function Group({
   title,
@@ -67,10 +60,30 @@ function Row({
   );
 }
 
-export function AttentionPanel() {
-  const stale = staleEntries(mockPendingEntries, mockCourse.staleThresholdDays);
-  const ready = mockStudents.filter((s) => s.status === "ready");
-  const open = openEntriesBefore(mockOpenEntries, mockCourse.asOf);
+// What only the coordinator can chase: entries that have waited too long for a
+// supervisor, students whose evaluation is due, and days never timed out. The
+// coordinator cannot act on them here; supervisors do (AGENTS.md section 4).
+export function AttentionPanel({
+  course,
+  students,
+  companies,
+  pending,
+  open,
+}: {
+  course: CourseInfo;
+  students: DashboardStudent[];
+  companies: DashboardCompany[];
+  pending: PendingEntry[];
+  open: OpenEntry[];
+}) {
+  const studentsById = new Map(students.map((student) => [student.id, student]));
+  const companiesById = new Map(companies.map((company) => [company.id, company]));
+  const companyName = (companyId: string | null) =>
+    companyId ? (companiesById.get(companyId)?.name ?? "Unknown") : "No company";
+
+  const stale = staleEntries(pending, course.staleThresholdDays);
+  const ready = students.filter((student) => student.status === "ready");
+  const never = openEntriesBefore(open, course.asOf);
 
   return (
     <Card>
@@ -85,7 +98,7 @@ export function AttentionPanel() {
       <CardContent className="grid gap-6 lg:grid-cols-3">
         <Group
           title="Stale pending entries"
-          description={`Waiting more than ${mockCourse.staleThresholdDays} days for approval (placeholder threshold).`}
+          description={`Waiting more than ${course.staleThresholdDays} days for approval.`}
           empty="No stale entries."
           count={stale.length}
         >
@@ -115,7 +128,7 @@ export function AttentionPanel() {
             <Row
               key={student.id}
               name={student.name}
-              detail={`${companyName(student.companyId)} · ${formatHours(student.approvedHours)} of ${mockCourse.requiredHours} hours`}
+              detail={`${companyName(student.companyId)} · ${formatHours(student.approvedHours)} of ${course.requiredHours} hours`}
               badge={<RoleBadge role="teal">Ready</RoleBadge>}
             />
           ))}
@@ -124,9 +137,9 @@ export function AttentionPanel() {
           title="Entries never timed out"
           description="Timed in on an earlier day with no time out."
           empty="No open entries."
-          count={open.length}
+          count={never.length}
         >
-          {open.map((entry) => {
+          {never.map((entry) => {
             const student = studentsById.get(entry.studentId);
             return (
               <Row

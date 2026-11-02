@@ -1,57 +1,82 @@
+import type { Metadata } from "next";
 import Link from "next/link";
-import { Download, FileText, Upload } from "lucide-react";
+import { Upload } from "lucide-react";
+import { EmptyState, LoadError, PageHeader } from "@/components/admin/admin-parts";
 import { AttentionPanel } from "@/components/coordinator/attention-panel";
 import { CompaniesOverview } from "@/components/coordinator/companies-overview";
+import { DashboardCharts } from "@/components/coordinator/dashboard-charts";
 import { RecentActivity } from "@/components/coordinator/recent-activity";
-import { RoleBadge } from "@/components/coordinator/status-badge";
 import { StudentTable } from "@/components/coordinator/student-table";
 import { SummaryCards } from "@/components/coordinator/summary-cards";
 import { Button } from "@/components/ui/button";
+import { requireRole } from "@/lib/auth/server";
 import { formatDate, summarize } from "@/lib/coordinator/metrics";
-import { mockCourse, mockStudents } from "@/lib/mock/coordinator";
+import { getDashboard } from "@/lib/coordinator/queries";
 
-export default function CoordinatorDashboardPage() {
-  const summary = summarize(mockStudents);
+export const metadata: Metadata = {
+  title: "Coordinator dashboard | Dugtong OJT",
+  robots: { index: false, follow: false },
+};
+
+export default async function CoordinatorDashboardPage() {
+  // Only the coordinator has a course of their own to look at.
+  const session = await requireRole(["coordinator"]);
+  const result = await getDashboard(session.courseIds);
+
+  if (!result.ok) {
+    return (
+      <>
+        <PageHeader title="Dashboard" description="How your students are doing on OJT." />
+        <LoadError message={result.error.message} />
+      </>
+    );
+  }
+  if (!result.data) {
+    return (
+      <>
+        <PageHeader title="Dashboard" description="How your students are doing on OJT." />
+        <EmptyState>
+          There is no OJT batch to show yet. Ask the admin to assign you to a course and create its
+          batch for the school year.
+        </EmptyState>
+      </>
+    );
+  }
+
+  const data = result.data;
+  const { course } = data;
+  const summary = summarize(data.students);
 
   return (
     <>
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="font-heading text-2xl font-extrabold tracking-[-0.02em] text-ink">
-              Dashboard
-            </h1>
-            <RoleBadge role="warning">Mock data</RoleBadge>
-          </div>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {mockCourse.courseShort} · {mockCourse.departmentShort} · {mockCourse.school}
-          </p>
-          <p className="text-sm text-muted-foreground tabular-nums">
-            Required hours: {mockCourse.requiredHours} · As of {formatDate(mockCourse.asOf)}
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
+      <PageHeader
+        title="Dashboard"
+        description={`${course.courseShort} · ${course.departmentShort} · ${course.school}. Batch ${course.batchLabel}, ${course.requiredHours} required hours, as of ${formatDate(course.asOf)}.${data.otherCourses > 0 ? ` You have ${data.otherCourses} more ${data.otherCourses === 1 ? "course" : "courses"}; this page shows the first.` : ""}`}
+        actions={
           <Button variant="outline" nativeButton={false} render={<Link href="/coordinator/roster" />}>
             <Upload aria-hidden="true" data-icon="inline-start" />
             Import roster
           </Button>
-          <Button type="button" variant="outline">
-            <Download aria-hidden="true" data-icon="inline-start" />
-            Export CSV
-          </Button>
-          <Button type="button" variant="outline">
-            <FileText aria-hidden="true" data-icon="inline-start" />
-            Export DTR PDF
-          </Button>
-        </div>
-      </div>
+        }
+      />
 
       <SummaryCards summary={summary} />
-      <AttentionPanel />
-      <StudentTable />
+      <DashboardCharts data={data} />
+      <AttentionPanel
+        course={course}
+        students={data.students}
+        companies={data.companies}
+        pending={data.pending}
+        open={data.open}
+      />
+      <StudentTable
+        students={data.students}
+        companies={data.companies}
+        requiredHours={course.requiredHours}
+      />
       <div className="grid gap-6 xl:grid-cols-2">
-        <CompaniesOverview />
-        <RecentActivity />
+        <CompaniesOverview companies={data.companies} students={data.students} />
+        <RecentActivity activity={data.activity} />
       </div>
     </>
   );

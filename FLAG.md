@@ -11,7 +11,19 @@ This file tracks open questions, architectural concerns, blockers, and items tha
 
 ## 📝 Active Concerns
 
-*(No active flags)*
+### [FLAG-02] The DTR PDF is kept minimal on purpose
+- **Date Added:** 2026-11-03
+- **Branch / Ticket:** `ace` / `ticket-27` (exports)
+- **Status:** 🟡 [FOR REVIEW]
+- **Concern / Question:**
+  - For the first version the printable DTR shows only the student's name, the time entries (date, time in, time out, hours), and the supervisor's name (decided by the Lead Dev, 2026-11-03: "for now").
+  - It is not yet what a school would normally file. Decide with the coordinator what else it needs.
+- **Impact / Context:**
+  - Left out on purpose, to add once the school says what it wants: signature lines (student, supervisor, coordinator), a header with the school, course and company, a break column, the total against the required hours, the journal text, and a page footer with the date it was printed.
+  - Only approved entries are listed (only they count toward hours); pending ones are not shown.
+  - Code: the DTR PDF generator added in ticket-27 (`lib/dtr/`).
+- **Resolution / Decision:**
+  - *(open)*
 
 ---
 
