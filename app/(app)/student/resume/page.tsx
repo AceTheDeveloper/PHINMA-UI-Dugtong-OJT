@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { AuthShell } from "@/components/auth/auth-shell";
+import { PageHeader } from "@/components/admin/admin-parts";
 import { ResumeUploader } from "@/components/resume/resume-uploader";
+import { Card, CardContent } from "@/components/ui/card";
 import { requireRole } from "@/lib/auth/server";
 import { getOwnResume } from "@/lib/resume/queries";
 
@@ -16,17 +17,16 @@ export default async function ResumePage() {
   if (!resume.ok) throw new Error(resume.error.message);
 
   return (
-    <AuthShell maxWidth="max-w-[560px]">
-      <h1 className="font-heading text-[28px] font-extrabold leading-[1.2] tracking-[-0.04em]">
-        Resume
-      </h1>
-      <p className="mt-3 text-base leading-[1.65] text-copy-muted">
-        Upload your resume as a PDF of up to 2 MB. Your coordinator and the
-        supervisors of companies you apply to can open it.
-      </p>
-      <div className="mt-7">
-        <ResumeUploader studentId={session.studentId} current={resume.data} />
-      </div>
-    </AuthShell>
+    <>
+      <PageHeader
+        title="Resume"
+        description="Upload your resume as a PDF of up to 2 MB. Your coordinator and the supervisors of companies you apply to can open it."
+      />
+      <Card className="w-full max-w-xl">
+        <CardContent>
+          <ResumeUploader studentId={session.studentId} current={resume.data} />
+        </CardContent>
+      </Card>
+    </>
   );
 }
