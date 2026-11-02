@@ -69,7 +69,11 @@ export function parseLogFilters(params: SearchParams): LogFilters {
 
 // The address that shows these filters, keeping only what differs from the
 // default. `shown` is kept only when more than one page is open.
-export function logFiltersHref(filters: LogFilters, change: Partial<LogFilters> = {}): string {
+export function logFiltersHref(
+  filters: LogFilters,
+  change: Partial<LogFilters> = {},
+  basePath = "/coordinator/logs",
+): string {
   const next = { ...filters, ...change };
   const query = new URLSearchParams();
   if (next.status !== "all") query.set("status", next.status);
@@ -79,7 +83,7 @@ export function logFiltersHref(filters: LogFilters, change: Partial<LogFilters> 
   if (next.to) query.set("to", next.to);
   if (next.shown > logPageSize) query.set("shown", String(next.shown));
   const text = query.toString();
-  return text ? `/coordinator/logs?${text}` : "/coordinator/logs";
+  return text ? `${basePath}?${text}` : basePath;
 }
 
 // A pending entry is stale once it has waited more than the threshold in days

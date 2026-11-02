@@ -216,8 +216,11 @@ export async function saveSchoolSettings(raw: unknown): Promise<ActionResult> {
 }
 
 export async function reopenDailyLog(raw: unknown): Promise<ActionResult> {
-  return run(reopenDailyLogSchema, raw, ["/admin", "/admin/audit", "/coordinator"], (session, input) =>
-    adminReopenDailyLog(session.userId, input.logId, input.reason),
+  return run(
+    reopenDailyLogSchema,
+    raw,
+    ["/admin", "/admin/audit", "/admin/logs", "/coordinator"],
+    (session, input) => adminReopenDailyLog(session.userId, input.logId, input.reason),
   );
 }
 

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { RoleBadge } from "@/components/coordinator/status-badge";
 import { focusStyle } from "@/components/brand-link";
 import { NativeSelect } from "@/components/admin/form-parts";
+import { ReopenEntryDialog } from "@/components/admin/reopen-entry-dialog";
 import { LogStatusBadge } from "@/components/student/log-status";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,7 +30,15 @@ const statusRole: Record<LogStatusFilter, string> = {
   approved: "text-success-text",
 };
 
-function Entry({ row }: { row: LogRow }) {
+function Entry({
+  row,
+  studentBasePath = "/coordinator/students",
+  canReopen = false,
+}: {
+  row: LogRow;
+  studentBasePath?: string;
+  canReopen?: boolean;
+}) {
   const worked = workedMinutes({
     timeIn: row.timeIn,
     timeOut: row.timeOut,
@@ -41,7 +50,7 @@ function Entry({ row }: { row: LogRow }) {
         <div className="grid min-w-0 gap-0.5">
           <p className="flex flex-wrap items-baseline gap-x-2">
             <Link
-              href={`/coordinator/students/${row.studentId}`}
+              href={`${studentBasePath}/${row.studentId}`}
               className={cn(
                 "font-heading text-[17px] font-bold leading-tight text-ink underline-offset-4 hover:underline",
                 focusStyle,
@@ -70,6 +79,13 @@ function Entry({ row }: { row: LogRow }) {
           ) : null}
           {row.noTimeOut ? <RoleBadge role="warning">No time out</RoleBadge> : null}
           <LogStatusBadge status={row.status} />
+          {canReopen && row.status === "approved" ? (
+            <ReopenEntryDialog
+              logId={row.id}
+              studentName={row.studentName}
+              logDate={formatLogDate(row.logDate)}
+            />
+          ) : null}
         </div>
       </div>
 
@@ -106,7 +122,17 @@ function Entry({ row }: { row: LogRow }) {
   );
 }
 
-export function LogsScreen({ view }: { view: LogsView }) {
+export function LogsScreen({
+  view,
+  basePath = "/coordinator/logs",
+  studentBasePath = "/coordinator/students",
+  canReopen = false,
+}: {
+  view: LogsView;
+  basePath?: string;
+  studentBasePath?: string;
+  canReopen?: boolean;
+}) {
   const { filters, counts } = view;
   const narrowed = Boolean(filters.company || filters.student || filters.from || filters.to);
   return (
@@ -117,7 +143,7 @@ export function LogsScreen({ view }: { view: LogsView }) {
           return (
             <Link
               key={status}
-              href={logFiltersHref(filters, { status, shown: logPageSize })}
+              href={logFiltersHref(filters, { status, shown: logPageSize }, basePath)}
               aria-current={current ? "page" : undefined}
               className={cn(
                 "inline-flex min-h-11 items-center gap-2 rounded-full border px-4 text-[15px] font-semibold transition-colors",
@@ -138,7 +164,7 @@ export function LogsScreen({ view }: { view: LogsView }) {
 
       <form
         method="get"
-        action="/coordinator/logs"
+        action={basePath}
         aria-label="Filter entries"
         className="grid gap-3 rounded-2xl border border-border bg-card p-4 shadow-panel sm:grid-cols-2 sm:p-5 lg:grid-cols-[1fr_1fr_auto_auto_auto]"
       >
@@ -179,13 +205,17 @@ export function LogsScreen({ view }: { view: LogsView }) {
           </Button>
           {narrowed ? (
             <Link
-              href={logFiltersHref(filters, {
-                company: null,
-                student: null,
-                from: null,
-                to: null,
-                shown: logPageSize,
-              })}
+              href={logFiltersHref(
+                filters,
+                {
+                  company: null,
+                  student: null,
+                  from: null,
+                  to: null,
+                  shown: logPageSize,
+                },
+                basePath,
+              )}
               className={cn(buttonVariants({ variant: "ghost" }), "h-11", focusStyle)}
             >
               Clear
@@ -211,7 +241,12 @@ export function LogsScreen({ view }: { view: LogsView }) {
       ) : (
         <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card shadow-panel">
           {view.rows.map((row) => (
-            <Entry key={row.id} row={row} />
+            <Entry
+              key={row.id}
+              row={row}
+              studentBasePath={studentBasePath}
+              canReopen={canReopen}
+            />
           ))}
         </ul>
       )}
@@ -219,7 +254,7 @@ export function LogsScreen({ view }: { view: LogsView }) {
       {view.total > view.rows.length ? (
         <div>
           <Link
-            href={logFiltersHref(filters, { shown: filters.shown + logPageSize })}
+            href={logFiltersHref(filters, { shown: filters.shown + logPageSize }, basePath)}
             className={cn(buttonVariants({ variant: "outline" }), "h-11 px-5", focusStyle)}
           >
             Show {Math.min(logPageSize, view.total - view.rows.length)} more
