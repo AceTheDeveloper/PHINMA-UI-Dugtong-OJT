@@ -827,3 +827,13 @@ async function subjectNames(rows: z.infer<typeof auditRow>[]): Promise<Map<strin
   }
   return names;
 }
+
+// Returns all course ids in the system, for admin screens that look across every course.
+export async function getAllCourseIds(): Promise<Result<string[]>> {
+  const result = await read(z.array(z.object({ id: z.string() })), () =>
+    db().from("courses").select("id"),
+  );
+  if (!result.ok) return result;
+  return ok(result.data.map((course) => course.id));
+}
+

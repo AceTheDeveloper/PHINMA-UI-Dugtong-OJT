@@ -20,6 +20,8 @@ export type DashboardStudent = {
   approvedHours: number;
   pendingEntries: number;
   lastEntryDate: string | null;
+  courseId?: string;
+  courseCode?: string;
 };
 
 export type DashboardCompany = {

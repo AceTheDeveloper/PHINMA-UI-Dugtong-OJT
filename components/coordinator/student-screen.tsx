@@ -17,7 +17,15 @@ import { cn } from "@/lib/utils";
 
 // One student, read only, for the coordinator. It takes the data and draws it, so
 // the page only has to fetch and check access.
-export function StudentScreen({ view }: { view: StudentView }) {
+export function StudentScreen({
+  view,
+  showResume = true,
+  backHref = "/coordinator/students",
+}: {
+  view: StudentView;
+  showResume?: boolean;
+  backHref?: string;
+}) {
   const { profile, stage, hasResume, applications, deployments } = view;
   const totalHours =
     Math.round(deployments.reduce((sum, deployment) => sum + deployment.approvedHours, 0) * 100) / 100;
@@ -25,7 +33,7 @@ export function StudentScreen({ view }: { view: StudentView }) {
   return (
     <>
       <Link
-        href="/coordinator/students"
+        href={backHref}
         className={cn(buttonVariants({ variant: "ghost" }), "-ml-2 w-fit", focusStyle)}
       >
         <ArrowLeft aria-hidden="true" className="size-4" />
@@ -68,7 +76,7 @@ export function StudentScreen({ view }: { view: StudentView }) {
           <HoursChain approvedHours={totalHours} requiredHours={profile.requiredHours} className="mt-2" />
         </div>
 
-        <ResumeButton studentId={profile.id} hasResume={hasResume} />
+        {showResume ? <ResumeButton studentId={profile.id} hasResume={hasResume} /> : null}
       </section>
 
       {deployments.length === 0 ? (

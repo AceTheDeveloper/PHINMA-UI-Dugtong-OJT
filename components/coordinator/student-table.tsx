@@ -22,6 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 import {
   filterStudents,
   formatDate,
@@ -105,11 +106,15 @@ function Hours({ student, requiredHours }: { student: DashboardStudent; required
 export function StudentTable({
   students,
   companies,
+  courses,
   requiredHours,
+  basePath = "/coordinator/students",
 }: {
   students: DashboardStudent[];
   companies: DashboardCompany[];
+  courses?: { id: string; label: string }[];
   requiredHours: number;
+  basePath?: string;
 }) {
   const companyNames = useMemo(
     () => new Map(companies.map((company) => [company.id, company.name])),
@@ -123,17 +128,25 @@ export function StudentTable({
     ],
     [companies],
   );
+  const courseOptions: Option[] = useMemo(
+    () =>
+      courses
+        ? [{ value: "all", label: "All courses" }, ...courses.map((c) => ({ value: c.id, label: c.label }))]
+        : [],
+    [courses],
+  );
   const companyOf = (student: DashboardStudent) =>
     student.companyId ? (companyNames.get(student.companyId) ?? "Unknown") : "No company";
 
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<StatusFilter>("all");
   const [company, setCompany] = useState<CompanyFilter>("all");
+  const [course, setCourse] = useState<string>("all");
   const [sort, setSort] = useState<SortKey>("progress-desc");
 
   const rows = useMemo(
-    () => filterStudents(students, { query, status, company, sort }),
-    [students, query, status, company, sort],
+    () => filterStudents(students, { query, status, company, course, sort }),
+    [students, query, status, company, course, sort],
   );
 
   return (
@@ -147,7 +160,12 @@ export function StudentTable({
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-4">
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div
+          className={cn(
+            "grid gap-3 sm:grid-cols-2",
+            courses && courses.length > 0 ? "lg:grid-cols-5" : "lg:grid-cols-4",
+          )}
+        >
           <div className="grid gap-1.5">
             <label htmlFor="student-search" className="text-xs font-semibold text-muted-foreground">
               Search
@@ -167,6 +185,14 @@ export function StudentTable({
               />
             </div>
           </div>
+          {courses && courses.length > 0 ? (
+            <FilterSelect
+              label="Course"
+              value={course}
+              options={courseOptions}
+              onChange={(value) => setCourse(value)}
+            />
+          ) : null}
           <FilterSelect
             label="Status"
             value={status}
@@ -217,13 +243,14 @@ export function StudentTable({
                     <TableRow key={student.id}>
                       <TableCell>
                         <Link
-                          href={`/coordinator/students/${student.id}`}
+                          href={`${basePath}/${student.id}`}
                           className="font-semibold text-ink underline-offset-4 hover:text-primary hover:underline focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
                         >
                           {student.name}
                         </Link>
                         <p className="font-mono text-xs text-muted-foreground">
                           {student.studentNumber}
+                          {student.courseCode ? ` · ${student.courseCode}` : ""}
                         </p>
                       </TableCell>
                       <TableCell>{companyOf(student)}</TableCell>
@@ -259,13 +286,14 @@ export function StudentTable({
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <Link
-                        href={`/coordinator/students/${student.id}`}
+                        href={`${basePath}/${student.id}`}
                         className="block min-h-6 truncate font-semibold text-ink underline-offset-4 hover:text-primary hover:underline focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50 pointer-coarse:min-h-11 pointer-coarse:leading-[44px]"
                       >
                         {student.name}
                       </Link>
                       <p className="font-mono text-xs text-muted-foreground">
                         {student.studentNumber}
+                        {student.courseCode ? ` · ${student.courseCode}` : ""}
                       </p>
                     </div>
                     <StudentStatusBadge status={student.status} />

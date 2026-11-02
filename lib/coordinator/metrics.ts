@@ -8,12 +8,14 @@ import type {
 
 export type StatusFilter = StudentStatus | "all";
 export type CompanyFilter = string | "all" | "none";
+export type CourseFilter = string | "all";
 export type SortKey = "progress-desc" | "progress-asc" | "name";
 
 export type StudentFilters = {
   query: string;
   status: StatusFilter;
   company: CompanyFilter;
+  course?: CourseFilter;
   sort: SortKey;
 };
 
@@ -61,6 +63,9 @@ export function filterStudents(
     }
     if (filters.company === "none") return student.companyId === null;
     if (filters.company !== "all" && student.companyId !== filters.company) {
+      return false;
+    }
+    if (filters.course && filters.course !== "all" && student.courseId !== filters.course) {
       return false;
     }
     return true;
