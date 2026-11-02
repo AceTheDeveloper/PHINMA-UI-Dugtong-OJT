@@ -143,8 +143,12 @@ describe("Admin actions refuse anyone who is not an admin", () => {
     ["an inactive admin", () => authorize.mockResolvedValue(fail("inactive", "Deactivated."))],
   ];
 
+  // A company's own supervisors also manage listings (tests/admin/listing-actions.test.ts).
+  const supervisorManaged = ["addListing", "editListing", "changeListingStatus"];
+
   for (const call of calls) {
     for (const [label, setup] of callers) {
+      if (label === "a supervisor" && supervisorManaged.includes(call.name)) continue;
       it(`${call.name} refuses ${label}`, async () => {
         setup();
         const result = await call.run();
