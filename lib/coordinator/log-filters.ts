@@ -31,14 +31,14 @@ export type LogFilters = {
 
 export type SearchParams = Record<string, string | string[] | undefined>;
 
-const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+export const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-function first(value: string | string[] | undefined): string | null {
+export function first(value: string | string[] | undefined): string | null {
   const item = Array.isArray(value) ? value[0] : value;
   return typeof item === "string" && item.trim() !== "" ? item.trim() : null;
 }
 
-function validDate(value: string | null): string | null {
+export function validDate(value: string | null): string | null {
   if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
   const date = new Date(`${value}T12:00:00Z`);
   return Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== value ? null : value;
