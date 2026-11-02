@@ -108,3 +108,15 @@ export function todayView(input: TodayInput): TodayView {
   if (now.getTime() > ends) return { kind: "ended" };
   return { kind: "ready", scheduleLabel: label };
 }
+
+const clockParts = new Intl.DateTimeFormat("en-GB", {
+  timeZone: "Asia/Manila",
+  hour: "2-digit",
+  minute: "2-digit",
+  hourCycle: "h23",
+});
+
+// "08:02", the value for a time input, for a timestamp in school time.
+export function clockValue(iso: string): string {
+  return clockParts.format(new Date(iso));
+}

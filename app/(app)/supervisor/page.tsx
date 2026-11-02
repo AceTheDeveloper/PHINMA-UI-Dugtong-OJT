@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Briefcase, ChevronRight, Users } from "lucide-react";
+import { Briefcase, ChevronRight, ClipboardCheck, Users } from "lucide-react";
 import { LoadError } from "@/components/admin/admin-parts";
 import { buttonVariants } from "@/components/ui/button";
 import { focusStyle } from "@/components/brand-link";
 import { RoleBadge } from "@/components/coordinator/status-badge";
 import { getSupervisorSummary } from "@/lib/applicants/queries";
 import { requireRole } from "@/lib/auth/server";
+import { getReviewQueue } from "@/lib/review/queries";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -53,7 +54,10 @@ function Row({
 
 export default async function SupervisorHomePage() {
   const session = await requireRole(["supervisor"]);
-  const result = session.companyId ? await getSupervisorSummary(session.companyId) : null;
+  const [result, queue] = session.companyId
+    ? await Promise.all([getSupervisorSummary(session.companyId), getReviewQueue(session.companyId)])
+    : [null, null];
+  const waitingEntries = queue?.ok ? queue.data.pending.length + queue.data.needsTimeOut.length : 0;
 
   if (!result) return <LoadError message="This account has no company. Contact the admin." />;
   if (!result.ok) return <LoadError message={result.error.message} />;
@@ -106,7 +110,24 @@ export default async function SupervisorHomePage() {
           }
         />
         <Row
-          href="/supervisor/applicants"
+          href="/supervisor/approvals"
+          icon={<ClipboardCheck className="size-5" />}
+          title="Daily approval"
+          note={
+            waitingEntries === 0
+              ? "Nothing is waiting. Entries appear here after a student submits the day."
+              : "Approve, reject, or correct what your students submitted."
+          }
+          badge={
+            waitingEntries > 0 ? (
+              <RoleBadge role="warning">
+                <span className="tabular-nums">{waitingEntries}</span>&nbsp;waiting
+              </RoleBadge>
+            ) : null
+          }
+        />
+        <Row
+          href="/supervisor/students"
           icon={<Users className="size-5" />}
           title="Students"
           note={

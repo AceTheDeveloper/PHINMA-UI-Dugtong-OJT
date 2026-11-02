@@ -749,3 +749,142 @@ export async function resubmitLog(
   });
   return result.ok ? ok(null) : result;
 }
+
+// A supervisor approves a pending entry of their own company's student.
+export async function approveLog(actorId: string, logId: string): Promise<Result<null>> {
+  const parsed = z.object({ actorId: uuid, logId: uuid }).safeParse({ actorId, logId });
+  if (!parsed.success) return invalid("The entry details are not valid.");
+  const result = await call("approve_log", {
+    p_actor: parsed.data.actorId,
+    p_log_id: parsed.data.logId,
+  });
+  return result.ok ? ok(null) : result;
+}
+
+// Approves a chosen set in one transaction; if any entry cannot be approved,
+// none is. Returns how many were approved.
+export async function bulkApproveLogs(
+  actorId: string,
+  logIds: string[],
+): Promise<Result<number>> {
+  const parsed = z
+    .object({ actorId: uuid, logIds: z.array(uuid).min(1).max(200) })
+    .safeParse({ actorId, logIds });
+  if (!parsed.success) return invalid("Choose between 1 and 200 entries.");
+  const result = await call("bulk_approve_logs", {
+    p_actor: parsed.data.actorId,
+    p_log_ids: parsed.data.logIds,
+  });
+  if (!result.ok) return result;
+  const count = z.number().int().safeParse(result.data);
+  return count.success
+    ? ok(count.data)
+    : fail("unexpected", "Something went wrong. Try again in a moment.");
+}
+
+// A supervisor sends a pending entry back to the student, with a reason.
+export async function rejectLog(
+  actorId: string,
+  logId: string,
+  reason: string,
+): Promise<Result<null>> {
+  const parsed = z
+    .object({ actorId: uuid, logId: uuid, reason: z.string() })
+    .safeParse({ actorId, logId, reason });
+  if (!parsed.success) return invalid("The entry details are not valid.");
+  const result = await call("reject_log", {
+    p_actor: parsed.data.actorId,
+    p_log_id: parsed.data.logId,
+    p_reason: parsed.data.reason,
+  });
+  return result.ok ? ok(null) : result;
+}
+
+const clockTime = z.string().regex(/^\d{2}:\d{2}$/);
+
+// A supervisor corrects the times and break of an entry (also how a forgotten
+// time out is set). Times are school clock times on the entry date.
+export async function correctLog(
+  actorId: string,
+  input: { logId: string; timeIn: string; timeOut: string; breakMinutes: number; reason: string },
+): Promise<Result<null>> {
+  const parsed = z
+    .object({
+      actorId: uuid,
+      logId: uuid,
+      timeIn: clockTime,
+      timeOut: clockTime,
+      breakMinutes: z.number().int(),
+      reason: z.string(),
+    })
+    .safeParse({ actorId, ...input });
+  if (!parsed.success) return invalid("The correction details are not valid.");
+  const result = await call("correct_log", {
+    p_actor: parsed.data.actorId,
+    p_log_id: parsed.data.logId,
+    p_time_in: parsed.data.timeIn,
+    p_time_out: parsed.data.timeOut,
+    p_break_minutes: parsed.data.breakMinutes,
+    p_reason: parsed.data.reason,
+  });
+  return result.ok ? ok(null) : result;
+}
+
+// A supervisor unlocks an approved entry of their own company's student.
+export async function reopenLog(
+  actorId: string,
+  logId: string,
+  reason: string,
+): Promise<Result<null>> {
+  const parsed = z
+    .object({ actorId: uuid, logId: uuid, reason: z.string() })
+    .safeParse({ actorId, logId, reason });
+  if (!parsed.success) return invalid("The entry details are not valid.");
+  const result = await call("reopen_log", {
+    p_actor: parsed.data.actorId,
+    p_log_id: parsed.data.logId,
+    p_reason: parsed.data.reason,
+  });
+  return result.ok ? ok(null) : result;
+}
+
+// A supervisor records a day the student worked but never timed in. Returns the
+// new entry id.
+export async function addMissedDay(
+  actorId: string,
+  input: {
+    deploymentId: string;
+    logDate: string;
+    timeIn: string;
+    timeOut: string;
+    breakMinutes: number;
+    reason: string;
+  },
+): Promise<Result<string>> {
+  const parsed = z
+    .object({
+      actorId: uuid,
+      deploymentId: uuid,
+      logDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+      timeIn: clockTime,
+      timeOut: clockTime,
+      breakMinutes: z.number().int(),
+      reason: z.string(),
+    })
+    .safeParse({ actorId, ...input });
+  if (!parsed.success) return invalid("The day details are not valid.");
+  const result = await call("add_missed_day", {
+    p_actor: parsed.data.actorId,
+    p_deployment_id: parsed.data.deploymentId,
+    p_log_date: parsed.data.logDate,
+    p_time_in: parsed.data.timeIn,
+    p_time_out: parsed.data.timeOut,
+    p_break_minutes: parsed.data.breakMinutes,
+    p_reason: parsed.data.reason,
+  });
+  if (!result.ok) return result;
+  const created = idResult.safeParse(result.data);
+  return created.success
+    ? ok(created.data)
+    : fail("unexpected", "Something went wrong. Try again in a moment.");
+}

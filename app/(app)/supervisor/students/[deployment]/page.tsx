@@ -4,12 +4,15 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { LoadError } from "@/components/admin/admin-parts";
 import { focusStyle } from "@/components/brand-link";
+import { MissedDayForm } from "@/components/supervisor/missed-day-form";
+import { ReviewEntryCard } from "@/components/supervisor/review-entry";
 import { ScheduleForm } from "@/components/supervisor/schedule-form";
 import { DeploymentStatusBadge } from "@/components/supervisor/student-status";
 import { buttonVariants } from "@/components/ui/button";
 import { HoursChain } from "@/components/ui/hours-chain";
 import { formatPlainDate } from "@/lib/admin/format";
 import { requireRole } from "@/lib/auth/server";
+import { getEntriesForDeployment } from "@/lib/review/queries";
 import {
   describeSchedule,
   manilaToday,
@@ -57,6 +60,7 @@ export default async function SupervisorStudentPage({
     return <LoadError message={result.error.message} />;
   }
   const student = result.data;
+  const entries = await getEntriesForDeployment(session.companyId, deployment);
   const today = manilaToday();
   const current = scheduleInForce(student.schedules, today);
   const upcoming = upcomingSchedules(student.schedules, today);
@@ -165,6 +169,44 @@ export default async function SupervisorStudentPage({
           This deployment is no longer active, so its schedule cannot be changed.
         </p>
       )}
+
+      <section aria-label="Daily log" className="grid gap-3">
+        <h2 className="px-1 font-heading text-lg font-bold text-ink">Daily log</h2>
+        {!entries.ok ? (
+          <LoadError message={entries.error.message} />
+        ) : entries.data.length === 0 ? (
+          <p className="rounded-2xl border border-dashed border-border-strong bg-surface px-6 py-8 text-center text-[15px] text-copy-muted">
+            No entries yet. They appear here after the student times in.
+          </p>
+        ) : (
+          <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card shadow-panel">
+            {entries.data.map((entry) => (
+              <ReviewEntryCard key={entry.id} entry={entry} showStudent={false} />
+            ))}
+          </ul>
+        )}
+      </section>
+
+      {student.status === "active" ? (
+        <section
+          aria-label="Add a missed day"
+          className="grid gap-5 rounded-2xl border border-border bg-card p-6 shadow-panel sm:p-8"
+        >
+          <div className="grid gap-1">
+            <h2 className="font-heading text-lg font-bold text-ink">Add a missed day</h2>
+            <p className="max-w-[62ch] text-[15px] leading-[1.6] text-copy-muted">
+              Use this when the student worked but never timed in, for example when their phone had no
+              signal. The day goes back to the student to write the journal, then to you to approve.
+            </p>
+          </div>
+          <MissedDayForm
+            deploymentId={student.deploymentId}
+            today={today}
+            defaultStart={(current ?? upcoming[0])?.days[0]?.start ?? "08:00"}
+            defaultEnd={(current ?? upcoming[0])?.days[0]?.end ?? "17:00"}
+          />
+        </section>
+      ) : null}
 
       {earlier.length > 0 ? (
         <section
