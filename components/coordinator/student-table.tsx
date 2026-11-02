@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -215,7 +216,12 @@ export function StudentTable({
                   {rows.map((student) => (
                     <TableRow key={student.id}>
                       <TableCell>
-                        <p className="font-semibold text-ink">{student.name}</p>
+                        <Link
+                          href={`/coordinator/students/${student.id}`}
+                          className="font-semibold text-ink underline-offset-4 hover:text-primary hover:underline focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                        >
+                          {student.name}
+                        </Link>
                         <p className="font-mono text-xs text-muted-foreground">
                           {student.studentNumber}
                         </p>
@@ -252,7 +258,12 @@ export function StudentTable({
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="truncate font-semibold text-ink">{student.name}</p>
+                      <Link
+                        href={`/coordinator/students/${student.id}`}
+                        className="block min-h-6 truncate font-semibold text-ink underline-offset-4 hover:text-primary hover:underline focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50 pointer-coarse:min-h-11 pointer-coarse:leading-[44px]"
+                      >
+                        {student.name}
+                      </Link>
                       <p className="font-mono text-xs text-muted-foreground">
                         {student.studentNumber}
                       </p>

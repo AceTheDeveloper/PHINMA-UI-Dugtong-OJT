@@ -34,7 +34,8 @@ describe("links per role", () => {
 
   it("keeps links with no screen yet as rows without a link", () => {
     const soon = linksFor("coordinator").filter((item) => item.href === null);
-    expect(soon.map((item) => item.label)).toContain("Students");
+    expect(soon.map((item) => item.label)).toEqual(expect.arrayContaining(["Companies", "Daily logs", "Reports", "Audit log"]));
+    expect(soon.map((item) => item.label)).not.toContain("Students");
     expect(linksFor("supervisor").every((item) => item.href !== null)).toBe(true);
   });
 });
@@ -52,6 +53,7 @@ describe("current page", () => {
     expect(currentLabel("/supervisor/approvals", supervisor)).toBe("Daily approval");
     expect(currentLabel("/supervisor/evaluations/abc", supervisor)).toBe("Evaluations");
     expect(currentLabel("/coordinator/certifications", linksFor("coordinator"))).toBe("Certifications");
+    expect(currentLabel("/coordinator/students/abc", linksFor("coordinator"))).toBe("Students");
     expect(currentLabel("/supervisor/students", supervisor)).toBe("Students");
     expect(currentLabel("/supervisor/students/abc", supervisor)).toBe("Students");
     expect(isCurrentLink("/student/listings/abc", { href: "/student/listings", label: "Listings", exact: false })).toBe(true);
