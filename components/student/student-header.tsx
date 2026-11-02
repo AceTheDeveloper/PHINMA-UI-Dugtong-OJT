@@ -1,12 +1,11 @@
-import { Briefcase, FileText, House, Send } from "lucide-react";
 import { BottomTabs, type Tab } from "@/components/layout/bottom-tabs";
 import { RoleHeader } from "@/components/layout/role-header";
 
 const tabs: readonly Tab[] = [
-  { href: "/student", label: "Home", exact: true, icon: House },
-  { href: "/student/listings", label: "Listings", exact: false, icon: Briefcase },
-  { href: "/student/applications", label: "Applied", exact: false, icon: Send },
-  { href: "/student/resume", label: "Resume", exact: false, icon: FileText },
+  { href: "/student", label: "Home", exact: true, icon: "home" },
+  { href: "/student/listings", label: "Listings", exact: false, icon: "listings" },
+  { href: "/student/applications", label: "Applied", exact: false, icon: "applications" },
+  { href: "/student/resume", label: "Resume", exact: false, icon: "resume" },
 ];
 
 const links = tabs.map(({ href, label, exact }) => ({

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { LucideIcon } from "lucide-react";
+import { Briefcase, FileText, House, Send } from "lucide-react";
 import { focusStyle } from "@/components/brand-link";
 import { isCurrentLink, type NavLink } from "@/lib/nav";
 import { cn } from "@/lib/utils";
@@ -10,7 +10,11 @@ import { cn } from "@/lib/utils";
 // The phone navigation: tabs along the bottom edge, where the thumb rests. The
 // current tab is marked with the teal dot from the Dugtong mark. Hidden from
 // small tablets up, where the top bar carries the links.
-export type Tab = NavLink & { icon: LucideIcon };
+// Tabs name their icon instead of passing the component: a server component
+// cannot hand a function to this client component.
+const icons = { home: House, listings: Briefcase, applications: Send, resume: FileText };
+
+export type Tab = NavLink & { icon: keyof typeof icons };
 
 export function BottomTabs({ label, tabs }: { label: string; tabs: readonly Tab[] }) {
   const pathname = usePathname();
@@ -22,7 +26,7 @@ export function BottomTabs({ label, tabs }: { label: string; tabs: readonly Tab[
       <ul className="mx-auto flex max-w-lg">
         {tabs.map((tab) => {
           const current = isCurrentLink(pathname, tab);
-          const Icon = tab.icon;
+          const Icon = icons[tab.icon];
           return (
             <li key={tab.href} className="flex-1">
               <Link
