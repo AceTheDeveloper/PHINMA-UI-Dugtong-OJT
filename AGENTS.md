@@ -387,7 +387,10 @@ Do not:
 - Never commit or push to `dev`, `test`, or `main`; never force-push. If a check or a push fails, report the failure with its output and do not claim the change was published. Never merge into `dev` yourself; a human opens and merges the PR.
 - One ticket at a time per branch. Do not start the next ticket until the previous one is merged into `dev`.
 - Tick the "Tested by AI" boxes only for commands you actually ran, and write the command and result next to them. Never tick a human box.
-- Before the PR: merge the latest `dev` into the branch and run the checks again. You may resolve trivial conflicts (imports, formatting). Stop and ask a human for conflicts in auth, database migrations, audit logic, or the section 6 rules.
+- Before changing any code: run `git fetch origin` and merge the latest `origin/dev` into the developer's branch (`git merge origin/dev`). Do this at the start of every session and before starting each ticket, so work is never built on stale code. Do not use `--force`, `--strategy-option`, or a blanket "ours"/"theirs" choice to make a conflict go away.
+- Resolving merge conflicts: read both sides of every conflict and keep the intent of both. Nothing from either side may be silently dropped, and no conflict marker (`<<<<<<<`, `=======`, `>>>>>>>`) may remain. After resolving, check that imports, types, migrations order, tests, and callers of any changed function still line up, then run all four checks in section 15. Fix every failure before going on. If the merge pulled in changes to files this ticket also touches, re-read those files before continuing.
+- Stop and ask a human, without guessing, for conflicts in auth, database migrations, audit logic, or the section 6 rules, and for any conflict where the right result is not obvious. Never edit or renumber an applied migration to resolve a conflict.
+- Before the PR: merge the latest `dev` into the branch again and re-run the checks. You may resolve trivial conflicts (imports, formatting) following the rules above.
 - Git steps for humans are in `contributing.md`.
 
 ## 15. Local setup
