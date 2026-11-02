@@ -28,8 +28,9 @@ function Day({ date, entries }: { date: string; entries: ReviewEntry[] }) {
   return (
     <section aria-label={formatLogDate(date)} className="grid gap-2">
       <div className="flex flex-wrap items-center justify-between gap-3 px-1">
-        <h2 className="text-[15px] font-semibold text-copy-muted">
-          {formatLogDate(date)} <span className="tabular-nums">({entries.length})</span>
+        <h2 className="font-heading text-lg font-bold text-ink">
+          {formatLogDate(date)}{" "}
+          <span className="text-[15px] font-semibold tabular-nums text-copy-muted">({entries.length})</span>
         </h2>
         {entries.length > 1 ? (
           <Button
@@ -84,8 +85,9 @@ export function ApprovalQueue({ pending }: { pending: ReviewEntry[] }) {
 export function MissingTimeOut({ entries }: { entries: ReviewEntry[] }) {
   return (
     <section aria-label="Needs a time out" className="grid gap-2">
-      <h2 className="px-1 text-[15px] font-semibold text-copy-muted">
-        Needs a time out <span className="tabular-nums">({entries.length})</span>
+      <h2 className="px-1 font-heading text-lg font-bold text-ink">
+        Needs a time out{" "}
+        <span className="text-[15px] font-semibold tabular-nums text-copy-muted">({entries.length})</span>
       </h2>
       <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card shadow-panel">
         {entries.map((entry) => (

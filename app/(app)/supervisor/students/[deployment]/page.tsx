@@ -87,7 +87,7 @@ export default async function SupervisorStudentPage({
           <div className="grid min-w-0 gap-1">
             <h1
               id="student-heading"
-              className="font-heading text-[28px] font-extrabold leading-[1.1] tracking-[-0.03em] text-ink wrap-break-word sm:text-[36px]"
+              className="font-heading text-[28px] font-bold leading-[1.1] tracking-[-0.03em] text-ink wrap-break-word sm:text-[36px]"
             >
               {student.studentName}
             </h1>

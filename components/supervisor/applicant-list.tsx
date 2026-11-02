@@ -156,7 +156,7 @@ export function ApplicantList({ applicants }: { applicants: Applicant[] }) {
             </Button>
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="grid min-w-0 gap-1">
-                <h2 className="font-heading text-2xl font-extrabold leading-tight tracking-[-0.02em] text-ink wrap-break-word">
+                <h2 className="font-heading text-2xl font-bold leading-tight tracking-[-0.02em] text-ink wrap-break-word">
                   {selected.studentName}
                 </h2>
                 <p className="text-[15px] text-copy-muted wrap-break-word">

@@ -64,30 +64,50 @@ export default async function SupervisorHomePage() {
   const summary = result.data;
   const waiting = summary.waitingApplicants;
 
+  const entriesLabel = waitingEntries === 1 ? "entry is" : "entries are";
+  const applicantsLabel = waiting === 1 ? "applicant is" : "applicants are";
+
   return (
     <>
       <section
         aria-labelledby="supervisor-heading"
-        className="rounded-3xl border border-border bg-card p-6 shadow-panel sm:p-10"
+        className="overflow-hidden rounded-3xl border border-deep-border shadow-panel"
       >
-        <h1
-          id="supervisor-heading"
-          className="font-heading text-[28px] font-extrabold leading-[1.1] tracking-[-0.03em] text-ink sm:text-[40px]"
-        >
-          {summary.companyName}
-        </h1>
-        <div className="mt-8 flex flex-wrap items-end gap-x-3 gap-y-1">
-          <p className="font-mono text-[56px] font-semibold leading-none tabular-nums tracking-[-0.04em] text-ink sm:text-[72px]">
-            {waiting}
-          </p>
-          <p className="pb-1.5 text-[15px] text-copy-muted sm:pb-2.5 sm:text-base">
-            {waiting === 1 ? "applicant is" : "applicants are"} waiting for your decision
-          </p>
+        <div className="grid gap-5 bg-deep p-6 text-deep-foreground sm:p-10">
+          <h1
+            id="supervisor-heading"
+            className="font-heading text-[30px] font-bold leading-[1.1] tracking-[-0.03em] sm:text-[40px]"
+          >
+            {summary.companyName}
+          </h1>
+          <div className="flex flex-wrap items-end gap-x-3 gap-y-1">
+            <p className="font-heading text-[56px] font-bold leading-none tabular-nums tracking-[-0.04em] sm:text-[72px]">
+              {waitingEntries}
+            </p>
+            <p className="pb-1.5 text-[15px] text-deep-muted sm:pb-2.5 sm:text-base">
+              {entriesLabel} waiting for your approval
+            </p>
+          </div>
+          <div>
+            <Link
+              href="/supervisor/approvals"
+              className={cn(
+                "inline-flex h-14 items-center justify-center rounded-lg bg-deep-action px-8 text-base font-semibold text-deep-action-foreground transition-opacity hover:opacity-90",
+                focusStyle,
+              )}
+            >
+              {waitingEntries > 0 ? "Review entries" : "See approvals"}
+            </Link>
+          </div>
         </div>
-        <div className="mt-6">
+        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 bg-card px-6 py-4 sm:px-10">
+          <p className="text-[15px] text-copy-muted">
+            <span className="font-semibold tabular-nums text-ink">{waiting}</span> {applicantsLabel} waiting
+            for your decision
+          </p>
           <Link
             href="/supervisor/applicants"
-            className={cn(buttonVariants({ size: "lg" }), "h-11 px-5 text-[15px]", focusStyle)}
+            className={cn(buttonVariants({ variant: "outline" }), "h-11 px-5 text-[15px]", focusStyle)}
           >
             {waiting > 0 ? "Review applicants" : "See applicants"}
           </Link>

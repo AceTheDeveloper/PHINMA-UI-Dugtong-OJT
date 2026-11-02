@@ -27,7 +27,7 @@ export function SummaryCards({ summary }: { summary: Summary }) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="font-mono text-4xl font-semibold leading-none tracking-[-0.04em] tabular-nums text-ink">
+            <p className="font-heading text-4xl font-semibold leading-none tracking-[-0.04em] tabular-nums text-ink">
               {card.value}
             </p>
             <p className="mt-2 text-sm text-muted-foreground">{card.note}</p>

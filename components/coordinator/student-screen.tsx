@@ -40,7 +40,7 @@ export function StudentScreen({ view }: { view: StudentView }) {
           <div className="grid min-w-0 gap-1">
             <h1
               id="student-heading"
-              className="font-heading text-[28px] font-extrabold leading-[1.1] tracking-[-0.03em] text-ink wrap-break-word sm:text-[36px]"
+              className="font-heading text-[28px] font-bold leading-[1.1] tracking-[-0.03em] text-ink wrap-break-word sm:text-[36px]"
             >
               {profile.name}
             </h1>
@@ -58,7 +58,7 @@ export function StudentScreen({ view }: { view: StudentView }) {
 
         <div className="grid gap-1">
           <p className="text-sm text-muted-foreground">Approved hours</p>
-          <p className="font-mono text-[40px] font-semibold leading-none tabular-nums tracking-[-0.03em] text-ink sm:text-[48px]">
+          <p className="font-heading text-[40px] font-bold leading-none tabular-nums tracking-[-0.03em] text-ink sm:text-[48px]">
             {hoursText(totalHours)}
             <span className="text-base font-normal tracking-normal text-copy-muted">
               {" "}
