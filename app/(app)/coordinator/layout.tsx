@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { requireRole } from "@/lib/auth/server";
 import { AppSidebar } from "@/components/coordinator/app-sidebar";
-import { RoleBadge } from "@/components/coordinator/status-badge";
 import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
@@ -31,7 +30,6 @@ export default async function CoordinatorLayout({
               orientation="vertical"
               className="mr-2 data-vertical:h-4 data-vertical:self-auto"
             />
-            <RoleBadge role="warning">Mock data</RoleBadge>
             <div className="ml-auto">
               <ThemeToggle />
             </div>

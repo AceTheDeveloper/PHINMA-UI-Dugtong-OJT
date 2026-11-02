@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   Building2,
   ClipboardList,
@@ -33,21 +34,23 @@ import { mockCoordinator } from "@/lib/mock/coordinator";
 type NavItem = {
   label: string;
   Icon: LucideIcon;
-  built: boolean;
+  // A built screen has a link; the rest show as "Not built".
+  href?: string;
 };
 
 const navItems: NavItem[] = [
-  { label: "Dashboard", Icon: LayoutDashboard, built: true },
-  { label: "Students", Icon: Users, built: false },
-  { label: "Companies", Icon: Building2, built: false },
-  { label: "Daily logs", Icon: ClipboardList, built: false },
-  { label: "Evaluations", Icon: FileCheck2, built: false },
-  { label: "Reports", Icon: FileText, built: false },
-  { label: "Roster import", Icon: Upload, built: false },
-  { label: "Audit log", Icon: History, built: false },
+  { label: "Dashboard", Icon: LayoutDashboard, href: "/coordinator" },
+  { label: "Students", Icon: Users },
+  { label: "Companies", Icon: Building2 },
+  { label: "Daily logs", Icon: ClipboardList },
+  { label: "Evaluations", Icon: FileCheck2 },
+  { label: "Reports", Icon: FileText },
+  { label: "Roster import", Icon: Upload, href: "/coordinator/roster" },
+  { label: "Audit log", Icon: History },
 ];
 
 export function AppSidebar() {
+  const pathname = usePathname();
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
@@ -78,13 +81,18 @@ export function AppSidebar() {
           <SidebarGroupLabel>Coordinator</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navItems.map(({ label, Icon, built }) => (
+              {navItems.map(({ label, Icon, href }) => (
                 <SidebarMenuItem key={label}>
-                  {built ? (
+                  {href ? (
                     <SidebarMenuButton
-                      isActive
+                      isActive={pathname === href}
                       tooltip={label}
-                      render={<Link href="/coordinator" aria-current="page" />}
+                      render={
+                        <Link
+                          href={href}
+                          aria-current={pathname === href ? "page" : undefined}
+                        />
+                      }
                     >
                       <Icon aria-hidden="true" />
                       <span>{label}</span>

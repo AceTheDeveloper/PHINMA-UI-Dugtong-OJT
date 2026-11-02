@@ -321,6 +321,44 @@ export async function setCompanyStatus(
   });
 }
 
+export async function importRoster(
+  actorId: string,
+  batchId: string,
+  rows: { row: number; fullName: string; studentNumber: string; email: string }[],
+): Promise<Result<number>> {
+  const parsed = z
+    .object({
+      actorId: uuid,
+      batchId: uuid,
+      rows: z
+        .array(
+          z.object({
+            row: z.number().int().positive(),
+            fullName: z.string(),
+            studentNumber: z.string(),
+            email: z.string(),
+          }),
+        )
+        .min(1)
+        .max(1000),
+    })
+    .safeParse({ actorId, batchId, rows });
+  if (!parsed.success) return invalid("The roster is not valid.");
+  const result = await call("import_roster", {
+    p_actor: parsed.data.actorId,
+    p_batch_id: parsed.data.batchId,
+    p_rows: parsed.data.rows.map((row) => ({
+      row: row.row,
+      full_name: row.fullName,
+      student_number: row.studentNumber,
+      email: row.email,
+    })),
+  });
+  if (!result.ok) return result;
+  const count = z.number().int().safeParse(result.data);
+  return count.success ? ok(count.data) : fail("unexpected", unexpected);
+}
+
 export const databaseSessionStore: SessionStore = {
   resolve: resolveSession,
   accept: acceptInvitation,
