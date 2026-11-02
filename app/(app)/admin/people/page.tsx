@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AccountsTable } from "@/components/admin/accounts-table";
 import {
   EmptyState,
   InvitationStatusBadge,
@@ -22,7 +23,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatDateTime } from "@/lib/admin/format";
-import { getAcademics, getInvitations } from "@/lib/admin/queries";
+import { getAcademics, getInvitations, getRegisteredUsers } from "@/lib/admin/queries";
 import { requireRole } from "@/lib/auth/server";
 
 export const metadata: Metadata = {
@@ -38,10 +39,11 @@ const roleLabels = {
 } as const;
 
 export default async function PeoplePage() {
-  await requireRole(["admin"]);
-  const [invitations, academics] = await Promise.all([
+  const session = await requireRole(["admin"]);
+  const [invitations, academics, users] = await Promise.all([
     getInvitations({ roles: ["admin", "coordinator", "supervisor"] }),
     getAcademics(),
+    getRegisteredUsers(),
   ]);
 
   const courseOptions = academics.ok
@@ -57,7 +59,7 @@ export default async function PeoplePage() {
     <>
       <PageHeader
         title="People"
-        description="Invite coordinators and admins, and follow every invitation you or a company owner sent. Supervisors are invited from their company page."
+        description="Invite coordinators and admins, manage registered accounts, and follow every invitation sent across the system."
         actions={
           <>
             <InviteCoordinatorSheet courses={courseOptions} />
@@ -65,6 +67,17 @@ export default async function PeoplePage() {
           </>
         }
       />
+
+      <Section
+        title="Accounts"
+        description="Registered accounts across the system. Deactivated users lose access immediately."
+      >
+        {!users.ok ? (
+          <LoadError message={users.error.message} />
+        ) : (
+          <AccountsTable users={users.data} currentUserId={session.userId} />
+        )}
+      </Section>
 
       <Section
         title="Invitations"

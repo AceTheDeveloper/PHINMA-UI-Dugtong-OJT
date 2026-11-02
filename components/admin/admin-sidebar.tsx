@@ -5,11 +5,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SignOutButton } from "@clerk/nextjs";
 import {
+  Briefcase,
   Building2,
   GraduationCap,
   History,
   LayoutDashboard,
   LogOut,
+  Settings,
+  Upload,
   Users,
   type LucideIcon,
 } from "lucide-react";
@@ -27,12 +30,15 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 
-const navItems: { label: string; href: string; Icon: LucideIcon }[] = [
+export const adminNavItems: { label: string; href: string; Icon: LucideIcon }[] = [
   { label: "Overview", href: "/admin", Icon: LayoutDashboard },
   { label: "Academics", href: "/admin/academics", Icon: GraduationCap },
   { label: "Companies", href: "/admin/companies", Icon: Building2 },
+  { label: "Listings", href: "/admin/listings", Icon: Briefcase },
+  { label: "Roster import", href: "/admin/roster", Icon: Upload },
   { label: "People", href: "/admin/people", Icon: Users },
   { label: "Audit log", href: "/admin/audit", Icon: History },
+  { label: "Settings", href: "/admin/settings", Icon: Settings },
 ];
 
 export function AdminSidebar() {
@@ -68,7 +74,7 @@ export function AdminSidebar() {
           <SidebarGroupLabel>Platform admin</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navItems.map(({ label, href, Icon }) => (
+              {adminNavItems.map(({ label, href, Icon }) => (
                 <SidebarMenuItem key={href}>
                   <SidebarMenuButton
                     isActive={isActive(href)}

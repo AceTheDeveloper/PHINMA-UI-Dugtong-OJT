@@ -201,6 +201,7 @@ export type CompanyDetail = {
   company: { id: string; name: string; address: string | null; status: "active" | "inactive" };
   supervisors: { userId: string; name: string; email: string; isOwner: boolean; isActive: boolean }[];
   invitations: InvitationSummary[];
+  listings: AdminListingSummary[];
   historyRowIds: string[];
 };
 
@@ -212,7 +213,7 @@ export async function getCompany(companyId: string): Promise<Result<CompanyDetai
   if (!company.ok) return company;
   if (company.data.length === 0) return ok(null);
 
-  const [memberships, invitations] = await Promise.all([
+  const [memberships, invitations, listings] = await Promise.all([
     read(z.array(membershipRow), () =>
       db()
         .from("supervisor_memberships")
@@ -220,9 +221,11 @@ export async function getCompany(companyId: string): Promise<Result<CompanyDetai
         .eq("company_id", companyId),
     ),
     getInvitations({ companyId }),
+    getListings({ companyId }),
   ]);
   if (!memberships.ok) return memberships;
   if (!invitations.ok) return invitations;
+  if (!listings.ok) return listings;
 
   const users = await read(z.array(userRow), () =>
     db()
@@ -252,13 +255,155 @@ export async function getCompany(companyId: string): Promise<Result<CompanyDetai
     company: company.data[0],
     supervisors,
     invitations: invitations.data,
+    listings: listings.data,
     historyRowIds: [
       companyId,
       ...supervisors.map((supervisor) => supervisor.userId),
       ...invitations.data.map((invitation) => invitation.id),
+      ...listings.data.map((listing) => listing.id),
     ],
   });
 }
+
+// ------------------------------------------------------------------ listings
+
+const listingRow = z.object({
+  id: z.string(),
+  company_id: z.string(),
+  title: z.string(),
+  description: z.string().nullable(),
+  status: z.enum(["open", "closed"]),
+  created_at: z.string(),
+});
+
+const listingCourseRow = z.object({
+  listing_id: z.string(),
+  course_id: z.string(),
+});
+
+export type AdminListingSummary = {
+  id: string;
+  companyId: string;
+  companyName: string;
+  companyStatus: "active" | "inactive";
+  title: string;
+  description: string | null;
+  status: "open" | "closed";
+  courseCodes: string[];
+  courseIds: string[];
+  createdAt: string;
+};
+
+export async function getListings(
+  filters: {
+    companyId?: string;
+    status?: "open" | "closed";
+  } = {},
+): Promise<Result<AdminListingSummary[]>> {
+  let query = db()
+    .from("listings")
+    .select("id, company_id, title, description, status, created_at")
+    .order("created_at", { ascending: false });
+
+  if (filters.companyId) {
+    query = query.eq("company_id", filters.companyId);
+  }
+  if (filters.status) {
+    query = query.eq("status", filters.status);
+  }
+
+  const listings = await read(z.array(listingRow), () => query);
+  if (!listings.ok) return listings;
+  if (listings.data.length === 0) return ok([]);
+
+  const listingIds = listings.data.map((l) => l.id);
+  const companyIds = Array.from(new Set(listings.data.map((l) => l.company_id)));
+
+  const [companies, listingCourses, courses] = await Promise.all([
+    read(z.array(companyRow), () =>
+      db().from("companies").select("id, name, address, status").in("id", companyIds),
+    ),
+    read(z.array(listingCourseRow), () =>
+      db().from("listing_courses").select("listing_id, course_id").in("listing_id", listingIds),
+    ),
+    read(z.array(courseRow), () =>
+      db().from("courses").select("id, department_id, code, name, is_active"),
+    ),
+  ]);
+
+  if (!companies.ok) return companies;
+  if (!listingCourses.ok) return listingCourses;
+  if (!courses.ok) return courses;
+
+  const companyMap = new Map(companies.data.map((c) => [c.id, c]));
+  const courseMap = new Map(courses.data.map((c) => [c.id, c.code]));
+
+  const listingCoursesMap = new Map<string, string[]>();
+  for (const lc of listingCourses.data) {
+    const existing = listingCoursesMap.get(lc.listing_id) ?? [];
+    existing.push(lc.course_id);
+    listingCoursesMap.set(lc.listing_id, existing);
+  }
+
+  return ok(
+    listings.data.map((listing) => {
+      const company = companyMap.get(listing.company_id);
+      const cIds = listingCoursesMap.get(listing.id) ?? [];
+      const courseCodes = cIds.map((cId) => courseMap.get(cId) ?? "").filter(Boolean);
+
+      return {
+        id: listing.id,
+        companyId: listing.company_id,
+        companyName: company?.name ?? "Unknown company",
+        companyStatus: company?.status ?? "inactive",
+        title: listing.title,
+        description: listing.description,
+        status: listing.status,
+        courseCodes,
+        courseIds: cIds,
+        createdAt: listing.created_at,
+      };
+    }),
+  );
+}
+
+// ----------------------------------------------------------------- settings
+
+const schoolSettingsRow = z.object({
+  name: z.string(),
+  timezone: z.string(),
+  consent_notice_version: z.string(),
+  updated_at: z.string(),
+});
+
+export type SchoolSettingsDetail = {
+  name: string;
+  timezone: string;
+  consentNoticeVersion: string;
+  updatedAt: string;
+};
+
+export async function getSchoolSettings(): Promise<Result<SchoolSettingsDetail>> {
+  const settings = await read(z.array(schoolSettingsRow), () =>
+    db()
+      .from("school_settings")
+      .select("name, timezone, consent_notice_version, updated_at")
+      .eq("id", true),
+  );
+  if (!settings.ok) return settings;
+  if (settings.data.length === 0) {
+    return fail("not_found", "School settings not found.");
+  }
+  const row = settings.data[0];
+  return ok({
+    name: row.name,
+    timezone: row.timezone,
+    consentNoticeVersion: row.consent_notice_version,
+    updatedAt: row.updated_at,
+  });
+}
+
+
 
 // -------------------------------------------------------------- invitations
 
@@ -360,6 +505,108 @@ export async function getClerkInvitationId(invitationId: string): Promise<Result
   if (!found.ok) return found;
   return ok(found.data[0]?.clerk_invitation_id ?? null);
 }
+
+// --------------------------------------------------------------- accounts
+
+const registeredUserRow = z.object({
+  id: z.string(),
+  email: z.string(),
+  full_name: z.string(),
+  role: z.enum(["admin", "coordinator", "supervisor", "student"]),
+  is_active: z.boolean(),
+  created_at: z.string(),
+});
+
+export type RegisteredUserSummary = {
+  id: string;
+  email: string;
+  fullName: string;
+  role: "admin" | "coordinator" | "supervisor" | "student";
+  isActive: boolean;
+  affiliation: string | null;
+  createdAt: string;
+};
+
+export async function getRegisteredUsers(): Promise<Result<RegisteredUserSummary[]>> {
+  const [users, memberships, companies, assignments, students, courses] = await Promise.all([
+    read(z.array(registeredUserRow), () =>
+      db()
+        .from("users")
+        .select("id, email, full_name, role, is_active, created_at")
+        .order("created_at", { ascending: false }),
+    ),
+    read(z.array(membershipRow), () =>
+      db().from("supervisor_memberships").select("user_id, company_id, is_owner"),
+    ),
+    read(z.array(companyRow), () =>
+      db().from("companies").select("id, name, address, status"),
+    ),
+    read(
+      z.array(z.object({ user_id: z.string(), course_id: z.string() })),
+      () => db().from("coordinator_assignments").select("user_id, course_id"),
+    ),
+    read(
+      z.array(
+        z.object({
+          user_id: z.string().nullable(),
+          course_id: z.string(),
+          student_number: z.string(),
+        }),
+      ),
+      () => db().from("students").select("user_id, course_id, student_number"),
+    ),
+    read(z.array(courseRow), () =>
+      db().from("courses").select("id, department_id, code, name, is_active"),
+    ),
+  ]);
+
+  if (!users.ok) return users;
+  if (!memberships.ok) return memberships;
+  if (!companies.ok) return companies;
+  if (!assignments.ok) return assignments;
+  if (!students.ok) return students;
+  if (!courses.ok) return courses;
+
+  return ok(
+    users.data.map((user) => {
+      let affiliation: string | null = null;
+      if (user.role === "supervisor") {
+        const membership = memberships.data.find((m) => m.user_id === user.id);
+        const company = membership
+          ? companies.data.find((c) => c.id === membership.company_id)
+          : null;
+        affiliation = company
+          ? `${company.name}${membership?.is_owner ? " · Owner" : ""}`
+          : null;
+      } else if (user.role === "coordinator") {
+        const assignedCourses = assignments.data
+          .filter((a) => a.user_id === user.id)
+          .map((a) => courses.data.find((c) => c.id === a.course_id)?.code)
+          .filter(Boolean);
+        affiliation = assignedCourses.length > 0 ? assignedCourses.join(", ") : null;
+      } else if (user.role === "student") {
+        const student = students.data.find((s) => s.user_id === user.id);
+        const course = student ? courses.data.find((c) => c.id === student.course_id) : null;
+        affiliation = student
+          ? `${student.student_number}${course ? ` · ${course.code}` : ""}`
+          : null;
+      } else if (user.role === "admin") {
+        affiliation = "Platform admin";
+      }
+
+      return {
+        id: user.id,
+        email: user.email,
+        fullName: user.full_name,
+        role: user.role,
+        isActive: user.is_active,
+        affiliation,
+        createdAt: user.created_at,
+      };
+    }),
+  );
+}
+
 
 // ----------------------------------------------------------------- overview
 
@@ -529,6 +776,7 @@ async function subjectNames(rows: z.infer<typeof auditRow>[]): Promise<Map<strin
     ["courses", "id, code, name", (r) => `${String(r.code)} ${String(r.name)}`],
     ["ojt_batches", "id, school_year", (r) => `Batch ${String(r.school_year)}`],
     ["companies", "id, name", (r) => String(r.name)],
+    ["listings", "id, title", (r) => String(r.title)],
     ["invitations", "id, email", (r) => String(r.email)],
     ["students", "id, full_name", (r) => String(r.full_name)],
     ["users", "id, full_name", (r) => String(r.full_name)],
@@ -570,6 +818,11 @@ async function subjectNames(rows: z.infer<typeof auditRow>[]): Promise<Map<strin
         const user = users.data.find((candidate) => candidate.id === id.split(":")[0]);
         if (user) names.set(`coordinator_assignments:${id}`, user.full_name);
       }
+    }
+  }
+  for (const row of rows) {
+    if (row.table_name === "school_settings") {
+      names.set(`school_settings:${row.row_id}`, "School settings");
     }
   }
   return names;

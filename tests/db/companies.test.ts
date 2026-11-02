@@ -204,3 +204,92 @@ describe("listings and listing_courses", () => {
     expect(found.rows.map((r) => r.id)).toEqual([orphan]);
   });
 });
+
+describe("transfer_company_ownership", () => {
+  it("atomically transfers ownership from one supervisor to another", async () => {
+    const admin = await insertUser("admin");
+    const company = await insertCompany("Transfer Co");
+    const supervisor1 = await insertUser("supervisor");
+    const supervisor2 = await insertUser("supervisor");
+
+    await addSupervisor(supervisor1, company, true);
+    await addSupervisor(supervisor2, company, false);
+
+    await db.query("select transfer_company_ownership($1::uuid, $2::uuid, $3::uuid)", [
+      admin,
+      company,
+      supervisor2,
+    ]);
+
+    const rows = (
+      await db.query<{ user_id: string; is_owner: boolean }>(
+        "select user_id, is_owner from supervisor_memberships where company_id = $1 order by user_id",
+        [company],
+      )
+    ).rows;
+
+    const s1 = rows.find((r) => r.user_id === supervisor1);
+    const s2 = rows.find((r) => r.user_id === supervisor2);
+    expect(s1?.is_owner).toBe(false);
+    expect(s2?.is_owner).toBe(true);
+  });
+
+  it("safely no-ops if target is already the owner", async () => {
+    const admin = await insertUser("admin");
+    const company = await insertCompany("Already Owner Co");
+    const supervisor = await insertUser("supervisor");
+    await addSupervisor(supervisor, company, true);
+
+    await db.query("select transfer_company_ownership($1::uuid, $2::uuid, $3::uuid)", [
+      admin,
+      company,
+      supervisor,
+    ]);
+
+    const row = (
+      await db.query<{ is_owner: boolean }>(
+        "select is_owner from supervisor_memberships where user_id = $1",
+        [supervisor],
+      )
+    ).rows[0];
+    expect(row.is_owner).toBe(true);
+  });
+
+  it("refuses if target supervisor belongs to a different company", async () => {
+    const admin = await insertUser("admin");
+    const company1 = await insertCompany("Company One");
+    const company2 = await insertCompany("Company Two");
+    const supervisor1 = await insertUser("supervisor");
+    const supervisor2 = await insertUser("supervisor");
+
+    await addSupervisor(supervisor1, company1, true);
+    await addSupervisor(supervisor2, company2, true);
+
+    await expect(
+      db.query("select transfer_company_ownership($1::uuid, $2::uuid, $3::uuid)", [
+        admin,
+        company1,
+        supervisor2,
+      ]),
+    ).rejects.toThrow(/supervisor does not belong to this company/);
+  });
+
+  it("refuses if caller is not an admin", async () => {
+    const coordinator = await insertUser("coordinator");
+    const company = await insertCompany("No Admin Co");
+    const supervisor1 = await insertUser("supervisor");
+    const supervisor2 = await insertUser("supervisor");
+
+    await addSupervisor(supervisor1, company, true);
+    await addSupervisor(supervisor2, company, false);
+
+    await expect(
+      db.query("select transfer_company_ownership($1::uuid, $2::uuid, $3::uuid)", [
+        coordinator,
+        company,
+        supervisor2,
+      ]),
+    ).rejects.toThrow(/forbidden/);
+  });
+});
+

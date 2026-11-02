@@ -321,6 +321,122 @@ export async function setCompanyStatus(
   });
 }
 
+export async function transferCompanyOwnership(
+  actorId: string,
+  companyId: string,
+  newOwnerId: string,
+): Promise<Result<null>> {
+  const parsed = z
+    .object({ actorId: uuid, companyId: uuid, newOwnerId: uuid })
+    .safeParse({ actorId, companyId, newOwnerId });
+  if (!parsed.success) return invalid("The ownership transfer details are not valid.");
+  return changed("transfer_company_ownership", {
+    p_actor: parsed.data.actorId,
+    p_company_id: parsed.data.companyId,
+    p_new_owner_id: parsed.data.newOwnerId,
+  });
+}
+
+export async function createListing(
+  actorId: string,
+  input: {
+    companyId: string;
+    title: string;
+    description?: string | null;
+    courseIds: string[];
+  },
+): Promise<Result<string>> {
+  const parsed = z
+    .object({
+      actorId: uuid,
+      companyId: uuid,
+      title: z.string().trim().min(1),
+      description: z.string().trim().nullable().optional(),
+      courseIds: z.array(uuid).min(1),
+    })
+    .safeParse({ actorId, ...input });
+  if (!parsed.success) return invalid("The listing details are not valid.");
+  return createdId("create_listing", {
+    p_actor: parsed.data.actorId,
+    p_company_id: parsed.data.companyId,
+    p_title: parsed.data.title,
+    p_description: parsed.data.description ?? null,
+    p_course_ids: parsed.data.courseIds,
+  });
+}
+
+export async function updateListing(
+  actorId: string,
+  input: {
+    listingId: string;
+    title: string;
+    description?: string | null;
+    courseIds: string[];
+  },
+): Promise<Result<null>> {
+  const parsed = z
+    .object({
+      actorId: uuid,
+      listingId: uuid,
+      title: z.string().trim().min(1),
+      description: z.string().trim().nullable().optional(),
+      courseIds: z.array(uuid).min(1),
+    })
+    .safeParse({ actorId, ...input });
+  if (!parsed.success) return invalid("The listing details are not valid.");
+  return changed("update_listing", {
+    p_actor: parsed.data.actorId,
+    p_listing_id: parsed.data.listingId,
+    p_title: parsed.data.title,
+    p_description: parsed.data.description ?? null,
+    p_course_ids: parsed.data.courseIds,
+  });
+}
+
+export async function setListingStatus(
+  actorId: string,
+  listingId: string,
+  status: "open" | "closed",
+): Promise<Result<null>> {
+  const parsed = z
+    .object({ actorId: uuid, listingId: uuid, status: z.enum(["open", "closed"]) })
+    .safeParse({ actorId, listingId, status });
+  if (!parsed.success) return invalid("The listing status details are not valid.");
+  return changed("set_listing_status", {
+    p_actor: parsed.data.actorId,
+    p_listing_id: parsed.data.listingId,
+    p_status: parsed.data.status,
+  });
+}
+
+export async function updateSchoolSettings(
+  actorId: string,
+  input: {
+    name: string;
+    timezone: string;
+    consentNoticeVersion: string;
+  },
+): Promise<Result<null>> {
+  const parsed = z
+    .object({
+      actorId: uuid,
+      name: z.string().trim().min(1),
+      timezone: z.string().trim().min(1),
+      consentNoticeVersion: z.string().trim().min(1),
+    })
+    .safeParse({ actorId, ...input });
+  if (!parsed.success) return invalid("The school settings are not valid.");
+  return changed("update_school_settings", {
+    p_actor: parsed.data.actorId,
+    p_name: parsed.data.name,
+    p_timezone: parsed.data.timezone,
+    p_consent_notice_version: parsed.data.consentNoticeVersion,
+  });
+}
+
+
+
+
 export async function importRoster(
   actorId: string,
   batchId: string,
@@ -357,6 +473,54 @@ export async function importRoster(
   if (!result.ok) return result;
   const count = z.number().int().safeParse(result.data);
   return count.success ? ok(count.data) : fail("unexpected", unexpected);
+}
+
+export async function adminReopenDailyLog(
+  actorId: string,
+  logId: string,
+  reason: string,
+): Promise<Result<null>> {
+  const parsed = z
+    .object({
+      actorId: uuid,
+      logId: uuid,
+      reason: z.string().trim().min(1, "Support reason is required."),
+    })
+    .safeParse({ actorId, logId, reason });
+  if (!parsed.success) return invalid("The support reason is not valid.");
+  return changed("admin_reopen_daily_log", {
+    p_actor: parsed.data.actorId,
+    p_log_id: parsed.data.logId,
+    p_reason: parsed.data.reason,
+  });
+}
+
+export async function createDeployment(
+  actorId: string,
+  input: {
+    studentId: string;
+    companyId: string;
+    listingId?: string | null;
+    batchId: string;
+  },
+): Promise<Result<string>> {
+  const parsed = z
+    .object({
+      actorId: uuid,
+      studentId: uuid,
+      companyId: uuid,
+      listingId: uuid.nullable().optional(),
+      batchId: uuid,
+    })
+    .safeParse({ actorId, ...input });
+  if (!parsed.success) return invalid("The deployment details are not valid.");
+  return createdId("create_deployment", {
+    p_actor: parsed.data.actorId,
+    p_student_id: parsed.data.studentId,
+    p_company_id: parsed.data.companyId,
+    p_listing_id: parsed.data.listingId ?? null,
+    p_batch_id: parsed.data.batchId,
+  });
 }
 
 export const databaseSessionStore: SessionStore = {

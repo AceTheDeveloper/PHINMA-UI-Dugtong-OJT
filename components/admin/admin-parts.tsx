@@ -99,3 +99,12 @@ export function BatchStatusBadge({ status }: { status: keyof typeof batchRoles }
   const { label, role } = batchRoles[status];
   return <RoleBadge role={role}>{label}</RoleBadge>;
 }
+
+export function ListingStatusBadge({ status }: { status: "open" | "closed" }) {
+  return status === "open" ? (
+    <RoleBadge role="success">Open</RoleBadge>
+  ) : (
+    <RoleBadge role="neutral">Closed</RoleBadge>
+  );
+}
+

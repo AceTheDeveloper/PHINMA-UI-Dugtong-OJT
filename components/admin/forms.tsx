@@ -23,6 +23,7 @@ import {
   inviteCoordinator,
   inviteSupervisor,
   revokeInvitation,
+  transferOwnership,
 } from "@/app/(app)/admin/actions";
 import {
   batchSchema,
@@ -499,3 +500,39 @@ export function RevokeButton({ invitationId }: { invitationId: string }) {
     </div>
   );
 }
+
+export function TransferOwnershipButton({
+  companyId,
+  newOwnerId,
+  name,
+}: {
+  companyId: string;
+  newOwnerId: string;
+  name: string;
+}) {
+  const action = useAction();
+  return (
+    <div className="grid justify-items-end gap-1">
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        disabled={action.pending}
+        onClick={() => {
+          if (
+            !window.confirm(
+              `Transfer company ownership to ${name}? They will become the primary contact and be able to invite colleague supervisors.`,
+            )
+          ) {
+            return;
+          }
+          action.run(() => transferOwnership({ companyId, newOwnerId }));
+        }}
+      >
+        {action.pending ? "Transferring ownership" : "Transfer ownership"}
+      </Button>
+      {action.message ? <p className="max-w-48 text-xs text-error-text">{action.message}</p> : null}
+    </div>
+  );
+}
+

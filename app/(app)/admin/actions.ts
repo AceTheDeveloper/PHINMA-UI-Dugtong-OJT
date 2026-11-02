@@ -7,23 +7,37 @@ import {
   companySchema,
   companyStatusSchema,
   courseSchema,
+  createListingSchema,
   departmentSchema,
   inviteAdminSchema,
   inviteCoordinatorSchema,
   inviteSupervisorSchema,
+  reopenDailyLogSchema,
   requiredHoursSchema,
   revokeInvitationSchema,
+  schoolSettingsSchema,
+  setListingStatusSchema,
+  toggleUserActiveSchema,
+  transferOwnershipSchema,
+  updateListingSchema,
 } from "@/lib/admin/schemas";
 import { inviteUser, revokeInvitationEverywhere } from "@/lib/auth/invitations";
 import { authorize } from "@/lib/auth/server";
 import type { Session } from "@/lib/auth/session";
 import {
+  adminReopenDailyLog,
   createCompany,
   createCourse,
   createDepartment,
+  createListing,
   createOjtBatch,
   setCompanyStatus,
+  setListingStatus,
   setOjtRequiredHours,
+  setUserActive,
+  transferCompanyOwnership,
+  updateListing,
+  updateSchoolSettings,
 } from "@/lib/db/rpc";
 import { fail, ok, type Result } from "@/lib/result";
 
@@ -56,7 +70,9 @@ async function run<S extends z.ZodType>(
 
 const academics = ["/admin", "/admin/academics", "/admin/audit"];
 const companies = ["/admin", "/admin/companies", "/admin/audit"];
+const listings = ["/admin", "/admin/listings", "/admin/companies", "/admin/audit"];
 const people = ["/admin", "/admin/people", "/admin/audit"];
+const settings = ["/admin", "/admin/settings", "/admin/audit"];
 
 export async function addDepartment(raw: unknown): Promise<ActionResult> {
   return run(departmentSchema, raw, academics, (session, input) =>
@@ -136,3 +152,51 @@ export async function revokeInvitation(raw: unknown): Promise<ActionResult> {
     revokeInvitationEverywhere(session.userId, input.invitationId),
   );
 }
+
+export async function toggleUserActive(raw: unknown): Promise<ActionResult> {
+  return run(toggleUserActiveSchema, raw, people, (session, input) =>
+    setUserActive(session.userId, input.userId, input.active),
+  );
+}
+
+export async function transferOwnership(raw: unknown): Promise<ActionResult> {
+  return run(transferOwnershipSchema, raw, companies, (session, input) => {
+    revalidatePath(`/admin/companies/${input.companyId}`);
+    return transferCompanyOwnership(session.userId, input.companyId, input.newOwnerId);
+  });
+}
+
+export async function addListing(raw: unknown): Promise<ActionResult> {
+  return run(createListingSchema, raw, listings, (session, input) => {
+    revalidatePath(`/admin/companies/${input.companyId}`);
+    return createListing(session.userId, input);
+  });
+}
+
+export async function editListing(raw: unknown): Promise<ActionResult> {
+  return run(updateListingSchema, raw, listings, (session, input) =>
+    updateListing(session.userId, input),
+  );
+}
+
+export async function changeListingStatus(raw: unknown): Promise<ActionResult> {
+  return run(setListingStatusSchema, raw, listings, (session, input) =>
+    setListingStatus(session.userId, input.listingId, input.status),
+  );
+}
+
+export async function saveSchoolSettings(raw: unknown): Promise<ActionResult> {
+  return run(schoolSettingsSchema, raw, settings, (session, input) =>
+    updateSchoolSettings(session.userId, input),
+  );
+}
+
+export async function reopenDailyLog(raw: unknown): Promise<ActionResult> {
+  return run(reopenDailyLogSchema, raw, ["/admin", "/admin/audit", "/coordinator"], (session, input) =>
+    adminReopenDailyLog(session.userId, input.logId, input.reason),
+  );
+}
+
+
+
+

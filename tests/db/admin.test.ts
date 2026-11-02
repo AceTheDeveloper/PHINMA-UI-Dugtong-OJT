@@ -309,6 +309,32 @@ describe("audit log", () => {
     expect(membership[0].new_value).toMatchObject({ is_owner: true });
   });
 
+  it("records account deactivation and reactivation with the admin as actor", async () => {
+    const targetUser = await insertUser("student");
+    await db.query("select set_user_active($1::uuid, $2::uuid, false)", [admin, targetUser]);
+    const rows = await auditFor("users", targetUser);
+    const deactivationRow = rows[rows.length - 1];
+    expect(deactivationRow).toMatchObject({
+      action: "update",
+      actor_id: admin,
+      source: "app",
+      new_value: { is_active: false },
+      old_value: { is_active: true },
+    });
+
+    await db.query("select set_user_active($1::uuid, $2::uuid, true)", [admin, targetUser]);
+    const updatedRows = await auditFor("users", targetUser);
+    const reactivationRow = updatedRows[updatedRows.length - 1];
+    expect(reactivationRow).toMatchObject({
+      action: "update",
+      actor_id: admin,
+      source: "app",
+      new_value: { is_active: true },
+      old_value: { is_active: false },
+    });
+  });
+
+
   it("records an edit made outside the app with source database and no actor", async () => {
     await db.query("update companies set address = 'Changed in SQL editor' where id = $1", [
       company,

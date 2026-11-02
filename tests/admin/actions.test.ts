@@ -21,6 +21,13 @@ const rpc = {
   setOjtRequiredHours: vi.fn(),
   createCompany: vi.fn(),
   setCompanyStatus: vi.fn(),
+  setUserActive: vi.fn(),
+  transferCompanyOwnership: vi.fn(),
+  createListing: vi.fn(),
+  updateListing: vi.fn(),
+  setListingStatus: vi.fn(),
+  updateSchoolSettings: vi.fn(),
+  adminReopenDailyLog: vi.fn(),
 };
 vi.mock("@/lib/db/rpc", () => rpc);
 
@@ -82,7 +89,38 @@ const calls: { name: string; run: () => Promise<{ ok: boolean }> }[] = [
   },
   { name: "inviteAdmin", run: () => actions.inviteAdmin({ email: "a@example.test" }) },
   { name: "revokeInvitation", run: () => actions.revokeInvitation({ invitationId: uuid }) },
+  { name: "toggleUserActive", run: () => actions.toggleUserActive({ userId: uuid, active: false }) },
+  {
+    name: "transferOwnership",
+    run: () => actions.transferOwnership({ companyId: uuid, newOwnerId: uuid }),
+  },
+  {
+    name: "addListing",
+    run: () => actions.addListing({ companyId: uuid, title: "Intern", courseIds: [uuid] }),
+  },
+  {
+    name: "editListing",
+    run: () => actions.editListing({ listingId: uuid, title: "Intern", courseIds: [uuid] }),
+  },
+  {
+    name: "changeListingStatus",
+    run: () => actions.changeListingStatus({ listingId: uuid, status: "closed" }),
+  },
+  {
+    name: "saveSchoolSettings",
+    run: () =>
+      actions.saveSchoolSettings({
+        name: "PHINMA UI",
+        timezone: "Asia/Manila",
+        consentNoticeVersion: "v1",
+      }),
+  },
+  {
+    name: "reopenDailyLog",
+    run: () => actions.reopenDailyLog({ logId: uuid, reason: "Correction requested" }),
+  },
 ];
+
 
 function nothingWasWritten() {
   for (const fn of [...Object.values(rpc), ...Object.values(invitations)]) {
@@ -164,6 +202,67 @@ describe("Admin actions with an admin", () => {
     });
   });
 
+  it("toggles a user active status", async () => {
+    await actions.toggleUserActive({ userId: uuid, active: false });
+    expect(rpc.setUserActive).toHaveBeenCalledWith(userId, uuid, false);
+  });
+
+  it("transfers company ownership", async () => {
+    const newOwnerId = "00000000-0000-4000-8000-000000000002";
+    await actions.transferOwnership({ companyId: uuid, newOwnerId });
+    expect(rpc.transferCompanyOwnership).toHaveBeenCalledWith(userId, uuid, newOwnerId);
+  });
+
+  it("creates a listing", async () => {
+    await actions.addListing({
+      companyId: uuid,
+      title: "Backend Intern",
+      description: "Node.js",
+      courseIds: [uuid],
+    });
+    expect(rpc.createListing).toHaveBeenCalledWith(userId, {
+      companyId: uuid,
+      title: "Backend Intern",
+      description: "Node.js",
+      courseIds: [uuid],
+    });
+  });
+
+  it("edits a listing", async () => {
+    await actions.editListing({
+      listingId: uuid,
+      title: "Backend Intern Updated",
+      description: "Node.js & Postgres",
+      courseIds: [uuid],
+    });
+    expect(rpc.updateListing).toHaveBeenCalledWith(userId, {
+      listingId: uuid,
+      title: "Backend Intern Updated",
+      description: "Node.js & Postgres",
+      courseIds: [uuid],
+    });
+  });
+
+  it("changes listing status", async () => {
+    await actions.changeListingStatus({ listingId: uuid, status: "closed" });
+    expect(rpc.setListingStatus).toHaveBeenCalledWith(userId, uuid, "closed");
+  });
+
+  it("saves school settings", async () => {
+    await actions.saveSchoolSettings({
+      name: "PHINMA UI",
+      timezone: "Asia/Manila",
+      consentNoticeVersion: "v2",
+    });
+    expect(rpc.updateSchoolSettings).toHaveBeenCalledWith(userId, {
+      name: "PHINMA UI",
+      timezone: "Asia/Manila",
+      consentNoticeVersion: "v2",
+    });
+  });
+
+
+
   it("passes a database refusal on as a typed result", async () => {
     rpc.createDepartment.mockResolvedValue(
       fail("conflict", "A department with this code already exists."),
@@ -213,6 +312,18 @@ describe("Admin actions with an admin", () => {
       "a status other than active or inactive",
       () => actions.changeCompanyStatus({ companyId: uuid, status: "deleted" }),
     ],
+    ["an invalid user id to toggle", () => actions.toggleUserActive({ userId: "not-a-uuid", active: true })],
+    ["a missing active flag", () => actions.toggleUserActive({ userId: uuid })],
+    ["an invalid company id for transfer", () => actions.transferOwnership({ companyId: "not-a-uuid", newOwnerId: uuid })],
+    ["an invalid new owner id for transfer", () => actions.transferOwnership({ companyId: uuid, newOwnerId: "not-a-uuid" })],
+    ["a listing with no courses", () => actions.addListing({ companyId: uuid, title: "Intern", courseIds: [] })],
+    ["a listing with blank title", () => actions.addListing({ companyId: uuid, title: "   ", courseIds: [uuid] })],
+    ["an invalid listing status", () => actions.changeListingStatus({ listingId: uuid, status: "archived" })],
+    ["blank school name", () => actions.saveSchoolSettings({ name: " ", timezone: "Asia/Manila", consentNoticeVersion: "v1" })],
+    ["blank timezone", () => actions.saveSchoolSettings({ name: "School", timezone: " ", consentNoticeVersion: "v1" })],
+    ["blank consent version", () => actions.saveSchoolSettings({ name: "School", timezone: "Asia/Manila", consentNoticeVersion: " " })],
+    ["a reopen with blank reason", () => actions.reopenDailyLog({ logId: uuid, reason: "   " })],
+    ["a reopen with invalid log id", () => actions.reopenDailyLog({ logId: "not-a-uuid", reason: "Valid" })],
     ["a missing body", () => actions.addCompany(undefined)],
   ];
 
@@ -224,3 +335,19 @@ describe("Admin actions with an admin", () => {
     });
   }
 });
+
+describe("reopenDailyLog action", () => {
+  it("reopens daily log when caller is admin and calls rpc.adminReopenDailyLog", async () => {
+    authorize.mockResolvedValue(ok(session("admin")));
+    rpc.adminReopenDailyLog.mockResolvedValue(ok(null));
+
+    const result = await actions.reopenDailyLog({
+      logId: uuid,
+      reason: "Support correction",
+    });
+
+    expect(result.ok).toBe(true);
+    expect(rpc.adminReopenDailyLog).toHaveBeenCalledWith(userId, uuid, "Support correction");
+  });
+});
+

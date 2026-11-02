@@ -150,6 +150,7 @@ export async function commitRoster(raw: unknown): Promise<Result<{ imported: num
   const imported = await importRoster(session.userId, preview.batchId, preview.rows);
   if (!imported.ok) return imported;
   revalidatePath("/coordinator/roster");
+  revalidatePath("/admin/roster");
   revalidatePath("/admin/audit");
   return ok({ imported: imported.data });
 }
@@ -199,6 +200,7 @@ export async function sendInvitations(raw: unknown): Promise<Result<SendReport>>
     }
   }
   revalidatePath("/coordinator/roster");
+  revalidatePath("/admin/roster");
   revalidatePath("/admin/audit");
   return ok(report);
 }
@@ -238,6 +240,7 @@ export async function resendInvitation(raw: unknown): Promise<Result<null>> {
   }).catch(() => fail("unexpected", unexpected));
   if (!sent.ok) return sent;
   revalidatePath("/coordinator/roster");
+  revalidatePath("/admin/roster");
   revalidatePath("/admin/audit");
   return ok(null);
 }
