@@ -567,3 +567,38 @@ export async function getResumePath(
     ? ok(path.data)
     : fail("unexpected", "Something went wrong. Try again in a moment.");
 }
+
+// A student applies to a listing. The function checks the student, the
+// listing, the course, and the resume. Returns the new application id.
+export async function applyToListing(
+  actorId: string,
+  listingId: string,
+): Promise<Result<string>> {
+  const parsed = z.object({ actorId: uuid, listingId: uuid }).safeParse({ actorId, listingId });
+  if (!parsed.success) return invalid("The application details are not valid.");
+  const result = await call("apply_to_listing", {
+    p_actor: parsed.data.actorId,
+    p_listing_id: parsed.data.listingId,
+  });
+  if (!result.ok) return result;
+  const created = idResult.safeParse(result.data);
+  return created.success
+    ? ok(created.data)
+    : fail("unexpected", "Something went wrong. Try again in a moment.");
+}
+
+// A student withdraws their own application while it is still applied.
+export async function withdrawApplication(
+  actorId: string,
+  applicationId: string,
+): Promise<Result<null>> {
+  const parsed = z
+    .object({ actorId: uuid, applicationId: uuid })
+    .safeParse({ actorId, applicationId });
+  if (!parsed.success) return invalid("The application details are not valid.");
+  const result = await call("withdraw_application", {
+    p_actor: parsed.data.actorId,
+    p_application_id: parsed.data.applicationId,
+  });
+  return result.ok ? ok(null) : result;
+}

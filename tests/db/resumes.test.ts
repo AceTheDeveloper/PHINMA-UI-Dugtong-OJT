@@ -163,7 +163,7 @@ describe("resume_path_for", () => {
     ).rejects.toThrow(/forbidden/);
   });
 
-  it("refuses an admin and, until applications exist, a supervisor", async () => {
+  it("refuses an admin and a supervisor with no application", async () => {
     const { user, student } = await studentWithAccount();
     await db.query("select save_resume($1, 1000)", [user]);
     for (const role of ["admin", "supervisor"]) {
