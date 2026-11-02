@@ -58,9 +58,7 @@ export function AppSidebar({
                 height={32}
                 className="size-8 shrink-0 object-contain"
               />
-              <span className="font-heading text-base font-extrabold tracking-[-0.03em]">
-                Dugtong
-              </span>
+              <span className="font-heading text-lg font-bold tracking-[-0.02em]">Dugtong</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -84,7 +82,7 @@ export function AppSidebar({
                         <Icon aria-hidden="true" />
                         <span>{item.label}</span>
                       </SidebarMenuButton>
-                      <SidebarMenuBadge className="text-faint">Soon</SidebarMenuBadge>
+                      <SidebarMenuBadge className="text-sidebar-foreground/70">Soon</SidebarMenuBadge>
                     </SidebarMenuItem>
                   );
                 }
@@ -99,7 +97,7 @@ export function AppSidebar({
                     <SidebarMenuButton
                       isActive={current}
                       tooltip={item.label}
-                      className="pointer-coarse:h-11"
+                      className="relative pointer-coarse:h-11 data-active:font-semibold data-active:before:absolute data-active:before:inset-y-2 data-active:before:left-0 data-active:before:w-1 data-active:before:rounded-full data-active:before:bg-teal-bright"
                       render={
                         <Link
                           href={href}
@@ -123,12 +121,14 @@ export function AppSidebar({
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" className="cursor-default hover:bg-transparent">
               <Avatar>
-                <AvatarFallback>{initials(account.name)}</AvatarFallback>
+                <AvatarFallback className="bg-sidebar-accent text-sidebar-accent-foreground">
+                  {initials(account.name)}
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">{account.name}</span>
                 {account.email ? (
-                  <span className="truncate text-xs text-muted-foreground">{account.email}</span>
+                  <span className="truncate text-xs text-sidebar-foreground/70">{account.email}</span>
                 ) : null}
               </div>
             </SidebarMenuButton>

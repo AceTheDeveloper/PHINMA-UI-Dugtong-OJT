@@ -41,7 +41,7 @@ function Note({ children }: { children: React.ReactNode }) {
 function TimeIn({ scheduleLabel }: { scheduleLabel: string }) {
   const { pending, message, run } = useAction();
   return (
-    <section aria-label="Today" className={panel}>
+    <section id="today" aria-label="Today" className={`${panel} scroll-mt-20`}>
       <Heading title="Today" />
       <Note>
         Your schedule today is <span className="font-semibold text-ink">{scheduleLabel}</span>.
@@ -63,7 +63,7 @@ function TimeIn({ scheduleLabel }: { scheduleLabel: string }) {
 
 function Blocked({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section aria-label="Today" className={panel}>
+    <section id="today" aria-label="Today" className={`${panel} scroll-mt-20`}>
       <Heading title={title} />
       <Note>{children}</Note>
     </section>
@@ -123,7 +123,7 @@ function Running({
   }
 
   return (
-    <section aria-label="Today" className={panel}>
+    <section id="today" aria-label="Today" className={`${panel} scroll-mt-20`}>
       <Heading title="Today" badge={<LogStatusBadge status="open" />} />
       <div className="grid gap-1">
         <p className="text-sm text-muted-foreground">Timed in at</p>
@@ -242,7 +242,7 @@ export function TodayCard({ view }: { view: TodayView }) {
         );
       }
       return (
-        <section aria-label="Today" className={panel}>
+        <section id="today" aria-label="Today" className={`${panel} scroll-mt-20`}>
           <Heading title="Today" badge={<LogStatusBadge status={entry.status} />} />
           <Summary entry={entry} />
           {entry.status === "pending" ? (

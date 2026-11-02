@@ -4,6 +4,6 @@ import { requireRole } from "@/lib/auth/server";
 export default async function StudentLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  await requireRole(["student"]);
-  return <AppShell role="student">{children}</AppShell>;
+  const session = await requireRole(["student"]);
+  return <AppShell role="student" session={session}>{children}</AppShell>;
 }

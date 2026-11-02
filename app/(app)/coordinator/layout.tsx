@@ -10,6 +10,6 @@ export const metadata: Metadata = {
 export default async function CoordinatorLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  await requireRole(["coordinator", "admin"]);
-  return <AppShell role="coordinator">{children}</AppShell>;
+  const session = await requireRole(["coordinator", "admin"]);
+  return <AppShell role="coordinator" session={session}>{children}</AppShell>;
 }

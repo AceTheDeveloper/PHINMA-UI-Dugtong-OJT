@@ -4,6 +4,6 @@ import { requireRole } from "@/lib/auth/server";
 export default async function SupervisorLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  await requireRole(["supervisor"]);
-  return <AppShell role="supervisor">{children}</AppShell>;
+  const session = await requireRole(["supervisor"]);
+  return <AppShell role="supervisor" session={session}>{children}</AppShell>;
 }

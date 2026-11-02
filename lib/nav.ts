@@ -1,12 +1,24 @@
 import type { Role } from "@/lib/auth/roles";
 
-export type NavLink = { href: string; label: string; exact: boolean };
+export type NavLink = {
+  href: string;
+  label: string;
+  exact: boolean;
+  // Other sections that also mark this link as the current one (the phone bar's
+  // "Apply" covers both Listings and Applications).
+  also?: readonly string[];
+};
+
+function underOrAt(pathname: string, href: string): boolean {
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
 
 // Whether a navigation link is the page the person is on. A link that is not
 // "exact" also matches the pages below it (/student/listings/abc is Listings).
 export function isCurrentLink(pathname: string, link: NavLink): boolean {
+  if (link.also?.some((href) => underOrAt(pathname, href))) return true;
   if (link.exact) return pathname === link.href;
-  return pathname === link.href || pathname.startsWith(`${link.href}/`);
+  return underOrAt(pathname, link.href);
 }
 
 // Icons are named, not passed: a server component cannot hand a component
@@ -27,7 +39,8 @@ export type IconName =
   | "audit"
   | "academics"
   | "people"
-  | "settings";
+  | "settings"
+  | "menu";
 
 // One entry in a role's navigation. A link with no href has no screen yet; the
 // sidebar shows it as a disabled row so people can see what is coming.
@@ -36,6 +49,7 @@ export type ShellLink = {
   icon: IconName;
   href: string | null;
   exact: boolean;
+  also?: readonly string[];
 };
 
 const link = (label: string, icon: IconName, href: string | null, exact = false): ShellLink => ({
@@ -95,12 +109,59 @@ export function linksFor(role: Role): readonly ShellLink[] {
   return links[role];
 }
 
+// The bar along the bottom edge of a phone. Students get four tabs around the
+// punch button (Time in, then Time out) so the daily action is one tap from every
+// page; Listings and Applications share one "Apply" tab to make room. Supervisors
+// get their daily work and a "More" tab that opens the full menu. The other
+// roles use the menu only.
+export type BottomBar = {
+  label: string;
+  tabs: readonly ShellLink[];
+  punch: boolean;
+  more: boolean;
+};
+
+const studentBar: BottomBar = {
+  label: "Student",
+  punch: true,
+  more: false,
+  tabs: [
+    link("Home", "home", "/student", true),
+    link("Daily log", "logs", "/student/logs"),
+    { label: "Apply", icon: "listings", href: "/student/listings", exact: false, also: ["/student/applications"] },
+    link("Resume", "resume", "/student/resume"),
+  ],
+};
+
+const supervisorBar: BottomBar = {
+  label: "Supervisor",
+  punch: false,
+  more: true,
+  tabs: [
+    link("Home", "home", "/supervisor", true),
+    link("Approvals", "logs", "/supervisor/approvals"),
+    link("Students", "students", "/supervisor/students"),
+    link("Evaluations", "evaluations", "/supervisor/evaluations"),
+  ],
+};
+
+export function bottomBarFor(role: Role): BottomBar | null {
+  if (role === "student") return studentBar;
+  if (role === "supervisor") return supervisorBar;
+  return null;
+}
+
 // The label of the page the person is on, for the top bar.
 export function currentLabel(pathname: string, shellLinks: readonly ShellLink[]): string | null {
   const match = shellLinks.find(
     (item) =>
       item.href !== null &&
-      isCurrentLink(pathname, { href: item.href, label: item.label, exact: item.exact }),
+      isCurrentLink(pathname, {
+        href: item.href,
+        label: item.label,
+        exact: item.exact,
+        also: item.also,
+      }),
   );
   return match?.label ?? null;
 }

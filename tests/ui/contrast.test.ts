@@ -70,6 +70,10 @@ const textPairs: [string, string][] = [
   ["success-text", "card"],
   ["teal-text", "card"],
   ["info-text", "card"],
+  ["sidebar-foreground", "sidebar"],
+  ["sidebar-accent-foreground", "sidebar-accent"],
+  ["sidebar-foreground", "sidebar-accent"],
+  ["sidebar-primary", "sidebar"],
 ];
 
 // Marks and edges a person must be able to see: 3:1.
@@ -79,6 +83,7 @@ const markPairs: [string, string][] = [
   ["input", "card"],
   ["input", "background"],
   ["ring", "card"],
+  ["teal-bright", "sidebar"],
 ];
 
 describe.each(Object.entries(themes))("%s theme", (_name, theme) => {
@@ -94,6 +99,21 @@ describe.each(Object.entries(themes))("%s theme", (_name, theme) => {
     const light_text = "#ffffff";
     expect(contrast(light_text, resolve(theme, "warning"))).toBeGreaterThanOrEqual(4.5);
     expect(contrast(light_text, resolve(theme, "success"))).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it("keeps the sidebar's secondary text (the foreground at 70%) readable on the sidebar", () => {
+    const foreground = resolve(theme, "sidebar-foreground");
+    const ground = resolve(theme, "sidebar");
+    const mix = [1, 3, 5]
+      .map((offset) => {
+        const a = parseInt(foreground.slice(offset, offset + 2), 16);
+        const b = parseInt(ground.slice(offset, offset + 2), 16);
+        return Math.round(a * 0.7 + b * 0.3)
+          .toString(16)
+          .padStart(2, "0");
+      })
+      .join("");
+    expect(contrast(`#${mix}`, ground)).toBeGreaterThanOrEqual(4.5);
   });
 
   it("puts the destructive colour on a readable button", () => {

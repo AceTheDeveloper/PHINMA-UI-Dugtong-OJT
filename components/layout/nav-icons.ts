@@ -8,6 +8,7 @@ import {
   History,
   House,
   LayoutDashboard,
+  Menu,
   Send,
   Settings,
   Upload,
@@ -35,4 +36,5 @@ export const navIcons: Record<IconName, LucideIcon> = {
   academics: GraduationCap,
   people: Users,
   settings: Settings,
+  menu: Menu,
 };

@@ -15,10 +15,10 @@ export function PageHeader({
   return (
     <div className="flex flex-wrap items-end justify-between gap-4">
       <div className="min-w-0">
-        <h1 className="font-heading text-[28px] font-extrabold leading-[1.1] tracking-[-0.03em] text-ink sm:text-[32px]">
+        <h1 className="font-heading text-[30px] font-bold leading-[1.1] tracking-[-0.03em] text-ink sm:text-[38px]">
           {title}
         </h1>
-        <p className="mt-2 max-w-[62ch] text-[15px] leading-[1.6] text-copy-muted">
+        <p className="mt-2 max-w-[62ch] text-base leading-[1.6] text-copy-muted">
           {description}
         </p>
       </div>

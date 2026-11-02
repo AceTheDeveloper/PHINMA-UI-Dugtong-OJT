@@ -153,14 +153,16 @@
   /* Two radii, by role: controls (buttons, inputs, badges) and panels. */
   --radius: 0.625rem;
   --radius-panel: 1.25rem;
-  --sidebar: var(--card);
-  --sidebar-foreground: var(--foreground);
-  --sidebar-primary: var(--primary);
-  --sidebar-primary-foreground: var(--primary-foreground);
-  --sidebar-accent: var(--accent);
-  --sidebar-accent-foreground: var(--accent-foreground);
-  --sidebar-border: var(--border);
-  --sidebar-ring: var(--ring);
+  /* The shell is navy in both themes: the one dark surface in the light theme, so
+     the frame reads as the app and the page reads as paper. */
+  --sidebar: #0c1a33;
+  --sidebar-foreground: #dbe4f5;
+  --sidebar-primary: #6e93ff;
+  --sidebar-primary-foreground: #08122a;
+  --sidebar-accent: #1b2b4d;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #1f2f50;
+  --sidebar-ring: #6e93ff;
 }
 
 .dark {
@@ -226,6 +228,9 @@
   --destructive: #f87171;
   --input: #5a6b92;
   --ring: #93b0ff;
+  --sidebar: #070e1e;
+  --sidebar-border: #162340;
+  --sidebar-accent: #14223f;
 }
 
 html {

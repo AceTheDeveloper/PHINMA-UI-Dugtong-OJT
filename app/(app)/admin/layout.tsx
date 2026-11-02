@@ -12,6 +12,6 @@ export const metadata: Metadata = {
 export default async function AdminLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  await requireRole(["admin"]);
-  return <AppShell role="admin">{children}</AppShell>;
+  const session = await requireRole(["admin"]);
+  return <AppShell role="admin" session={session}>{children}</AppShell>;
 }
