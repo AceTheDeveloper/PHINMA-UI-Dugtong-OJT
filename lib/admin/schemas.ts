@@ -150,5 +150,16 @@ export type UpdateListingInput = z.infer<typeof updateListingSchema>;
 export type SetListingStatusInput = z.infer<typeof setListingStatusSchema>;
 export type SchoolSettingsInput = z.infer<typeof schoolSettingsSchema>;
 
+export const reopenDailyLogSchema = z.object({
+  logId: uuid,
+  reason: z
+    .string()
+    .trim()
+    .min(1, "Support reason is required.")
+    .max(500, "Support reason is too long."),
+});
+
+export type ReopenDailyLogInput = z.infer<typeof reopenDailyLogSchema>;
+
 
 

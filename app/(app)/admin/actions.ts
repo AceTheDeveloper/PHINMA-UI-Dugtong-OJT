@@ -12,6 +12,7 @@ import {
   inviteAdminSchema,
   inviteCoordinatorSchema,
   inviteSupervisorSchema,
+  reopenDailyLogSchema,
   requiredHoursSchema,
   revokeInvitationSchema,
   schoolSettingsSchema,
@@ -24,6 +25,7 @@ import { inviteUser, revokeInvitationEverywhere } from "@/lib/auth/invitations";
 import { authorize } from "@/lib/auth/server";
 import type { Session } from "@/lib/auth/session";
 import {
+  adminReopenDailyLog,
   createCompany,
   createCourse,
   createDepartment,
@@ -186,6 +188,12 @@ export async function changeListingStatus(raw: unknown): Promise<ActionResult> {
 export async function saveSchoolSettings(raw: unknown): Promise<ActionResult> {
   return run(schoolSettingsSchema, raw, settings, (session, input) =>
     updateSchoolSettings(session.userId, input),
+  );
+}
+
+export async function reopenDailyLog(raw: unknown): Promise<ActionResult> {
+  return run(reopenDailyLogSchema, raw, ["/admin", "/admin/audit", "/coordinator"], (session, input) =>
+    adminReopenDailyLog(session.userId, input.logId, input.reason),
   );
 }
 

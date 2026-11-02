@@ -35,5 +35,7 @@ describe("admin navigation and sidebar", () => {
     expect(tableLabel("school_settings")).toBe("School settings");
     expect(tableLabel("departments")).toBe("Department");
     expect(tableLabel("courses")).toBe("Course");
+    expect(tableLabel("deployments")).toBe("Deployment");
+    expect(tableLabel("daily_logs")).toBe("Daily log");
   });
 });

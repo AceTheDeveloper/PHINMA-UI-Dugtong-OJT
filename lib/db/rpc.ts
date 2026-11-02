@@ -475,6 +475,54 @@ export async function importRoster(
   return count.success ? ok(count.data) : fail("unexpected", unexpected);
 }
 
+export async function adminReopenDailyLog(
+  actorId: string,
+  logId: string,
+  reason: string,
+): Promise<Result<null>> {
+  const parsed = z
+    .object({
+      actorId: uuid,
+      logId: uuid,
+      reason: z.string().trim().min(1, "Support reason is required."),
+    })
+    .safeParse({ actorId, logId, reason });
+  if (!parsed.success) return invalid("The support reason is not valid.");
+  return changed("admin_reopen_daily_log", {
+    p_actor: parsed.data.actorId,
+    p_log_id: parsed.data.logId,
+    p_reason: parsed.data.reason,
+  });
+}
+
+export async function createDeployment(
+  actorId: string,
+  input: {
+    studentId: string;
+    companyId: string;
+    listingId?: string | null;
+    batchId: string;
+  },
+): Promise<Result<string>> {
+  const parsed = z
+    .object({
+      actorId: uuid,
+      studentId: uuid,
+      companyId: uuid,
+      listingId: uuid.nullable().optional(),
+      batchId: uuid,
+    })
+    .safeParse({ actorId, ...input });
+  if (!parsed.success) return invalid("The deployment details are not valid.");
+  return createdId("create_deployment", {
+    p_actor: parsed.data.actorId,
+    p_student_id: parsed.data.studentId,
+    p_company_id: parsed.data.companyId,
+    p_listing_id: parsed.data.listingId ?? null,
+    p_batch_id: parsed.data.batchId,
+  });
+}
+
 export const databaseSessionStore: SessionStore = {
   resolve: resolveSession,
   accept: acceptInvitation,

@@ -27,6 +27,7 @@ const rpc = {
   updateListing: vi.fn(),
   setListingStatus: vi.fn(),
   updateSchoolSettings: vi.fn(),
+  adminReopenDailyLog: vi.fn(),
 };
 vi.mock("@/lib/db/rpc", () => rpc);
 
@@ -113,6 +114,10 @@ const calls: { name: string; run: () => Promise<{ ok: boolean }> }[] = [
         timezone: "Asia/Manila",
         consentNoticeVersion: "v1",
       }),
+  },
+  {
+    name: "reopenDailyLog",
+    run: () => actions.reopenDailyLog({ logId: uuid, reason: "Correction requested" }),
   },
 ];
 
@@ -317,9 +322,10 @@ describe("Admin actions with an admin", () => {
     ["blank school name", () => actions.saveSchoolSettings({ name: " ", timezone: "Asia/Manila", consentNoticeVersion: "v1" })],
     ["blank timezone", () => actions.saveSchoolSettings({ name: "School", timezone: " ", consentNoticeVersion: "v1" })],
     ["blank consent version", () => actions.saveSchoolSettings({ name: "School", timezone: "Asia/Manila", consentNoticeVersion: " " })],
+    ["a reopen with blank reason", () => actions.reopenDailyLog({ logId: uuid, reason: "   " })],
+    ["a reopen with invalid log id", () => actions.reopenDailyLog({ logId: "not-a-uuid", reason: "Valid" })],
     ["a missing body", () => actions.addCompany(undefined)],
   ];
-
 
   for (const [label, run] of bad) {
     it(`refuses ${label} before any write`, async () => {
@@ -329,3 +335,19 @@ describe("Admin actions with an admin", () => {
     });
   }
 });
+
+describe("reopenDailyLog action", () => {
+  it("reopens daily log when caller is admin and calls rpc.adminReopenDailyLog", async () => {
+    authorize.mockResolvedValue(ok(session("admin")));
+    rpc.adminReopenDailyLog.mockResolvedValue(ok(null));
+
+    const result = await actions.reopenDailyLog({
+      logId: uuid,
+      reason: "Support correction",
+    });
+
+    expect(result.ok).toBe(true);
+    expect(rpc.adminReopenDailyLog).toHaveBeenCalledWith(userId, uuid, "Support correction");
+  });
+});
+

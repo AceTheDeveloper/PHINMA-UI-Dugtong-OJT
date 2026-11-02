@@ -21,6 +21,8 @@ const tableLabels: Record<string, string> = {
   students: "Student",
   users: "Account",
   school_settings: "School settings",
+  deployments: "Deployment",
+  daily_logs: "Daily log",
 };
 
 const actionLabels = { insert: "Created", update: "Changed", delete: "Deleted" } as const;
