@@ -11,7 +11,8 @@ import {
   Award, 
   Wifi, 
   BatteryMedium,
-  Check
+  Check,
+  Building2
 } from 'lucide-react';
 import { HoursChain } from '@/components/ui/hours-chain';
 import { cn } from '@/lib/utils';
@@ -373,7 +374,7 @@ export default function OjtHero() {
         {/* ── CONTINUOUS PARTNER MARQUEE TICKER (Smooth Infinite Stream) ── */}
         <div className="mt-12 pt-6 border-t border-border flex flex-col md:flex-row md:items-center gap-4 text-xs font-mono text-copy-muted overflow-hidden">
           <div className="shrink-0 font-bold uppercase text-ink flex items-center gap-2">
-            <span className="size-1.5 rounded-full bg-primary" />
+            <Building2 className="size-3.5 text-primary" />
             <span>Accredited Industry Partners:</span>
           </div>
 
