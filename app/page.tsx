@@ -9,6 +9,7 @@ import {
   Team,
   Trust,
 } from "@/components/landing/landing-sections";
+import DtrPipelineBreakdown from "@/components/DtrPipelineBreakdown";
 import { focusStyle } from "@/components/brand-link";
 import { cn } from "@/lib/utils";
 
@@ -29,6 +30,7 @@ export default function Home() {
       <main id="main-content">
         <Hero />
         <Journey />
+        <DtrPipelineBreakdown />
         <Roles />
         <Trust />
         <Team />

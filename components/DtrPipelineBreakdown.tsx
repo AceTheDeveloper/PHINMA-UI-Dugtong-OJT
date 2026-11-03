@@ -1,6 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
+import { HoursChain } from '@/components/ui/hours-chain';
+import { cn } from '@/lib/utils';
+import { focusStyle } from '@/components/brand-link';
 
 /* ────────────────────────────────────────────────────────────────────────────
  * DUGTONG OJT — DETERMINISTIC-FIRST VERIFICATION PIPELINE
@@ -37,7 +40,7 @@ const SCENARIOS: Scenario[] = [
       '[PHASE 2: DETERMINISTIC AUDIT] Active deployment confirmed: 1 active placement at Western Visayas Tech Partners.',
       '[PHASE 2: DETERMINISTIC AUDIT] Break duration deducted: 1.0 hr lunch break subtracted (net: 8.0 hrs).',
       '[PHASE 2: DETERMINISTIC AUDIT] No shift collision: Zero overlap with prior approved records.',
-      '[PHASE 3: SUPERVISOR REVIEW] Notification dispatched to company supervisor.',
+      '[PHASE 3: SUPERVISOR REVIEW] Notification dispatched to company supervisor queue.',
       '[PHASE 4: APPROVED & ACCUMULATED] Supervisor approved shift. +8.0 hrs added to student ledger. Entry locked.',
     ],
   },
@@ -89,6 +92,8 @@ const SCENARIOS: Scenario[] = [
     ],
   },
 ];
+
+const container = 'mx-auto w-[min(100%_-_64px,1200px)] max-md:w-[calc(100%_-_48px)]';
 
 export default function DtrPipelineBreakdown() {
   const [activeScenario, setActiveScenario] = useState<Scenario>(SCENARIOS[0]);
@@ -151,360 +156,305 @@ export default function DtrPipelineBreakdown() {
   const percentage = Math.min(100, Math.round((displayedApproved / requiredHours) * 1000) / 10);
 
   return (
-    <div className="space-y-8 font-sans">
-      {/* ── KPI METRICS STRIP ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Metric 1: Required Hours */}
-        <div className="p-5 rounded-2xl bg-white border border-[#eceef2] shadow-sm flex flex-col justify-between">
-          <div className="flex items-center justify-between text-xs font-medium text-[#596579]">
-            <span>Required course hours</span>
-            <span className="w-2 h-2 rounded-full bg-[#2563eb]" />
-          </div>
-          <div className="mt-3">
-            <span className="text-3xl font-bold tracking-tight text-[#0f172a] tabular-nums">
-              {requiredHours.toFixed(1)}
-            </span>
-            <span className="text-xs text-[#596579] ml-1.5 font-medium">hrs total (BSIT)</span>
-          </div>
-          <div className="text-[11px] text-[#6b7686] mt-2">
-            Target required for graduation certification
-          </div>
-        </div>
-
-        {/* Metric 2: Accumulated Approved Hours */}
-        <div className="p-5 rounded-2xl bg-white border border-[#eceef2] shadow-sm flex flex-col justify-between">
-          <div className="flex items-center justify-between text-xs font-medium text-[#596579]">
-            <span>Approved accumulated</span>
-            <span className="w-2 h-2 rounded-full bg-[#087a55]" />
-          </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-bold tracking-tight text-[#087a55] tabular-nums">
-              {displayedApproved.toFixed(1)}
-            </span>
-            <span className="text-xs font-semibold text-[#087a55] tabular-nums">
-              ({percentage}%)
-            </span>
-          </div>
-          {/* Progress Bar */}
-          <div className="w-full bg-[#eceef2] h-2 rounded-full overflow-hidden mt-2">
-            <div
-              className="bg-[#087a55] h-full rounded-full transition-all duration-500 ease-out"
-              style={{ width: `${percentage}%` }}
-            />
-          </div>
-        </div>
-
-        {/* Metric 3: Remaining Hours */}
-        <div className="p-5 rounded-2xl bg-white border border-[#eceef2] shadow-sm flex flex-col justify-between">
-          <div className="flex items-center justify-between text-xs font-medium text-[#596579]">
-            <span>Hours remaining</span>
-            <span className="w-2 h-2 rounded-full bg-[#b45309]" />
-          </div>
-          <div className="mt-3">
-            <span className="text-3xl font-bold tracking-tight text-[#0f172a] tabular-nums">
-              {(requiredHours - displayedApproved).toFixed(1)}
-            </span>
-            <span className="text-xs text-[#596579] ml-1.5 font-medium">hrs to unlock</span>
-          </div>
-          <div className="text-[11px] text-[#6b7686] mt-2">
-            Supervisor evaluation unlocks at 486.0 hrs
-          </div>
-        </div>
-
-        {/* Metric 4: Active Deployment */}
-        <div className="p-5 rounded-2xl bg-white border border-[#eceef2] shadow-sm flex flex-col justify-between">
-          <div className="flex items-center justify-between text-xs font-medium text-[#596579]">
-            <span>Active deployment</span>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#d9f5ea] text-[#087a55]">
-              Active
-            </span>
-          </div>
-          <div className="mt-2 text-sm font-bold text-[#0f172a] line-clamp-1">
-            Western Visayas Tech Partners
-          </div>
-          <div className="text-[11px] text-[#596579] mt-2 flex items-center justify-between">
-            <span>Supervisor: Engr. M. Ramos</span>
-            <span className="text-[#2563eb] font-semibold">1 entry pending</span>
-          </div>
-        </div>
-      </div>
-
-      {/* ── INTERACTIVE WORKFLOW PIPELINE ARCHITECTURE ── */}
-      <div className="rounded-2xl bg-white border border-[#eceef2] p-6 shadow-sm space-y-6">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-[#eceef2]">
-          <div>
-            <div className="flex items-center gap-2 text-xs font-semibold text-[#2563eb] tracking-wide uppercase">
-              <span className="w-2 h-2 rounded-full bg-[#2563eb]" />
-              <span>Deterministic-first verification architecture</span>
-            </div>
-            <h2 className="text-xl font-bold text-[#0f172a] mt-1">
-              Automated DTR and Daily Journal Invariant Pipeline
-            </h2>
-            <p className="text-xs text-[#596579] mt-1 max-w-2xl leading-relaxed">
-              Eliminates supervisor fatigue by running strict automated server checks before routing entries for approval.
-              Errors return to the student immediately without manual triage.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2.5">
-            <button
-              onClick={startSimulation}
-              disabled={isRunning}
-              className="px-4 py-2 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] disabled:opacity-50 text-white font-medium text-xs flex items-center gap-2 transition-colors cursor-pointer shadow-sm"
-            >
-              <span>{isRunning ? 'Auditing shift...' : 'Simulate shift review'}</span>
-            </button>
-            <button
-              onClick={resetSimulation}
-              title="Reset simulation"
-              className="px-3 py-2 rounded-xl border border-[#eceef2] hover:bg-[#f5f7fa] text-[#596579] text-xs font-medium transition-colors cursor-pointer"
-            >
-              Reset
-            </button>
-          </div>
-        </div>
-
-        {/* Scenario Selection Pills */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {SCENARIOS.map((sc) => {
-            const isSelected = activeScenario.id === sc.id;
-            return (
-              <button
-                key={sc.id}
-                onClick={() => {
-                  setActiveScenario(sc);
-                  resetSimulation();
-                }}
-                className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
-                  isSelected
-                    ? 'border-[#2563eb] bg-[#e6eefe]/50 ring-2 ring-[#2563eb]/20 shadow-xs'
-                    : 'border-[#eceef2] bg-[#f8fafe] hover:border-[#d5dae2]'
-                }`}
-              >
-                <div className="flex items-center justify-between text-[11px] mb-1.5 font-medium">
-                  <span
-                    className={
-                      sc.failingPhase
-                        ? 'text-[#dc2626] font-semibold'
-                        : 'text-[#087a55] font-semibold'
-                    }
-                  >
-                    {sc.failingPhase ? `Fails Phase 0${sc.failingPhase}` : 'Passes to approved'}
-                  </span>
-                  <span className="text-[10px] text-[#6b7686] tabular-nums">
-                    {sc.hoursToAdd > 0 ? `+${sc.hoursToAdd}h` : '0h'}
-                  </span>
-                </div>
-                <div className="text-xs font-bold text-[#0f172a] truncate">{sc.title}</div>
-                <div className="text-[11px] text-[#596579] line-clamp-2 mt-1 leading-normal">
-                  {sc.description}
-                </div>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* ── THE 4-PHASE VISUAL WORKFLOW PIPELINE ── */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-4">
-          {/* Phase 1: Draft Phase */}
-          <div
-            className={`p-4 rounded-xl border transition-all ${
-              currentStep >= 1
-                ? 'border-[#2563eb] bg-white shadow-xs'
-                : 'border-[#eceef2] bg-[#f8fafe] opacity-75'
-            }`}
-          >
-            <div className="flex items-center justify-between text-xs font-semibold text-[#2563eb] mb-2">
-              <span>Phase 01 // Draft</span>
-              <span className="w-5 h-5 rounded-full bg-[#e6eefe] text-[#2563eb] flex items-center justify-center text-[10px]">
-                1
-              </span>
-            </div>
-            <h3 className="text-sm font-bold text-[#0f172a]">Daily log & journal</h3>
-            <p className="text-xs text-[#596579] mt-1.5 leading-relaxed">
-              Student records time in, time out, and journal reflection. Status set to open/pending.
-            </p>
-            <div className="mt-3 pt-2.5 border-t border-[#eceef2] text-[11px] text-[#6b7686] space-y-1">
-              <div>• Server clock timestamp</div>
-              <div>• Lunch break duration</div>
-            </div>
-          </div>
-
-          {/* Phase 2: Deterministic Pre-Flight Audit */}
-          <div
-            className={`p-4 rounded-xl border transition-all ${
-              currentStep === 2 && activeScenario.failingPhase === 2
-                ? 'border-[#dc2626] bg-[#fee2e2]/30 shadow-xs'
-                : currentStep >= 2
-                ? 'border-[#2563eb] bg-white shadow-xs'
-                : 'border-[#eceef2] bg-[#f8fafe] opacity-75'
-            }`}
-          >
-            <div className="flex items-center justify-between text-xs font-semibold text-[#2563eb] mb-2">
-              <span className={activeScenario.failingPhase === 2 && currentStep >= 2 ? 'text-[#dc2626]' : ''}>
-                Phase 02 // Automated audit
-              </span>
-              <span className="w-5 h-5 rounded-full bg-[#e6eefe] text-[#2563eb] flex items-center justify-center text-[10px]">
-                2
-              </span>
-            </div>
-            <h3 className="text-sm font-bold text-[#0f172a]">Deterministic checks</h3>
-            <p className="text-xs text-[#596579] mt-1.5 leading-relaxed">
-              Zero manual triage. Server validates Asia/Manila clock, deployment status, and shift collisions.
-            </p>
-            <div className="mt-3 pt-2.5 border-t border-[#eceef2] text-[11px] text-[#6b7686] space-y-1">
-              <div>• Reject client clock drift</div>
-              <div>• Word count threshold check</div>
-            </div>
-          </div>
-
-          {/* Phase 3: Correction & Rejection Loop */}
-          <div
-            className={`p-4 rounded-xl border transition-all ${
-              activeScenario.status === 'supervisor_reopened' && currentStep >= 3
-                ? 'border-[#b45309] bg-[#fef3c7]/30 shadow-xs'
-                : currentStep >= 3
-                ? 'border-[#2563eb] bg-white shadow-xs'
-                : 'border-[#eceef2] bg-[#f8fafe] opacity-75'
-            }`}
-          >
-            <div className="flex items-center justify-between text-xs font-semibold text-[#b45309] mb-2">
-              <span>Phase 03 // Review & loop</span>
-              <span className="w-5 h-5 rounded-full bg-[#fef3c7] text-[#b45309] flex items-center justify-center text-[10px]">
-                3
-              </span>
-            </div>
-            <h3 className="text-sm font-bold text-[#0f172a]">Supervisor review</h3>
-            <p className="text-xs text-[#596579] mt-1.5 leading-relaxed">
-              Supervisor approves or rejects with required reason. Corrections return to student; audit log kept.
-            </p>
-            <div className="mt-3 pt-2.5 border-t border-[#eceef2] text-[11px] text-[#6b7686] space-y-1">
-              <div>• Required rejection reason</div>
-              <div>• Immutable revision trail</div>
-            </div>
-          </div>
-
-          {/* Phase 4: Final Locked Pass */}
-          <div
-            className={`p-4 rounded-xl border transition-all ${
-              currentStep >= 4
-                ? 'border-[#087a55] bg-[#d9f5ea]/20 shadow-xs'
-                : 'border-[#eceef2] bg-[#f8fafe] opacity-75'
-            }`}
-          >
-            <div className="flex items-center justify-between text-xs font-semibold text-[#087a55] mb-2">
-              <span>Phase 04 // Accumulated</span>
-              <span className="w-5 h-5 rounded-full bg-[#d9f5ea] text-[#087a55] flex items-center justify-center text-[10px]">
-                4
-              </span>
-            </div>
-            <h3 className="text-sm font-bold text-[#0f172a]">Approved & locked</h3>
-            <p className="text-xs text-[#596579] mt-1.5 leading-relaxed">
-              Approved hours lock permanently. Accumulates to 486.0 hrs to trigger final evaluation & certificate.
-            </p>
-            <div className="mt-3 pt-2.5 border-t border-[#eceef2] text-[11px] text-[#6b7686] space-y-1">
-              <div>• Locked against client edit</div>
-              <div>• Unlocks evaluation PDF</div>
-            </div>
-          </div>
-        </div>
-
-        {/* ── LIVE AUDIT TELEMETRY STREAM ── */}
-        {currentStep > 0 && (
-          <div className="mt-4 p-4 rounded-xl bg-[#0f172a] text-white font-mono text-xs space-y-2 border border-[#334155] overflow-x-auto shadow-inner">
-            <div className="flex items-center justify-between pb-2 border-b border-[#334155] text-[11px] text-[#94a3b8]">
-              <span>DTR VERIFICATION ENGINE LOG // ASIA/MANILA</span>
-              <span className="font-semibold text-[#38bdf8]">
-                {isRunning ? 'PROCESSING SHIFT...' : isCompleted ? (activeScenario.failingPhase ? 'FLAGGED / REJECTED' : 'HOURS COMMITTED') : 'READY'}
-              </span>
-            </div>
-
-            <div className="space-y-1.5 pt-1">
-              {activeScenario.logs.slice(0, currentStep * 2).map((line, idx) => {
-                const isFail = line.includes('🚨') || line.includes('🛑');
-                const isPass = line.includes('APPROVED');
-                const isLoop = line.includes('CORRECTION LOOP');
-
-                return (
-                  <div
-                    key={idx}
-                    className={`leading-relaxed ${
-                      isFail
-                        ? 'text-[#f87171] font-semibold bg-[#450a0a]/40 px-2 py-1 rounded'
-                        : isPass
-                        ? 'text-[#4ade80] font-semibold'
-                        : isLoop
-                        ? 'text-[#fbbf24] font-semibold'
-                        : 'text-[#e2e8f0]'
-                    }`}
-                  >
-                    <span>{'> '}</span>
-                    <span>{line}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* ── MOCK DAILY DTR ENTRY DEMO CARD ── */}
-      <div className="rounded-2xl bg-white border border-[#eceef2] p-6 shadow-sm space-y-5">
-        <div className="flex items-center justify-between border-b border-[#eceef2] pb-4">
-          <div>
-            <div className="text-xs text-[#596579] font-medium">Daily attendance journal</div>
-            <h3 className="text-base font-bold text-[#0f172a] mt-0.5">
-              Today&apos;s active shift log
-            </h3>
-          </div>
-          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-[#e6eefe] text-[#2563eb]">
-            Asia/Manila: 08:00 — 17:00
+    <section id="verification-pipeline" className="border-b border-border bg-surface py-20 max-sm:py-14" data-reveal>
+      <div className={container}>
+        {/* Section Header */}
+        <div className="space-y-3 max-w-[720px] mb-12">
+          <span className="inline-flex items-center gap-2 rounded-full border border-border-strong bg-card px-3 py-1 font-mono text-xs font-semibold text-primary">
+            <span className="size-2 rounded-full bg-primary" />
+            <span>Deterministic verification pipeline</span>
           </span>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="p-3.5 rounded-xl bg-[#f8fafe] border border-[#eceef2]">
-            <div className="text-[11px] text-[#596579]">Time in (server clock)</div>
-            <div className="text-lg font-bold text-[#0f172a] mt-1 tabular-nums">08:00 AM</div>
-            <div className="text-[10px] text-[#087a55] mt-1 font-medium">Verified by biometrics/server</div>
-          </div>
-
-          <div className="p-3.5 rounded-xl bg-[#f8fafe] border border-[#eceef2]">
-            <div className="text-[11px] text-[#596579]">Time out (server clock)</div>
-            <div className="text-lg font-bold text-[#0f172a] mt-1 tabular-nums">05:00 PM</div>
-            <div className="text-[10px] text-[#596579] mt-1 font-medium">Deducted 1.0 hr lunch break</div>
-          </div>
-
-          <div className="p-3.5 rounded-xl bg-[#f8fafe] border border-[#eceef2]">
-            <div className="text-[11px] text-[#596579]">Net shift hours</div>
-            <div className="text-lg font-bold text-[#2563eb] mt-1 tabular-nums">8.0 hrs</div>
-            <div className="text-[10px] text-[#596579] mt-1 font-medium">Accumulates on approval</div>
-          </div>
-        </div>
-
-        <div className="p-4 rounded-xl bg-[#f8fafe] border border-[#eceef2] space-y-2">
-          <div className="text-xs font-bold text-[#0f172a]">Daily journal entry</div>
-          <p className="text-xs text-[#596579] leading-relaxed">
-            &quot;Implemented the responsive student evaluation modal and standardized table row skeletons. Resolved tap target sizing on low-end mobile viewports. Documented component state changes in accordance with UX-04.&quot;
+          <h2 className="font-heading text-[clamp(28px,3.2vw,40px)] font-bold leading-[1.2] tracking-[-0.02em] text-ink">
+            How Dugtong verifies every shift before supervisor review.
+          </h2>
+          <p className="text-base leading-[1.65] text-copy-muted">
+            Rather than relying on manual supervisor triage, the server runs strict automated invariant checks. 
+            Anomalies and missing fields return to the student immediately, saving supervisor time for what matters.
           </p>
         </div>
 
-        <div className="flex items-center justify-end gap-3 pt-2">
-          <button
-            type="button"
-            className="px-4 py-2 rounded-xl border border-[#eceef2] hover:bg-[#f5f7fa] text-[#596579] text-xs font-medium cursor-pointer transition-colors"
-          >
-            Discard entry
-          </button>
-          <button
-            type="button"
-            className="px-4 py-2 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-medium cursor-pointer transition-colors shadow-xs"
-          >
-            Submit journal
-          </button>
+        {/* ── KPI METRICS STRIP WITH SIGNATURE HOURS CHAIN ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+          {/* Card 1: Hours Chain Progress */}
+          <div className="sm:col-span-2 rounded-2xl border border-border bg-card p-6 shadow-xs flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between text-xs font-medium text-copy-muted mb-2">
+                <span>The hours chain</span>
+                <span className="font-mono text-[11px] font-semibold text-primary">
+                  1 link = 40 hours
+                </span>
+              </div>
+              <div className="my-2 py-1">
+                <HoursChain approvedHours={displayedApproved} requiredHours={requiredHours} size="md" />
+              </div>
+            </div>
+            <div className="mt-4 pt-3 border-t border-border flex items-baseline justify-between text-xs font-medium">
+              <span className="text-copy-muted">Progress toward 486.0 hrs</span>
+              <span className="font-bold text-ink tabular-nums">
+                {displayedApproved.toFixed(1)} / {requiredHours.toFixed(1)} hrs ({percentage}%)
+              </span>
+            </div>
+          </div>
+
+          {/* Card 2: Hours Remaining */}
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-xs flex flex-col justify-between">
+            <div className="flex items-center justify-between text-xs font-medium text-copy-muted">
+              <span>Hours remaining</span>
+              <span className="size-2 rounded-full bg-warning" />
+            </div>
+            <div className="my-3">
+              <span className="text-3xl font-bold tracking-tight text-ink tabular-nums">
+                {(requiredHours - displayedApproved).toFixed(1)}
+              </span>
+              <span className="text-xs text-copy-muted ml-1.5 font-medium">hrs left</span>
+            </div>
+            <div className="text-xs text-copy-muted">
+              Supervisor evaluation unlocks at 486.0 hrs
+            </div>
+          </div>
+
+          {/* Card 3: Active Placement */}
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-xs flex flex-col justify-between">
+            <div className="flex items-center justify-between text-xs font-medium text-copy-muted">
+              <span>Active deployment</span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-success-tint text-success-text">
+                Active
+              </span>
+            </div>
+            <div className="my-2 text-sm font-bold text-ink line-clamp-1">
+              Western Visayas Tech Partners
+            </div>
+            <div className="text-xs text-copy-muted flex items-center justify-between pt-1">
+              <span>Supervisor: Engr. M. Ramos</span>
+              <span className="text-primary font-semibold">1 pending</span>
+            </div>
+          </div>
+        </div>
+
+        {/* ── THE INTERACTIVE VERIFICATION SIMULATOR ── */}
+        <div className="rounded-2xl border border-border bg-card p-7 shadow-xs space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-border">
+            <div>
+              <h3 className="font-heading text-lg font-bold text-ink">
+                Interactive DTR verification simulator
+              </h3>
+              <p className="text-xs text-copy-muted mt-0.5">
+                Select a shift scenario to watch how deterministic rules protect supervisor queues from manual errors.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2.5">
+              <button
+                type="button"
+                onClick={startSimulation}
+                disabled={isRunning}
+                className={cn(
+                  "h-10 px-4 rounded-lg bg-primary hover:bg-primary-hover disabled:opacity-50 text-primary-foreground font-semibold text-xs flex items-center gap-2 transition-colors cursor-pointer",
+                  focusStyle
+                )}
+              >
+                <span>{isRunning ? 'Auditing shift...' : 'Simulate shift review'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={resetSimulation}
+                className={cn(
+                  "h-10 px-3 rounded-lg border border-border-strong hover:bg-surface text-copy-muted text-xs font-medium transition-colors cursor-pointer",
+                  focusStyle
+                )}
+              >
+                Reset
+              </button>
+            </div>
+          </div>
+
+          {/* Scenario Selection Pills */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {SCENARIOS.map((sc) => {
+              const isSelected = activeScenario.id === sc.id;
+              return (
+                <button
+                  key={sc.id}
+                  type="button"
+                  onClick={() => {
+                    setActiveScenario(sc);
+                    resetSimulation();
+                  }}
+                  className={cn(
+                    "p-3.5 rounded-xl border text-left transition-all cursor-pointer",
+                    isSelected
+                      ? "border-primary bg-primary-tint/60 ring-2 ring-primary/20"
+                      : "border-border bg-surface hover:border-border-strong"
+                  )}
+                >
+                  <div className="flex items-center justify-between text-[11px] mb-1 font-medium">
+                    <span
+                      className={
+                        sc.failingPhase
+                          ? "text-error font-semibold"
+                          : "text-success font-semibold"
+                      }
+                    >
+                      {sc.failingPhase ? `Fails Phase 0${sc.failingPhase}` : 'Passes to approved'}
+                    </span>
+                    <span className="text-[10px] text-copy-muted tabular-nums">
+                      {sc.hoursToAdd > 0 ? `+${sc.hoursToAdd}h` : '0h'}
+                    </span>
+                  </div>
+                  <div className="text-xs font-bold text-ink truncate">{sc.title}</div>
+                  <div className="text-[11px] text-copy-muted line-clamp-2 mt-1 leading-normal">
+                    {sc.description}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* ── 4-PHASE VISUAL WORKFLOW ── */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-2">
+            {/* Phase 1: Draft */}
+            <div
+              className={cn(
+                "p-4 rounded-xl border transition-all",
+                currentStep >= 1 ? "border-primary bg-card" : "border-border bg-surface opacity-70"
+              )}
+            >
+              <div className="flex items-center justify-between text-xs font-semibold text-primary mb-2">
+                <span>Phase 01 // Draft</span>
+                <span className="size-5 rounded-full bg-primary-tint text-primary flex items-center justify-center text-[10px]">
+                  1
+                </span>
+              </div>
+              <h4 className="text-sm font-bold text-ink">Daily log & journal</h4>
+              <p className="text-xs text-copy-muted mt-1 leading-relaxed">
+                Student records time in, time out, and journal reflection.
+              </p>
+              <div className="mt-3 pt-2 border-t border-border text-[11px] text-copy-muted space-y-0.5">
+                <div>• Server clock timestamp</div>
+                <div>• Lunch break duration</div>
+              </div>
+            </div>
+
+            {/* Phase 2: Deterministic Pre-Flight Audit */}
+            <div
+              className={cn(
+                "p-4 rounded-xl border transition-all",
+                currentStep === 2 && activeScenario.failingPhase === 2
+                  ? "border-error bg-error-tint/40"
+                  : currentStep >= 2
+                  ? "border-primary bg-card"
+                  : "border-border bg-surface opacity-70"
+              )}
+            >
+              <div className="flex items-center justify-between text-xs font-semibold text-primary mb-2">
+                <span className={activeScenario.failingPhase === 2 && currentStep >= 2 ? "text-error" : ""}>
+                  Phase 02 // Automated audit
+                </span>
+                <span className="size-5 rounded-full bg-primary-tint text-primary flex items-center justify-center text-[10px]">
+                  2
+                </span>
+              </div>
+              <h4 className="text-sm font-bold text-ink">Deterministic checks</h4>
+              <p className="text-xs text-copy-muted mt-1 leading-relaxed">
+                Automated checks: Asia/Manila clock, single deployment, collision.
+              </p>
+              <div className="mt-3 pt-2 border-t border-border text-[11px] text-copy-muted space-y-0.5">
+                <div>• Reject device clock drift</div>
+                <div>• Reflection word-count check</div>
+              </div>
+            </div>
+
+            {/* Phase 3: Review & Correction Loop */}
+            <div
+              className={cn(
+                "p-4 rounded-xl border transition-all",
+                activeScenario.status === 'supervisor_reopened' && currentStep >= 3
+                  ? "border-warning bg-warning-tint/40"
+                  : currentStep >= 3
+                  ? "border-primary bg-card"
+                  : "border-border bg-surface opacity-70"
+              )}
+            >
+              <div className="flex items-center justify-between text-xs font-semibold text-warning mb-2">
+                <span>Phase 03 // Review & loop</span>
+                <span className="size-5 rounded-full bg-warning-tint text-warning flex items-center justify-center text-[10px]">
+                  3
+                </span>
+              </div>
+              <h4 className="text-sm font-bold text-ink">Supervisor review</h4>
+              <p className="text-xs text-copy-muted mt-1 leading-relaxed">
+                Approve or reject with reason. Corrections return to student.
+              </p>
+              <div className="mt-3 pt-2 border-t border-border text-[11px] text-copy-muted space-y-0.5">
+                <div>• Required rejection reason</div>
+                <div>• Immutable revision trail</div>
+              </div>
+            </div>
+
+            {/* Phase 4: Approved & Locked Accumulation */}
+            <div
+              className={cn(
+                "p-4 rounded-xl border transition-all",
+                currentStep >= 4 ? "border-success bg-success-tint/30" : "border-border bg-surface opacity-70"
+              )}
+            >
+              <div className="flex items-center justify-between text-xs font-semibold text-success mb-2">
+                <span>Phase 04 // Accumulated</span>
+                <span className="size-5 rounded-full bg-success-tint text-success flex items-center justify-center text-[10px]">
+                  4
+                </span>
+              </div>
+              <h4 className="text-sm font-bold text-ink">Approved & locked</h4>
+              <p className="text-xs text-copy-muted mt-1 leading-relaxed">
+                Hours lock permanently and add to the 486.0 hrs requirement.
+              </p>
+              <div className="mt-3 pt-2 border-t border-border text-[11px] text-copy-muted space-y-0.5">
+                <div>• Locked against client edits</div>
+                <div>• Unlocks final certificate</div>
+              </div>
+            </div>
+          </div>
+
+          {/* ── LIVE AUDIT TELEMETRY STREAM ── */}
+          {currentStep > 0 && (
+            <div className="mt-4 p-4 rounded-xl bg-ink text-surface font-mono text-xs space-y-2 border border-border-strong overflow-x-auto shadow-inner">
+              <div className="flex items-center justify-between pb-2 border-b border-border-strong text-[11px] text-muted">
+                <span>DTR INVARIANT ENGINE LOG // ASIA/MANILA</span>
+                <span className="font-semibold text-primary">
+                  {isRunning ? 'PROCESSING SHIFT...' : isCompleted ? (activeScenario.failingPhase ? 'FLAGGED / REJECTED' : 'HOURS COMMITTED') : 'READY'}
+                </span>
+              </div>
+
+              <div className="space-y-1.5 pt-1">
+                {activeScenario.logs.slice(0, currentStep * 2).map((line, idx) => {
+                  const isFail = line.includes('🚨') || line.includes('🛑');
+                  const isPass = line.includes('APPROVED');
+                  const isLoop = line.includes('CORRECTION LOOP');
+
+                  return (
+                    <div
+                      key={idx}
+                      className={cn(
+                        "leading-relaxed",
+                        isFail
+                          ? "text-[#f87171] font-semibold bg-[#450a0a]/50 px-2 py-1 rounded"
+                          : isPass
+                          ? "text-[#4ade80] font-semibold"
+                          : isLoop
+                          ? "text-[#fbbf24] font-semibold"
+                          : "text-slate-200"
+                      )}
+                    >
+                      <span>{'> '}</span>
+                      <span>{line}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       </div>
-    </div>
+    </section>
   );
 }
-

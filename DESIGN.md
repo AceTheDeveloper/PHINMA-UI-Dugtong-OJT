@@ -233,3 +233,4 @@ Before pushing any ticket to branch `Neil`:
 - [ ] No raw hex codes used in markup.
 - [ ] TypeScript check (`npx tsc --noEmit`) passes with 0 errors.
 - [ ] Commit format: `ticket-XX: <short UI description>`.
+
