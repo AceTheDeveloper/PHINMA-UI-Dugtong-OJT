@@ -9,7 +9,7 @@ import {
   Team,
   Trust,
 } from "@/components/landing/landing-sections";
-import DtrPipelineBreakdown from "@/components/DtrPipelineBreakdown";
+import OjtDashboardView from "@/components/dashboard/OjtDashboardView";
 import { focusStyle } from "@/components/brand-link";
 import { cn } from "@/lib/utils";
 
@@ -30,7 +30,28 @@ export default function Home() {
       <main id="main-content">
         <Hero />
         <Journey />
-        <DtrPipelineBreakdown />
+        {/* Real OJT Dashboard Experience (Replacing developer simulator) */}
+        <section
+          id="ojt-portal-preview"
+          className="border-y border-border bg-page-wash py-20 max-sm:py-14"
+          data-reveal
+        >
+          <div className="mx-auto w-[min(100%_-_64px,1200px)] max-md:w-[calc(100%_-_48px)] space-y-6">
+            <div className="space-y-2 max-w-[680px]">
+              <span className="inline-flex items-center gap-2 rounded-full border border-border-strong bg-card px-3 py-1 font-mono text-xs font-semibold text-primary">
+                <span className="size-2 rounded-full bg-primary" />
+                <span>Live Portal Experience</span>
+              </span>
+              <h2 className="font-heading text-[clamp(28px,3vw,38px)] font-bold leading-[1.2] tracking-[-0.02em] text-ink">
+                Built for daily use by students and supervisors.
+              </h2>
+              <p className="text-base text-copy-muted leading-[1.6]">
+                Experience the real OJT workflow. Clock in, submit daily journals, verify attendance, and monitor graduation hours in real time.
+              </p>
+            </div>
+            <OjtDashboardView />
+          </div>
+        </section>
         <Roles />
         <Trust />
         <Team />
