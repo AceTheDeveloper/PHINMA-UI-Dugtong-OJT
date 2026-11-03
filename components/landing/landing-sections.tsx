@@ -48,14 +48,14 @@ export function LandingHeader() {
         <div className="flex items-center gap-3 shrink-0">
           <BrandLink size="md" />
 
-          <div className="hidden sm:flex items-center gap-2 pl-3 border-l border-border-strong text-xs font-mono">
+          {/* <div className="hidden sm:flex items-center gap-2 pl-3 border-l border-border-strong text-xs font-mono">
             <span className="font-bold text-ink tracking-tight">PHINMA UI</span>
             <span className="text-border-strong">•</span>
             <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-primary-tint text-primary border border-primary/20">
               <span className="size-1.5 rounded-full bg-success animate-pulse" />
               CITE BSIT Pilot
             </span>
-          </div>
+          </div> */}
         </div>
 
         {/* Center: Sleek Segmented Capsule Navigation */}
@@ -98,22 +98,22 @@ export function LandingHeader() {
         {/* Right: Telemetry Ping, Theme Toggle & Action CTA */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           {/* Live Node Telemetry (Desktop) */}
-          <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-border bg-surface/60 font-mono text-[10px] text-copy-muted">
+          {/* <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-border bg-surface/60 font-mono text-[10px] text-copy-muted">
             <span className="size-1.5 rounded-full bg-success animate-pulse" />
             <span className="font-semibold text-ink">SYSTEM ONLINE</span>
             <span className="text-border-strong">•</span>
             <span>24ms</span>
-          </div>
+          </div> */}
 
           <ThemeToggle />
 
-          <Link
+          {/* <Link
             href="#ojt-portal-preview"
             className="inline-flex items-center gap-1.5 h-9 sm:h-10 px-3.5 sm:px-4 rounded-xl bg-primary hover:bg-primary-hover text-primary-foreground font-semibold text-xs transition-colors shadow-xs"
           >
             <span>Live Portal</span>
             <ArrowRight className="size-3.5" />
-          </Link>
+          </Link> */}
 
           {!isLandingOnly() && (
             <Button
@@ -362,7 +362,11 @@ export function Trust() {
               className="flex gap-3 text-base leading-[1.6] text-copy-muted"
             >
               <span className="mt-px inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-success-tint text-success-text">
-                <Check className="size-3.5" strokeWidth={3} aria-hidden="true" />
+                <Check
+                  className="size-3.5"
+                  strokeWidth={3}
+                  aria-hidden="true"
+                />
               </span>
               <span>{line}</span>
             </li>
