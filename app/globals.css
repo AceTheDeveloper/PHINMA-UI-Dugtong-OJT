@@ -339,3 +339,70 @@ html.reveal-enabled [data-reveal].is-visible {
     animation: dg-link-in 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 }
+
+/* Continuous smooth marquee ticker */
+@keyframes dg-marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: dg-marquee 30s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* Hide scrollbars completely while keeping flow accessible */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Looping sync & shimmer animation for hours progress */
+@keyframes dg-sync-scan {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateX(300%);
+    opacity: 0.2;
+  }
+}
+
+.animate-sync-shimmer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(110, 147, 255, 0.6), rgba(45, 212, 191, 0.8), transparent);
+  animation: dg-sync-scan 2.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Pulsing circuit flow lines */
+@keyframes dg-circuit-dash {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+
+.animate-circuit-flow {
+  stroke-dasharray: 6 6;
+  animation: dg-circuit-dash 1.2s linear infinite;
+}
