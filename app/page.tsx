@@ -1,7 +1,6 @@
 import ScrollReveal from "./components/scroll-reveal";
 import {
   FinalCta,
-  Hero,
   Journey,
   LandingFooter,
   LandingHeader,
@@ -9,6 +8,8 @@ import {
   Team,
   Trust,
 } from "@/components/landing/landing-sections";
+import OjtHero from "@/components/landing/OjtHero";
+import OjtTelemetryData from "@/components/landing/OjtTelemetryData";
 import OjtDashboardView from "@/components/dashboard/OjtDashboardView";
 import { focusStyle } from "@/components/brand-link";
 import { cn } from "@/lib/utils";
@@ -28,9 +29,16 @@ export default function Home() {
       <LandingHeader />
       <ScrollReveal />
       <main id="main-content">
-        <Hero />
+        {/* 1. Sleek Portfolio-Style Bento Hero */}
+        <OjtHero />
+
+        {/* 2. Minimalist Telemetry & Glowing SVG Curve Charts */}
+        <OjtTelemetryData />
+
+        {/* 3. The 6-Step Practicum Journey */}
         <Journey />
-        {/* Real OJT Dashboard Experience (Replacing developer simulator) */}
+
+        {/* 4. Live Interactive OJT Dashboard Experience (Student & Supervisor Deck) */}
         <section
           id="ojt-portal-preview"
           className="border-y border-border bg-page-wash py-20 max-sm:py-14"
@@ -52,7 +60,11 @@ export default function Home() {
             <OjtDashboardView />
           </div>
         </section>
+
+        {/* 5. User Roles Breakdown */}
         <Roles />
+
+        {/* 6. Partner Trust, Team & Final CTA */}
         <Trust />
         <Team />
         <FinalCta />
