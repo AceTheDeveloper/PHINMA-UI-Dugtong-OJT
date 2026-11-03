@@ -187,11 +187,10 @@ export default function OjtJourneyCircuit() {
           <div className="lg:col-span-8 relative flex flex-col gap-5 pl-10">
             
             {/* ── SINGLE CONTINUOUS UNBROKEN VERTICAL LINE ──
-                Placed at exactly left-[15px]. Cards are indented by pl-10 (40px).
-                Distance from card edge (x=0) to line is exactly 25px. ── */}
+                Placed at exactly left-[15px]. Spans full height of the stack (top of Phase 01 to bottom of Phase 06). ── */}
             <div 
               aria-hidden="true"
-              className="absolute left-[15px] top-[40px] bottom-[40px] w-[2px] bg-slate-300 dark:bg-slate-700 pointer-events-none z-0" 
+              className="absolute left-[15px] top-0 bottom-0 w-[2px] bg-slate-300 dark:bg-slate-700 pointer-events-none z-0" 
             />
 
             {/* 6 Rigid Cards */}
