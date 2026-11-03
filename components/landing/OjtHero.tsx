@@ -45,18 +45,52 @@ const container = 'mx-auto w-[min(100%_-_40px,1200px)] sm:w-[min(100%_-_64px,120
 export interface AccreditedPartner {
   name: string;
   category: string;
-  icon: React.ComponentType<{ className?: string }>;
-  accentColor: string;
-  badgeBg: string;
+  icon?: React.ComponentType<{ className?: string }>;
+  logoSrc?: string;
+  accentColor?: string;
+  badgeBg?: string;
 }
 
 export const accreditedPartners: AccreditedPartner[] = [
   {
+    name: 'Callbox',
+    category: 'B2B Sales & Digital Marketing',
+    logoSrc: '/partners/callbox.png',
+    icon: Headset,
+    accentColor: 'text-yellow-600 dark:text-yellow-400',
+    badgeBg: 'bg-yellow-500/10 border-yellow-500/25',
+  },
+  {
+    name: 'F&C Jewelry',
+    category: 'Retail & Luxury Systems',
+    logoSrc: '/partners/fc-jewelry.png',
+    icon: Gem,
+    accentColor: 'text-emerald-600 dark:text-emerald-400',
+    badgeBg: 'bg-emerald-500/10 border-emerald-500/25',
+  },
+  {
+    name: 'DICT',
+    category: 'Gov ICT & Cybersecurity',
+    logoSrc: '/partners/dict.png',
+    icon: RadioTower,
+    accentColor: 'text-blue-600 dark:text-blue-400',
+    badgeBg: 'bg-blue-500/10 border-blue-500/25',
+  },
+  {
     name: 'RELX',
     category: 'Analytics & Legal Tech',
+    logoSrc: '/partners/relx.png',
     icon: Globe,
     accentColor: 'text-amber-600 dark:text-amber-400',
     badgeBg: 'bg-amber-500/10 border-amber-500/25',
+  },
+  {
+    name: 'PESO Iloilo City',
+    category: 'City Employment Office',
+    logoSrc: '/partners/peso-iloilo-city.jpg',
+    icon: Briefcase,
+    accentColor: 'text-orange-600 dark:text-orange-400',
+    badgeBg: 'bg-orange-500/10 border-orange-500/25',
   },
   {
     name: 'iXL',
@@ -66,39 +100,11 @@ export const accreditedPartners: AccreditedPartner[] = [
     badgeBg: 'bg-sky-500/10 border-sky-500/25',
   },
   {
-    name: 'Callbox',
-    category: 'B2B Sales & Digital Marketing',
-    icon: Headset,
-    accentColor: 'text-yellow-600 dark:text-yellow-400',
-    badgeBg: 'bg-yellow-500/10 border-yellow-500/25',
-  },
-  {
     name: 'iGift',
     category: 'Rewards & E-Commerce',
     icon: Gift,
     accentColor: 'text-purple-600 dark:text-purple-400',
     badgeBg: 'bg-purple-500/10 border-purple-500/25',
-  },
-  {
-    name: 'DICT',
-    category: 'Gov ICT & Cybersecurity',
-    icon: RadioTower,
-    accentColor: 'text-blue-600 dark:text-blue-400',
-    badgeBg: 'bg-blue-500/10 border-blue-500/25',
-  },
-  {
-    name: 'F&C Jewelry',
-    category: 'Retail & Luxury Systems',
-    icon: Gem,
-    accentColor: 'text-emerald-600 dark:text-emerald-400',
-    badgeBg: 'bg-emerald-500/10 border-emerald-500/25',
-  },
-  {
-    name: 'PESO Iloilo City',
-    category: 'City Employment Office',
-    icon: Briefcase,
-    accentColor: 'text-orange-600 dark:text-orange-400',
-    badgeBg: 'bg-orange-500/10 border-orange-500/25',
   },
   {
     name: 'PESO Province of Iloilo',
@@ -535,9 +541,20 @@ export default function OjtHero() {
                     key={`p1-${i}`}
                     className="inline-flex items-center gap-2 rounded-xl bg-surface/80 dark:bg-card/80 border border-border/80 px-3 py-1.5 hover:border-primary/40 hover:bg-surface transition-all cursor-default"
                   >
-                    <span className={cn('size-6 rounded-lg border flex items-center justify-center shrink-0', partner.badgeBg, partner.accentColor)}>
-                      <IconComponent className="size-3.5" />
-                    </span>
+                    {partner.logoSrc ? (
+                      <span className="size-6 sm:size-7 rounded-lg bg-white p-0.5 border border-border/80 shadow-xs flex items-center justify-center overflow-hidden shrink-0">
+                        <img
+                          src={partner.logoSrc}
+                          alt={`${partner.name} logo`}
+                          className="max-h-full max-w-full object-contain"
+                          loading="lazy"
+                        />
+                      </span>
+                    ) : (
+                      <span className={cn('size-6 sm:size-7 rounded-lg border flex items-center justify-center shrink-0', partner.badgeBg, partner.accentColor)}>
+                        {IconComponent && <IconComponent className="size-3.5" />}
+                      </span>
+                    )}
                     <span className="font-heading text-xs font-bold text-ink">
                       {partner.name}
                     </span>
@@ -556,9 +573,20 @@ export default function OjtHero() {
                     key={`p2-${i}`}
                     className="inline-flex items-center gap-2 rounded-xl bg-surface/80 dark:bg-card/80 border border-border/80 px-3 py-1.5 hover:border-primary/40 hover:bg-surface transition-all cursor-default"
                   >
-                    <span className={cn('size-6 rounded-lg border flex items-center justify-center shrink-0', partner.badgeBg, partner.accentColor)}>
-                      <IconComponent className="size-3.5" />
-                    </span>
+                    {partner.logoSrc ? (
+                      <span className="size-6 sm:size-7 rounded-lg bg-white p-0.5 border border-border/80 shadow-xs flex items-center justify-center overflow-hidden shrink-0">
+                        <img
+                          src={partner.logoSrc}
+                          alt={`${partner.name} logo`}
+                          className="max-h-full max-w-full object-contain"
+                          loading="lazy"
+                        />
+                      </span>
+                    ) : (
+                      <span className={cn('size-6 sm:size-7 rounded-lg border flex items-center justify-center shrink-0', partner.badgeBg, partner.accentColor)}>
+                        {IconComponent && <IconComponent className="size-3.5" />}
+                      </span>
+                    )}
                     <span className="font-heading text-xs font-bold text-ink">
                       {partner.name}
                     </span>
