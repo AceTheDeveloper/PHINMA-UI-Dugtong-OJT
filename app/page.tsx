@@ -1,69 +1,80 @@
-import Image from "next/image";
+import React from 'react';
+import DtrPipelineBreakdown from '../components/DtrPipelineBreakdown';
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
+    <div className="min-h-screen bg-[#f8fafe] text-[#0f172a] flex flex-col font-sans">
+      {/* ── TOP HEADER & NAVIGATION ── */}
+      <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-[#eceef2] px-6 py-3.5 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          {/* PHINMA UI Brand Mark */}
+          <div className="w-8 h-8 rounded-lg bg-[#2563eb] text-white flex items-center justify-center font-bold text-sm tracking-tight shadow-xs">
+            UI
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-bold text-[#0f172a] tracking-tight">Dugtong OJT</span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#e6eefe] text-[#2563eb]">
+                Pilot // CITE BSIT
+              </span>
+            </div>
+            <p className="text-[11px] text-[#596579]">
+              PHINMA University of Iloilo — On-the-Job Training Portal
+            </p>
+          </div>
+        </div>
+
+        {/* User Role / Navigation Badge */}
+        <div className="flex items-center gap-3">
+          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#f5f7fa] border border-[#eceef2] text-xs font-medium text-[#596579]">
+            <span className="w-2 h-2 rounded-full bg-[#087a55]" />
+            <span>Role: Student</span>
+            <span>•</span>
+            <span className="text-[#0f172a] font-semibold">Neil (UI/UX)</span>
+          </div>
+
+          <button
+            type="button"
+            className="px-3.5 py-1.5 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-medium transition-colors cursor-pointer shadow-xs"
+          >
+            Time in
+          </button>
+        </div>
+      </header>
+
+      {/* ── MAIN CONTENT AREA ── */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-8 space-y-8">
+        {/* Welcome Banner */}
+        <div className="space-y-1">
+          <div className="text-xs font-semibold uppercase tracking-wider text-[#2563eb]">
+            Attendance and DTR Verification
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0f172a] tracking-tight">
+            Daily Time Record & Progress Overview
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="text-xs sm:text-sm text-[#596579] max-w-3xl leading-relaxed">
+            Record shifts, submit daily journals, and track your graduation hours against the 486.0-hour course requirement.
+            All hours are authoritative and audited server-side in the Asia/Manila timezone.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+
+        {/* ── THE INTERACTIVE DTR VERIFICATION PIPELINE ── */}
+        <DtrPipelineBreakdown />
       </main>
+
+      {/* ── FOOTER ── */}
+      <footer className="border-t border-[#eceef2] bg-white py-6 px-6 mt-12 text-xs text-[#596579]">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div>
+            © 2026 PHINMA University of Iloilo — College of Information Technology Education (CITE)
+          </div>
+          <div className="flex items-center gap-4 text-[11px]">
+            <span>BSIT Practicum Program</span>
+            <span>•</span>
+            <span>AGENTS.md Compliance Active</span>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

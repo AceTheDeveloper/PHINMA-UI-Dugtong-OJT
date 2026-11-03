@@ -1,26 +1,55 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+  /* Foundation (AGENTS.md §10) */
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-tint: #e6eefe;
+  --primary-track: #d4e0fb;
+  --ink: #0f172a;
+  --muted: #596579;
+  --faint: #6b7686;
+  --disabled: #98a2b3;
+  --border: #eceef2;
+  --border-strong: #d5dae2;
+  --surface: #f5f7fa;
+  --page-wash: #f8fafe;
+  --focus-ring: rgb(37 99 235 / 0.4);
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  /* Success */
+  --success-tint: #d9f5ea;
+  --success-border: #a8e3cb;
+  --success: #087a55;
+  --success-hover: #066245;
+  --success-text: #087a55;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Warning */
+  --warning-tint: #fef3c7;
+  --warning-border: #f6d776;
+  --warning: #b45309;
+  --warning-hover: #92400e;
+  --warning-text: #92400e;
+
+  /* Error */
+  --error-tint: #fee2e2;
+  --error-border: #fca5a5;
+  --error: #dc2626;
+  --error-hover: #b91c1c;
+  --error-text: #dc2626;
+
+  /* Background & Foreground mappings */
+  --background: #f8fafe;
+  --foreground: #0f172a;
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Enforce tabular numerals on all times, dates, and hours counters (AGENTS.md §9) */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
 }
