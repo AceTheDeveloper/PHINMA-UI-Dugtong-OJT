@@ -234,7 +234,7 @@ export default function OjtHero() {
             <div className="space-y-3.5 pt-1">
               <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                 <Link
-                  href="/dashboard"
+                  href="#ojt-portal-preview"
                   className={cn(
                     'h-12 w-full sm:w-auto px-6 rounded-xl bg-primary hover:bg-primary-hover text-primary-foreground text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-xs cursor-pointer',
                     focusStyle
