@@ -12,40 +12,108 @@ import {
   Wifi, 
   BatteryMedium,
   Check,
-  CheckCircle2,
   Building2,
   RotateCw,
   LogOut,
-  LogIn
+  LogIn,
+  Globe,
+  Headset,
+  Gift,
+  RadioTower,
+  Gem,
+  Briefcase,
+  Landmark,
+  Users
 } from 'lucide-react';
 import { HoursChain } from '@/components/ui/hours-chain';
 import { cn } from '@/lib/utils';
 import { focusStyle } from '@/components/brand-link';
 
 /* ─────────────────────────────────────────────────────────────────────────────
- * DUGTONG OJT // ARCHITECTURAL BENTO HERO + PROPORTIONAL INTERACTIVE DEVICE
+ * DUGTONG OJT // ARCHITECTURAL BENTO HERO (Fully Responsive Desktop & Mobile)
  *
- * Designed from Neil's Portfolio & Cortex Aesthetic:
- *   - Top System Status HUD Strip (Asia/Manila Server Authoritative)
- *   - Left Bento Panel: High-impact editorial headline + metadata tags
- *   - Right Panel: Sleek, proportional Smartphone (9:19.5 aspect ratio)
- *     with ZERO dead space, live ticking server clock, stateful single
- *     Time In / Time Out toggle button with glowing color shifts,
- *     and looping data-sync animation on Approved Hours progress.
- *   - Bottom: Smooth, continuous infinite marquee ticker (no scrollbars).
+ * Mobile Overhaul:
+ *   - Native fluid card on mobile (hides redundant fake notch/battery/home bar)
+ *   - Sleek handheld mockup preserved on desktop (lg:)
+ *   - Thumb-friendly full-width touch actions
+ *   - Proportional typography and tight padding on mobile screens (360px+)
+ *   - Zero gradient buttons, live server clock, smooth continuous partner marquee
  * ───────────────────────────────────────────────────────────────────────────── */
 
-const container = 'mx-auto w-[min(100%_-_64px,1200px)] max-md:w-[calc(100%_-_48px)]';
+const container = 'mx-auto w-[min(100%_-_40px,1200px)] sm:w-[min(100%_-_64px,1200px)]';
 
-const partnerCompanies = [
-  'Western Visayas Tech Partners Inc.',
-  'Iloilo Digital Innovations Hub',
-  'Panay Cloud Solutions Corp.',
-  'Metro Iloilo Dev Labs',
-  'CITE Software Engineering Cell',
-  'Panay Telecom Networks',
-  'Visayas Applied AI Consortium',
-  'Iloilo FinTech Systems',
+export interface AccreditedPartner {
+  name: string;
+  category: string;
+  icon: React.ComponentType<{ className?: string }>;
+  accentColor: string;
+  badgeBg: string;
+}
+
+export const accreditedPartners: AccreditedPartner[] = [
+  {
+    name: 'RELX',
+    category: 'Analytics & Legal Tech',
+    icon: Globe,
+    accentColor: 'text-amber-600 dark:text-amber-400',
+    badgeBg: 'bg-amber-500/10 border-amber-500/25',
+  },
+  {
+    name: 'iXL',
+    category: 'EdTech & Learning Analytics',
+    icon: Sparkles,
+    accentColor: 'text-sky-600 dark:text-sky-400',
+    badgeBg: 'bg-sky-500/10 border-sky-500/25',
+  },
+  {
+    name: 'Callbox',
+    category: 'B2B Sales & Digital Marketing',
+    icon: Headset,
+    accentColor: 'text-yellow-600 dark:text-yellow-400',
+    badgeBg: 'bg-yellow-500/10 border-yellow-500/25',
+  },
+  {
+    name: 'iGift',
+    category: 'Rewards & E-Commerce',
+    icon: Gift,
+    accentColor: 'text-purple-600 dark:text-purple-400',
+    badgeBg: 'bg-purple-500/10 border-purple-500/25',
+  },
+  {
+    name: 'DICT',
+    category: 'Gov ICT & Cybersecurity',
+    icon: RadioTower,
+    accentColor: 'text-blue-600 dark:text-blue-400',
+    badgeBg: 'bg-blue-500/10 border-blue-500/25',
+  },
+  {
+    name: 'F&C Jewelry',
+    category: 'Retail & Luxury Systems',
+    icon: Gem,
+    accentColor: 'text-emerald-600 dark:text-emerald-400',
+    badgeBg: 'bg-emerald-500/10 border-emerald-500/25',
+  },
+  {
+    name: 'PESO Iloilo City',
+    category: 'City Employment Office',
+    icon: Briefcase,
+    accentColor: 'text-orange-600 dark:text-orange-400',
+    badgeBg: 'bg-orange-500/10 border-orange-500/25',
+  },
+  {
+    name: 'PESO Province of Iloilo',
+    category: 'Provincial Employment',
+    icon: Landmark,
+    accentColor: 'text-teal-600 dark:text-teal-400',
+    badgeBg: 'bg-teal-500/10 border-teal-500/25',
+  },
+  {
+    name: 'Inspiro',
+    category: 'Global CX & BPO Operations',
+    icon: Users,
+    accentColor: 'text-rose-600 dark:text-rose-400',
+    badgeBg: 'bg-rose-500/10 border-rose-500/25',
+  },
 ];
 
 export default function OjtHero() {
@@ -55,7 +123,6 @@ export default function OjtHero() {
 
   // Real-time ticking clock for live server shift telemetry
   const [liveClock, setLiveClock] = useState('08:32:15 AM');
-  const [liveSeconds, setLiveSeconds] = useState(15);
 
   useEffect(() => {
     const updateTime = () => {
@@ -69,7 +136,6 @@ export default function OjtHero() {
           second: '2-digit',
         })
       );
-      setLiveSeconds(now.getSeconds());
     };
     updateTime();
     const interval = setInterval(updateTime, 1000);
@@ -105,15 +171,15 @@ export default function OjtHero() {
   };
 
   return (
-    <section className="border-b border-border bg-page-wash pt-8 pb-16">
+    <section className="border-b border-border bg-page-wash pt-6 sm:pt-8 pb-12 sm:pb-16">
       <div className={container}>
         {/* ── TOP SYSTEM HUD STRIP ── */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-6 border-b border-border/80 text-[11px] font-mono text-copy-muted">
-          <div className="flex items-center gap-2">
-            <span className="size-2 rounded-full bg-success animate-pulse" />
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 sm:pb-6 border-b border-border/80 text-[11px] font-mono text-copy-muted">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="size-2 rounded-full bg-success animate-pulse shrink-0" />
             <span className="font-bold text-ink">PHINMA UI CITE // PRACTICUM PORTAL</span>
-            <span className="text-border-strong">•</span>
-            <span className="text-primary font-semibold">ASIA/MANILA SERVER VERIFIED</span>
+            <span className="text-border-strong hidden sm:inline">•</span>
+            <span className="text-primary font-semibold">ASIA/MANILA VERIFIED</span>
           </div>
 
           <div className="flex items-center gap-3">
@@ -127,37 +193,37 @@ export default function OjtHero() {
         </div>
 
         {/* ── BENTO HERO GRID ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-8 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 pt-6 sm:pt-8 items-stretch">
           {/* ── LEFT / MAIN BENTO HERO PANEL (7 Cols) ── */}
-          <div className="lg:col-span-7 p-8 sm:p-10 rounded-3xl border border-border bg-card shadow-xs flex flex-col justify-between space-y-8">
-            <div className="space-y-5">
+          <div className="lg:col-span-7 p-5 sm:p-8 lg:p-10 rounded-2xl sm:rounded-3xl border border-border bg-card shadow-xs flex flex-col justify-between space-y-6 sm:space-y-8">
+            <div className="space-y-4 sm:space-y-5">
               {/* Category Pill */}
-              <div className="inline-flex items-center gap-2 rounded-full border border-border-strong bg-surface px-3 py-1 font-mono text-xs font-semibold text-primary">
-                <Sparkles className="size-3 text-primary" />
+              <div className="inline-flex items-center gap-1.5 sm:gap-2 rounded-full border border-border-strong bg-surface px-3 py-1 font-mono text-[11px] sm:text-xs font-semibold text-primary">
+                <Sparkles className="size-3 text-primary shrink-0" />
                 <span>PRACTICUM OPERATIONS // BSIT // CITE</span>
               </div>
 
-              {/* Main Headline (Editorial Polish) */}
-              <h1 className="font-heading text-[clamp(38px,4.5vw,58px)] font-black leading-[1.05] tracking-[-0.04em] text-ink">
+              {/* Main Headline (Responsive typography for mobile) */}
+              <h1 className="font-heading text-[clamp(28px,6.8vw,56px)] font-black leading-[1.08] tracking-[-0.04em] text-ink">
                 Your OJT, from application to{' '}
                 <span className="text-primary italic font-serif font-normal">
                   certification.
                 </span>
               </h1>
 
-              {/* Clear Subtitle */}
-              <p className="text-base sm:text-lg leading-[1.65] text-copy-muted max-w-[540px]">
+              {/* Subtitle */}
+              <p className="text-sm sm:text-base lg:text-lg leading-[1.6] text-copy-muted max-w-[540px]">
                 Apply to accredited partner companies, record daily shifts with server-side time in and time out, submit daily journals, and earn verified graduation credentials. Zero lost paperwork, zero delayed signatures.
               </p>
             </div>
 
-            {/* CTAs & Navigation */}
-            <div className="space-y-4 pt-2">
-              <div className="flex flex-wrap items-center gap-3.5">
+            {/* CTAs & Navigation (Full-width touch targets on mobile) */}
+            <div className="space-y-3.5 pt-1">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                 <Link
                   href="/dashboard"
                   className={cn(
-                    'h-12 px-6 rounded-xl bg-primary hover:bg-primary-hover text-primary-foreground text-xs font-bold flex items-center gap-2 transition-all shadow-xs cursor-pointer',
+                    'h-12 w-full sm:w-auto px-6 rounded-xl bg-primary hover:bg-primary-hover text-primary-foreground text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-xs cursor-pointer',
                     focusStyle
                   )}
                 >
@@ -168,7 +234,7 @@ export default function OjtHero() {
                 <a
                   href="#how-it-works"
                   className={cn(
-                    'h-12 px-5 rounded-xl border border-border hover:bg-surface text-ink text-xs font-semibold flex items-center gap-2 transition-colors cursor-pointer',
+                    'h-12 w-full sm:w-auto px-5 rounded-xl border border-border hover:bg-surface text-ink text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer',
                     focusStyle
                   )}
                 >
@@ -176,13 +242,13 @@ export default function OjtHero() {
                 </a>
               </div>
 
-              <div className="text-xs text-faint">
+              <div className="text-[11px] sm:text-xs text-faint">
                 Accounts are managed by CITE administration • Sign-in is invitation-only.
               </div>
             </div>
 
-            {/* Sub-Bento Info Strip */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6 border-t border-border">
+            {/* Sub-Bento Info Strip (Stack on small mobile, 2-cols on sm:) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-5 border-t border-border">
               <div className="p-3.5 rounded-xl bg-surface border border-border flex items-start gap-3">
                 <MapPin className="size-4 text-primary shrink-0 mt-0.5" />
                 <div>
@@ -203,13 +269,13 @@ export default function OjtHero() {
             </div>
           </div>
 
-          {/* ── RIGHT PANEL: PROPORTIONAL SMARTPHONE MINI-APP (5 Cols) ── */}
+          {/* ── RIGHT PANEL: NATIVE MOBILE CARD (< lg) / HANDHELD PREVIEW (lg:) ── */}
           <div className="lg:col-span-5 flex justify-center items-center w-full">
-            {/* Phone Chassis locked to sleek handheld proportions (No awkward dead space) */}
-            <div className="relative w-full max-w-[390px] rounded-[38px] p-3 sm:p-3.5 bg-gradient-to-b from-[#1b2b4e] via-[#0e1933] to-[#081020] border border-border-strong/90 shadow-[0_20px_50px_rgba(8,18,42,0.45),0_0_30px_rgba(34,85,242,0.18)] transition-all flex flex-col">
+            {/* On mobile: clean native container. On desktop: sleek handheld chassis. */}
+            <div className="relative w-full max-w-full lg:max-w-[390px] rounded-2xl sm:rounded-3xl lg:rounded-[38px] p-0 lg:p-3.5 bg-transparent lg:bg-gradient-to-b lg:from-[#1b2b4e] lg:via-[#0e1933] lg:to-[#081020] border-0 lg:border border-border-strong/90 lg:shadow-[0_20px_50px_rgba(8,18,42,0.45),0_0_30px_rgba(34,85,242,0.18)] transition-all flex flex-col">
               
-              {/* Phone Inner Screen Glass */}
-              <div className="relative rounded-[30px] overflow-hidden border border-border/80 bg-card/95 backdrop-blur-md flex flex-col justify-between">
+              {/* Screen Glass Container */}
+              <div className="relative rounded-2xl sm:rounded-3xl lg:rounded-[30px] overflow-hidden border border-border/80 bg-card/95 backdrop-blur-md flex flex-col justify-between">
                 
                 {/* Mathematical Precision Dot Grid Background */}
                 <div 
@@ -221,8 +287,8 @@ export default function OjtHero() {
                   }}
                 />
 
-                {/* Top Phone Status Bar + Dynamic Island Speaker */}
-                <div className="relative z-10 pt-2.5 pb-2 px-5 flex items-center justify-between border-b border-border/50 text-[10px] font-mono text-copy-muted bg-surface/50">
+                {/* Top Phone Status Bar: ONLY visible on desktop mockup (hidden on real mobile phones) */}
+                <div className="hidden lg:flex relative z-10 pt-2.5 pb-2 px-5 items-center justify-between border-b border-border/50 text-[10px] font-mono text-copy-muted bg-surface/50">
                   <span className="font-bold text-ink tracking-tight">08:02</span>
                   
                   {/* Dynamic Island Speaker */}
@@ -237,12 +303,21 @@ export default function OjtHero() {
                   </div>
                 </div>
 
-                {/* Mini-App Content Stack (Compact, No Dead Gaps) */}
-                <div className="relative z-10 p-4 space-y-3">
+                {/* Mobile Top Header Chip (Shown on mobile for clean contextual heading) */}
+                <div className="flex lg:hidden relative z-10 px-4 py-2.5 border-b border-border items-center justify-between text-[11px] font-mono bg-surface/40">
+                  <span className="font-bold text-primary flex items-center gap-1.5">
+                    <span className="size-1.5 rounded-full bg-success animate-pulse" />
+                    LIVE SHIFT TELEMETRY
+                  </span>
+                  <span className="text-copy-muted">ASIA/MANILA</span>
+                </div>
+
+                {/* Content Stack */}
+                <div className="relative z-10 p-3.5 sm:p-4 space-y-3">
                   
                   {/* Card 1: Today Shift & Live Toggle Switch */}
                   <div className={cn(
-                    'rounded-2xl border p-3.5 transition-all shadow-xs backdrop-blur-xs',
+                    'rounded-xl sm:rounded-2xl border p-3 sm:p-3.5 transition-all shadow-xs backdrop-blur-xs',
                     isClockedIn 
                       ? 'border-primary/40 bg-surface/90 shadow-[0_0_20px_rgba(34,85,242,0.08)]' 
                       : 'border-border bg-card/90'
@@ -277,7 +352,7 @@ export default function OjtHero() {
                       </div>
                     </div>
 
-                    {/* Single Prominent Stateful Toggle Button (Crucial Requirement 1) */}
+                    {/* Single Stateful Toggle Button (Solid, No Gradient) */}
                     <button
                       type="button"
                       onClick={handleToggleShift}
@@ -311,8 +386,8 @@ export default function OjtHero() {
                   </div>
 
                   {/* Card 2: Boxed Approved Hours with Looping Loading Progress */}
-                  <div className="rounded-2xl border border-border bg-surface/90 dark:bg-card/90 p-3.5 shadow-xs backdrop-blur-xs relative overflow-hidden">
-                    {/* Looping ambient data-sync shimmer line (Requirement 2) */}
+                  <div className="rounded-xl sm:rounded-2xl border border-border bg-surface/90 dark:bg-card/90 p-3 sm:p-3.5 shadow-xs backdrop-blur-xs relative overflow-hidden">
+                    {/* Looping ambient data-sync shimmer line */}
                     <div className="animate-sync-shimmer" />
 
                     <div className="flex items-center justify-between mb-1.5">
@@ -337,14 +412,14 @@ export default function OjtHero() {
                     </div>
 
                     {/* Signature Hours Chain Visualizer */}
-                    <div className="my-2.5 py-0.5">
+                    <div className="my-2 py-0.5">
                       <HoursChain approvedHours={approvedHours} requiredHours={requiredHours} size="sm" />
                     </div>
 
-                    {/* Looping Progress Bar (Infinitely looping loading sequence) */}
+                    {/* Looping Progress Bar */}
                     <div className="relative h-1.5 w-full rounded-full bg-border-strong/50 overflow-hidden mt-1">
                       <div 
-                        className="h-full rounded-full bg-gradient-to-r from-primary via-teal-bright to-primary transition-all duration-500 relative"
+                        className="h-full rounded-full bg-primary transition-all duration-500 relative"
                         style={{ width: `${percentage}%` }}
                       >
                         <div className="absolute inset-0 bg-white/40 animate-pulse" />
@@ -358,7 +433,7 @@ export default function OjtHero() {
                   </div>
 
                   {/* Card 3: Supervisor Review Quick Queue */}
-                  <div className="rounded-2xl border border-border bg-surface/90 dark:bg-card/90 p-3 shadow-xs space-y-2">
+                  <div className="rounded-xl sm:rounded-2xl border border-border bg-surface/90 dark:bg-card/90 p-3 shadow-xs space-y-2">
                     <div className="flex items-center justify-between text-[11px]">
                       <span className="font-bold font-mono uppercase text-copy-muted">Supervisor Review</span>
                       <span className={cn(
@@ -408,7 +483,7 @@ export default function OjtHero() {
                       <button
                         type="button"
                         onClick={handleApproveAll}
-                        className="w-full h-7 rounded-lg border border-border-strong hover:bg-surface text-ink text-[10px] font-bold transition-colors cursor-pointer"
+                        className="w-full h-8 rounded-lg border border-border-strong hover:bg-surface text-ink text-[10px] font-bold transition-colors cursor-pointer"
                       >
                         Approve all {pendingCount} shifts
                       </button>
@@ -428,8 +503,8 @@ export default function OjtHero() {
 
                 </div>
 
-                {/* Bottom Home Indicator Bar */}
-                <div className="relative z-10 pb-2.5 pt-1 flex justify-center bg-surface/30">
+                {/* Bottom Home Indicator Bar: Desktop ONLY */}
+                <div className="hidden lg:flex relative z-10 pb-2.5 pt-1 justify-center bg-surface/30">
                   <div className="h-1 w-24 rounded-full bg-border-strong" />
                 </div>
               </div>
@@ -437,14 +512,13 @@ export default function OjtHero() {
           </div>
         </div>
 
-        {/* ── CONTINUOUS PARTNER MARQUEE TICKER (Smooth Infinite Stream) ── */}
-        <div className="mt-12 pt-6 border-t border-border flex flex-col md:flex-row md:items-center gap-4 text-xs font-mono text-copy-muted overflow-hidden">
+        {/* ── CONTINUOUS PARTNER MARQUEE TICKER ── */}
+        <div className="mt-8 sm:mt-12 pt-6 border-t border-border flex flex-col md:flex-row md:items-center gap-3 sm:gap-4 text-xs font-mono text-copy-muted overflow-hidden">
           <div className="shrink-0 font-bold uppercase text-ink flex items-center gap-2">
-            <span className="size-1.5 rounded-full bg-primary" />
-            <span>Accredited Industry Partners:</span>
+            <Building2 className="size-3.5 text-primary" />
+            <span>Accredited Partners:</span>
           </div>
 
-          {/* Infinite Marquee Track with Dual Streams and Left/Right Mask */}
           <div 
             className="relative flex-1 overflow-hidden"
             style={{
@@ -452,26 +526,48 @@ export default function OjtHero() {
               WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)',
             }}
           >
-            <div className="animate-marquee whitespace-nowrap flex items-center gap-8 py-1 select-none">
+            <div className="animate-marquee whitespace-nowrap flex items-center gap-4 sm:gap-6 py-1 select-none">
               {/* Track 1 */}
-              {partnerCompanies.map((company, i) => (
-                <React.Fragment key={`p1-${i}`}>
-                  <span className="text-[11px] font-medium text-copy-muted hover:text-primary transition-colors cursor-default">
-                    {company}
-                  </span>
-                  <span className="text-border-strong">•</span>
-                </React.Fragment>
-              ))}
+              {accreditedPartners.map((partner, i) => {
+                const IconComponent = partner.icon;
+                return (
+                  <div
+                    key={`p1-${i}`}
+                    className="inline-flex items-center gap-2 rounded-xl bg-surface/80 dark:bg-card/80 border border-border/80 px-3 py-1.5 hover:border-primary/40 hover:bg-surface transition-all cursor-default"
+                  >
+                    <span className={cn('size-6 rounded-lg border flex items-center justify-center shrink-0', partner.badgeBg, partner.accentColor)}>
+                      <IconComponent className="size-3.5" />
+                    </span>
+                    <span className="font-heading text-xs font-bold text-ink">
+                      {partner.name}
+                    </span>
+                    <span className="text-[10px] font-mono text-copy-muted hidden sm:inline">
+                      • {partner.category}
+                    </span>
+                  </div>
+                );
+              })}
 
               {/* Track 2 (Duplicate for Seamless Loop) */}
-              {partnerCompanies.map((company, i) => (
-                <React.Fragment key={`p2-${i}`}>
-                  <span className="text-[11px] font-medium text-copy-muted hover:text-primary transition-colors cursor-default">
-                    {company}
-                  </span>
-                  <span className="text-border-strong">•</span>
-                </React.Fragment>
-              ))}
+              {accreditedPartners.map((partner, i) => {
+                const IconComponent = partner.icon;
+                return (
+                  <div
+                    key={`p2-${i}`}
+                    className="inline-flex items-center gap-2 rounded-xl bg-surface/80 dark:bg-card/80 border border-border/80 px-3 py-1.5 hover:border-primary/40 hover:bg-surface transition-all cursor-default"
+                  >
+                    <span className={cn('size-6 rounded-lg border flex items-center justify-center shrink-0', partner.badgeBg, partner.accentColor)}>
+                      <IconComponent className="size-3.5" />
+                    </span>
+                    <span className="font-heading text-xs font-bold text-ink">
+                      {partner.name}
+                    </span>
+                    <span className="text-[10px] font-mono text-copy-muted hidden sm:inline">
+                      • {partner.category}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>

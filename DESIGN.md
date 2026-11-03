@@ -78,7 +78,7 @@ The following core modules and screens have been designed and implemented on bra
   * Signature **Approved Hours Box** with live visual Hours Chain rendering.
   * Supervisor approval queue with toggleable student approvals (`Ana S.`, `Ben M.`, `Cara D.`).
   * Instant auto-calculation of progress toward the 300.0-hour course requirement.
-* **Infinite Industry Marquee:** Dual-track streaming strip of accredited Iloilo industry partners with linear alpha masking.
+* **Infinite Industry Marquee:** Dual-track streaming strip of official CITE accredited industry partners with dedicated category badges and semantic icons: **RELX** (`Globe`), **iXL** (`Sparkles`), **Callbox** (`Headset`), **iGift** (`Gift`), **DICT** (`RadioTower`), **F&C Jewelry** (`Gem`), **PESO Iloilo City** (`Briefcase`), **PESO Province of Iloilo** (`Landmark`), and **Inspiro** (`Users`).
 
 ### 2. Minimalist Telemetry & SVG Curve Charts (`components/landing/OjtTelemetryData.tsx`)
 * High-precision trajectory chart graphing cumulative cohort hours against the required milestone.

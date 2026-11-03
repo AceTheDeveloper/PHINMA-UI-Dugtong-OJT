@@ -118,7 +118,7 @@ export default function OjtDashboardView() {
       breakDuration: '1.0 hr',
       netHours: 8.0,
       status: 'pending',
-      journal: 'Active shift in progress at Western Visayas Tech Partners Inc.',
+      journal: 'Active shift in progress at RELX (Reed Elsevier).',
     },
     {
       id: 'log-02',
@@ -159,7 +159,7 @@ export default function OjtDashboardView() {
       studentName: 'Neil Alisasis',
       studentId: '04-2223-0192',
       section: 'BSIT 4-A',
-      company: 'Western Visayas Tech Partners Inc.',
+      company: 'RELX',
       date: 'Nov 2, 2026',
       timeIn: '08:00 AM',
       timeOut: '05:00 PM',
@@ -172,7 +172,7 @@ export default function OjtDashboardView() {
       studentName: 'Maria Sophia Santos',
       studentId: '04-2223-0841',
       section: 'BSIT 4-B',
-      company: 'Iloilo Digital Innovations Hub',
+      company: 'Callbox',
       date: 'Nov 2, 2026',
       timeIn: '08:30 AM',
       timeOut: '05:30 PM',
@@ -185,7 +185,7 @@ export default function OjtDashboardView() {
       studentName: 'Joshua De la Cruz',
       studentId: '04-2223-0415',
       section: 'BSIT 4-A',
-      company: 'Panay Cloud Solutions Corp.',
+      company: 'Inspiro',
       date: 'Nov 1, 2026',
       timeIn: '08:00 AM',
       timeOut: '04:00 PM',
@@ -310,7 +310,7 @@ export default function OjtDashboardView() {
                   Hello, Neil Alisasis.
                 </h2>
                 <p className="text-xs text-copy-muted mt-0.5">
-                  BSIT Practicum • Western Visayas Tech Partners Inc. (Supervisor: Engr. M. Ramos)
+                  BSIT Practicum • RELX (Supervisor: Cybele Custodio)
                 </p>
               </div>
 
