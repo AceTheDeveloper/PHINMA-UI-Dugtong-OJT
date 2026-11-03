@@ -47,6 +47,7 @@ export interface AccreditedPartner {
   category: string;
   icon?: React.ComponentType<{ className?: string }>;
   logoSrc?: string;
+  darkInvert?: boolean;
   accentColor?: string;
   badgeBg?: string;
 }
@@ -56,6 +57,7 @@ export const accreditedPartners: AccreditedPartner[] = [
     name: 'Callbox',
     category: 'B2B Sales & Digital Marketing',
     logoSrc: '/partners/callbox.png',
+    darkInvert: true,
     icon: Headset,
     accentColor: 'text-yellow-600 dark:text-yellow-400',
     badgeBg: 'bg-yellow-500/10 border-yellow-500/25',
@@ -64,6 +66,7 @@ export const accreditedPartners: AccreditedPartner[] = [
     name: 'F&C Jewelry',
     category: 'Retail & Luxury Systems',
     logoSrc: '/partners/fc-jewelry.png',
+    darkInvert: true,
     icon: Gem,
     accentColor: 'text-emerald-600 dark:text-emerald-400',
     badgeBg: 'bg-emerald-500/10 border-emerald-500/25',
@@ -87,7 +90,7 @@ export const accreditedPartners: AccreditedPartner[] = [
   {
     name: 'PESO Iloilo City',
     category: 'City Employment Office',
-    logoSrc: '/partners/peso-iloilo-city.jpg',
+    logoSrc: '/partners/peso-iloilo-city.png',
     icon: Briefcase,
     accentColor: 'text-orange-600 dark:text-orange-400',
     badgeBg: 'bg-orange-500/10 border-orange-500/25',
@@ -103,7 +106,7 @@ export const accreditedPartners: AccreditedPartner[] = [
   {
     name: 'iGift',
     category: 'Rewards & E-Commerce',
-    logoSrc: '/partners/igift.jpg',
+    logoSrc: '/partners/igift.png',
     icon: Gift,
     accentColor: 'text-purple-600 dark:text-purple-400',
     badgeBg: 'bg-purple-500/10 border-purple-500/25',
@@ -111,7 +114,7 @@ export const accreditedPartners: AccreditedPartner[] = [
   {
     name: 'PESO Province of Iloilo',
     category: 'Provincial Employment',
-    logoSrc: '/partners/peso-province-iloilo.jpg',
+    logoSrc: '/partners/peso-province-iloilo.png',
     icon: Landmark,
     accentColor: 'text-teal-600 dark:text-teal-400',
     badgeBg: 'bg-teal-500/10 border-teal-500/25',
@@ -119,7 +122,7 @@ export const accreditedPartners: AccreditedPartner[] = [
   {
     name: 'Inspiro',
     category: 'Global CX & BPO Operations',
-    logoSrc: '/partners/inspiro.jpg',
+    logoSrc: '/partners/inspiro.png',
     icon: Users,
     accentColor: 'text-rose-600 dark:text-rose-400',
     badgeBg: 'bg-rose-500/10 border-rose-500/25',
@@ -549,7 +552,10 @@ export default function OjtHero() {
                       <img
                         src={partner.logoSrc}
                         alt={`${partner.name} logo`}
-                        className="h-6 sm:h-7 w-auto max-w-[120px] object-contain shrink-0 filter contrast-105 group-hover:scale-105 transition-transform"
+                        className={cn(
+                          "h-6 sm:h-7 w-auto max-w-[120px] object-contain shrink-0 filter contrast-105 group-hover:scale-105 transition-transform",
+                          partner.darkInvert && "dark:brightness-0 dark:invert"
+                        )}
                         loading="lazy"
                       />
                     ) : (
@@ -580,7 +586,10 @@ export default function OjtHero() {
                       <img
                         src={partner.logoSrc}
                         alt={`${partner.name} logo`}
-                        className="h-6 sm:h-7 w-auto max-w-[120px] object-contain shrink-0 filter contrast-105 group-hover:scale-105 transition-transform"
+                        className={cn(
+                          "h-6 sm:h-7 w-auto max-w-[120px] object-contain shrink-0 filter contrast-105 group-hover:scale-105 transition-transform",
+                          partner.darkInvert && "dark:brightness-0 dark:invert"
+                        )}
                         loading="lazy"
                       />
                     ) : (
