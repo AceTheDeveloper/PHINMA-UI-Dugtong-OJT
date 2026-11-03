@@ -48,7 +48,9 @@ document.documentElement.classList.toggle(
 );`}
         </Script>
       </head>
-      <body className="font-sans text-ink">{children}</body>
+      <body className="font-sans text-ink" suppressHydrationWarning>
+        {children}
+      </body>
     </html>
   );
 }
