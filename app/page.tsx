@@ -1,7 +1,6 @@
 import ScrollReveal from "./components/scroll-reveal";
 import {
   FinalCta,
-  Journey,
   LandingFooter,
   LandingHeader,
   Roles,
@@ -10,6 +9,7 @@ import {
 } from "@/components/landing/landing-sections";
 import OjtHero from "@/components/landing/OjtHero";
 import OjtTelemetryData from "@/components/landing/OjtTelemetryData";
+import OjtJourneyCircuit from "@/components/landing/OjtJourneyCircuit";
 import OjtDashboardView from "@/components/dashboard/OjtDashboardView";
 import { focusStyle } from "@/components/brand-link";
 import { cn } from "@/lib/utils";
@@ -35,8 +35,8 @@ export default function Home() {
         {/* 2. Minimalist Telemetry & Glowing SVG Curve Charts */}
         <OjtTelemetryData />
 
-        {/* 3. The 6-Step Practicum Journey */}
-        <Journey />
+        {/* 3. The 6-Step Practicum Journey (Cortex-Inspired Circuit Map) */}
+        <OjtJourneyCircuit />
 
         {/* 4. Live Interactive OJT Dashboard Experience (Student & Supervisor Deck) */}
         <section

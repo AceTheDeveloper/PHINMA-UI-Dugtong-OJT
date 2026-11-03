@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { 
   ArrowRight, 
@@ -12,21 +12,26 @@ import {
   Wifi, 
   BatteryMedium,
   Check,
-  Building2
+  CheckCircle2,
+  Building2,
+  RotateCw,
+  LogOut,
+  LogIn
 } from 'lucide-react';
 import { HoursChain } from '@/components/ui/hours-chain';
 import { cn } from '@/lib/utils';
 import { focusStyle } from '@/components/brand-link';
 
 /* ─────────────────────────────────────────────────────────────────────────────
- * DUGTONG OJT // ARCHITECTURAL BENTO HERO + INTERACTIVE DEVICE
+ * DUGTONG OJT // ARCHITECTURAL BENTO HERO + PROPORTIONAL INTERACTIVE DEVICE
  *
  * Designed from Neil's Portfolio & Cortex Aesthetic:
- *   - Top System Status HUD Pill
+ *   - Top System Status HUD Strip (Asia/Manila Server Authoritative)
  *   - Left Bento Panel: High-impact editorial headline + metadata tags
- *   - Right Panel: Sleek, welcoming interactive device (Smartphone / Mini-App)
- *     with mathematically centered dot grid, dynamic Time In/Out toggle,
- *     signature boxed Approved Hours with Hours Chain, and supervisor approvals.
+ *   - Right Panel: Sleek, proportional Smartphone (9:19.5 aspect ratio)
+ *     with ZERO dead space, live ticking server clock, stateful single
+ *     Time In / Time Out toggle button with glowing color shifts,
+ *     and looping data-sync animation on Approved Hours progress.
  *   - Bottom: Smooth, continuous infinite marquee ticker (no scrollbars).
  * ───────────────────────────────────────────────────────────────────────────── */
 
@@ -48,20 +53,42 @@ export default function OjtHero() {
   const requiredHours = 300.0;
   const percentage = Math.round((approvedHours / requiredHours) * 1000) / 10;
 
-  // Interactive device state
+  // Real-time ticking clock for live server shift telemetry
+  const [liveClock, setLiveClock] = useState('08:32:15 AM');
+  const [liveSeconds, setLiveSeconds] = useState(15);
+
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      setLiveClock(
+        now.toLocaleTimeString('en-US', {
+          timeZone: 'Asia/Manila',
+          hour12: true,
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+        })
+      );
+      setLiveSeconds(now.getSeconds());
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Single stateful Toggle Switch state for Time In / Time Out
   const [isClockedIn, setIsClockedIn] = useState(true);
-  const [todayJournal] = useState('Fixed the login redirect and reviewed two pull requests.');
   const [approvedStudents, setApprovedStudents] = useState<Record<string, boolean>>({});
 
   const pendingQueue = [
-    { id: 'ana', name: 'Ana S.', hours: '8.0 h', role: 'Frontend Dev' },
-    { id: 'ben', name: 'Ben M.', hours: '7.5 h', role: 'QA Analyst' },
+    { id: 'ana', name: 'Ana S.', hours: '8.0 h', role: 'Frontend' },
+    { id: 'ben', name: 'Ben M.', hours: '7.5 h', role: 'QA Lead' },
     { id: 'cara', name: 'Cara D.', hours: '8.0 h', role: 'Full Stack' },
   ];
 
   const pendingCount = pendingQueue.filter((item) => !approvedStudents[item.id]).length;
 
-  const handleToggleClock = () => {
+  const handleToggleShift = () => {
     setIsClockedIn((prev) => !prev);
   };
 
@@ -100,7 +127,7 @@ export default function OjtHero() {
         </div>
 
         {/* ── BENTO HERO GRID ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-8 items-stretch">
           {/* ── LEFT / MAIN BENTO HERO PANEL (7 Cols) ── */}
           <div className="lg:col-span-7 p-8 sm:p-10 rounded-3xl border border-border bg-card shadow-xs flex flex-col justify-between space-y-8">
             <div className="space-y-5">
@@ -139,13 +166,13 @@ export default function OjtHero() {
                 </Link>
 
                 <a
-                  href="#ojt-portal-preview"
+                  href="#how-it-works"
                   className={cn(
                     'h-12 px-5 rounded-xl border border-border hover:bg-surface text-ink text-xs font-semibold flex items-center gap-2 transition-colors cursor-pointer',
                     focusStyle
                   )}
                 >
-                  <span>Explore Interactive DTR</span>
+                  <span>View 6-Step Journey Map</span>
                 </a>
               </div>
 
@@ -176,17 +203,17 @@ export default function OjtHero() {
             </div>
           </div>
 
-          {/* ── RIGHT PANEL: INTERACTIVE MOBILE PHONE / MINI-APP FRAME (5 Cols) ── */}
-          <div className="lg:col-span-5 relative flex justify-center w-full">
-            {/* Phone Outer Chassis with Ambient Blue/Cyan Glow */}
-            <div className="relative w-full max-w-[420px] rounded-[40px] p-3 sm:p-4 bg-gradient-to-b from-[#1c2c52] via-[#0f1b36] to-[#0a1224] border-2 border-border-strong/90 shadow-[0_20px_50px_rgba(8,18,42,0.45),0_0_30px_rgba(34,85,242,0.15)] transition-all">
+          {/* ── RIGHT PANEL: PROPORTIONAL SMARTPHONE MINI-APP (5 Cols) ── */}
+          <div className="lg:col-span-5 flex justify-center items-center w-full">
+            {/* Phone Chassis locked to sleek handheld proportions (No awkward dead space) */}
+            <div className="relative w-full max-w-[390px] rounded-[38px] p-3 sm:p-3.5 bg-gradient-to-b from-[#1b2b4e] via-[#0e1933] to-[#081020] border border-border-strong/90 shadow-[0_20px_50px_rgba(8,18,42,0.45),0_0_30px_rgba(34,85,242,0.18)] transition-all flex flex-col">
               
-              {/* Phone Inner Bezel & Screen Container */}
-              <div className="relative rounded-[32px] overflow-hidden border border-border/80 bg-card/95 backdrop-blur-md">
+              {/* Phone Inner Screen Glass */}
+              <div className="relative rounded-[30px] overflow-hidden border border-border/80 bg-card/95 backdrop-blur-md flex flex-col justify-between">
                 
                 {/* Mathematical Precision Dot Grid Background */}
                 <div 
-                  className="absolute inset-0 pointer-events-none opacity-45 dark:opacity-60"
+                  className="absolute inset-0 pointer-events-none opacity-40 dark:opacity-55"
                   style={{
                     backgroundImage: 'radial-gradient(rgba(110, 147, 255, 0.35) 1.5px, transparent 1.5px)',
                     backgroundSize: '20px 20px',
@@ -194,14 +221,14 @@ export default function OjtHero() {
                   }}
                 />
 
-                {/* Top Phone Speaker / Notch */}
-                <div className="relative z-10 pt-3 pb-2 px-6 flex items-center justify-between border-b border-border/50 text-[10px] font-mono text-copy-muted bg-surface/40">
+                {/* Top Phone Status Bar + Dynamic Island Speaker */}
+                <div className="relative z-10 pt-2.5 pb-2 px-5 flex items-center justify-between border-b border-border/50 text-[10px] font-mono text-copy-muted bg-surface/50">
                   <span className="font-bold text-ink tracking-tight">08:02</span>
                   
-                  {/* Dynamic Island / Speaker Pill */}
-                  <div className="h-4 w-20 rounded-full bg-ink/20 dark:bg-black/60 flex items-center justify-center">
-                    <span className="size-1.5 rounded-full bg-primary/80 animate-ping mr-1" />
-                    <span className="size-1.5 rounded-full bg-success" />
+                  {/* Dynamic Island Speaker */}
+                  <div className="h-3.5 w-18 rounded-full bg-ink/20 dark:bg-black/70 flex items-center justify-center gap-1">
+                    <span className="size-1 rounded-full bg-primary/80 animate-ping" />
+                    <span className="size-1 rounded-full bg-success" />
                   </div>
 
                   <div className="flex items-center gap-1.5 text-ink">
@@ -210,15 +237,22 @@ export default function OjtHero() {
                   </div>
                 </div>
 
-                {/* Mini-App Content Area */}
-                <div className="relative z-10 p-4 sm:p-5 space-y-4">
+                {/* Mini-App Content Stack (Compact, No Dead Gaps) */}
+                <div className="relative z-10 p-4 space-y-3">
                   
-                  {/* Card 1: Today Time-In/Out (Live Interactive Toggle) */}
-                  <div className="rounded-2xl border border-border bg-surface/90 dark:bg-card/90 p-4 shadow-xs backdrop-blur-xs transition-all">
-                    <div className="flex items-center justify-between mb-2.5">
-                      <span className="text-xs font-bold font-mono uppercase text-copy-muted">Today</span>
+                  {/* Card 1: Today Shift & Live Toggle Switch */}
+                  <div className={cn(
+                    'rounded-2xl border p-3.5 transition-all shadow-xs backdrop-blur-xs',
+                    isClockedIn 
+                      ? 'border-primary/40 bg-surface/90 shadow-[0_0_20px_rgba(34,85,242,0.08)]' 
+                      : 'border-border bg-card/90'
+                  )}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[11px] font-bold font-mono uppercase text-copy-muted">
+                        Today Shift
+                      </span>
                       <span className={cn(
-                        'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold border transition-all',
+                        'inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-semibold border transition-all',
                         isClockedIn 
                           ? 'border-success-border bg-success-tint text-success-text' 
                           : 'border-border bg-surface text-copy-muted'
@@ -231,40 +265,58 @@ export default function OjtHero() {
                       </span>
                     </div>
 
-                    <div className="flex items-baseline gap-2">
-                      <span className="font-mono text-3xl font-black text-ink tracking-tight tabular-nums">
-                        {isClockedIn ? '08:02' : '--:--'}
-                      </span>
-                      <span className="text-xs text-copy-muted">
-                        {isClockedIn ? 'AM, time in' : 'Ready to clock in'}
-                      </span>
+                    {/* Live Server Clock */}
+                    <div className="flex items-baseline justify-between">
+                      <div>
+                        <div className="font-mono text-2xl sm:text-3xl font-black text-ink tracking-tight tabular-nums">
+                          {liveClock}
+                        </div>
+                        <div className="text-[10px] text-copy-muted font-mono mt-0.5">
+                          {isClockedIn ? 'Server Time In: 08:00:00 AM' : 'Server Status: Standby'}
+                        </div>
+                      </div>
                     </div>
 
-                    {isClockedIn && (
-                      <div className="mt-2.5 rounded-xl bg-card dark:bg-surface/80 border border-border/80 px-3 py-2 text-xs text-copy-muted leading-relaxed">
-                        {todayJournal}
-                      </div>
-                    )}
-
+                    {/* Single Prominent Stateful Toggle Button (Crucial Requirement 1) */}
                     <button
                       type="button"
-                      onClick={handleToggleClock}
+                      onClick={handleToggleShift}
                       className={cn(
-                        'mt-3.5 w-full h-10 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs',
+                        'mt-3 w-full h-11 rounded-xl font-bold text-xs flex items-center justify-between px-4 transition-all duration-300 cursor-pointer shadow-md select-none relative overflow-hidden',
                         isClockedIn 
-                          ? 'bg-primary hover:bg-primary-hover text-primary-foreground' 
-                          : 'bg-success hover:bg-success-hover text-white'
+                          ? 'bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white shadow-[0_0_20px_rgba(220,38,38,0.35)]' 
+                          : 'bg-gradient-to-r from-emerald-600 via-teal-600 to-blue-600 hover:from-emerald-500 hover:to-blue-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.35)]'
                       )}
                     >
-                      <span>{isClockedIn ? 'Time out' : 'Time in now'}</span>
-                      <ArrowRight className="size-3.5" />
+                      <div className="flex items-center gap-2">
+                        {isClockedIn ? (
+                          <LogOut className="size-4 text-white" />
+                        ) : (
+                          <LogIn className="size-4 text-white" />
+                        )}
+                        <span className="font-extrabold tracking-wide uppercase">
+                          {isClockedIn ? 'Time Out Shift' : 'Time In Shift'}
+                        </span>
+                      </div>
+
+                      {/* Toggle Visual Pill Switch */}
+                      <div className="flex items-center gap-1.5 bg-black/30 rounded-full px-2.5 py-1 text-[10px] font-mono font-semibold">
+                        <span>{isClockedIn ? 'CLICK TO END' : 'CLICK TO START'}</span>
+                        <span className={cn(
+                          'size-2 rounded-full',
+                          isClockedIn ? 'bg-amber-300 animate-ping' : 'bg-emerald-300 animate-ping'
+                        )} />
+                      </div>
                     </button>
                   </div>
 
-                  {/* Card 2: Boxed Approved Hours with Hours Chain */}
-                  <div className="rounded-2xl border border-border bg-surface/90 dark:bg-card/90 p-4 shadow-xs backdrop-blur-xs">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-bold font-mono uppercase text-copy-muted">Approved hours</span>
+                  {/* Card 2: Boxed Approved Hours with Looping Loading Progress */}
+                  <div className="rounded-2xl border border-border bg-surface/90 dark:bg-card/90 p-3.5 shadow-xs backdrop-blur-xs relative overflow-hidden">
+                    {/* Looping ambient data-sync shimmer line (Requirement 2) */}
+                    <div className="animate-sync-shimmer" />
+
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-[11px] font-bold font-mono uppercase text-copy-muted">Approved hours</span>
                       <span className="inline-flex items-center gap-1 rounded-full border border-success-border bg-success-tint px-2 py-0.5 text-[10px] font-semibold text-success-text">
                         <Check className="size-3" />
                         <span>On track</span>
@@ -272,29 +324,43 @@ export default function OjtHero() {
                     </div>
 
                     <div className="flex items-baseline gap-1.5">
-                      <span className="font-mono text-3xl font-black text-ink tracking-tight tabular-nums">
+                      <span className="font-mono text-2xl sm:text-3xl font-black text-ink tracking-tight tabular-nums">
                         212
                       </span>
-                      <span className="font-mono text-sm font-semibold text-copy-muted tabular-nums">
+                      <span className="font-mono text-xs font-semibold text-copy-muted tabular-nums">
                         / 300 h
+                      </span>
+                      <span className="ml-auto text-[10px] font-mono text-primary font-semibold flex items-center gap-1">
+                        <RotateCw className="size-2.5 animate-spin text-primary" />
+                        <span>Live Sync</span>
                       </span>
                     </div>
 
                     {/* Signature Hours Chain Visualizer */}
-                    <div className="my-3 py-1">
+                    <div className="my-2.5 py-0.5">
                       <HoursChain approvedHours={approvedHours} requiredHours={requiredHours} size="sm" />
                     </div>
 
-                    <div className="flex items-center justify-between text-xs text-copy-muted font-medium">
+                    {/* Looping Progress Bar (Infinitely looping loading sequence) */}
+                    <div className="relative h-1.5 w-full rounded-full bg-border-strong/50 overflow-hidden mt-1">
+                      <div 
+                        className="h-full rounded-full bg-gradient-to-r from-primary via-teal-bright to-primary transition-all duration-500 relative"
+                        style={{ width: `${percentage}%` }}
+                      >
+                        <div className="absolute inset-0 bg-white/40 animate-pulse" />
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between text-[11px] text-copy-muted font-medium pt-1">
                       <span>Progress: {percentage}%</span>
                       <span className="text-primary font-bold">88 hours to go</span>
                     </div>
                   </div>
 
-                  {/* Card 3: Supervisor Pending Approval Strip */}
-                  <div className="rounded-2xl border border-border bg-surface/90 dark:bg-card/90 p-4 shadow-xs backdrop-blur-xs space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold font-mono uppercase text-copy-muted">Supervisor Review</span>
+                  {/* Card 3: Supervisor Review Quick Queue */}
+                  <div className="rounded-2xl border border-border bg-surface/90 dark:bg-card/90 p-3 shadow-xs space-y-2">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="font-bold font-mono uppercase text-copy-muted">Supervisor Review</span>
                       <span className={cn(
                         'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold transition-colors',
                         pendingCount > 0 
@@ -305,7 +371,7 @@ export default function OjtHero() {
                       </span>
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="space-y-1.5">
                       {pendingQueue.map((student) => {
                         const isApproved = approvedStudents[student.id];
                         return (
@@ -313,7 +379,7 @@ export default function OjtHero() {
                             key={student.id} 
                             onClick={() => handleApproveStudent(student.id)}
                             className={cn(
-                              'flex items-center justify-between p-2 rounded-xl border text-xs transition-all cursor-pointer',
+                              'flex items-center justify-between p-1.5 px-2.5 rounded-xl border text-[11px] transition-all cursor-pointer',
                               isApproved 
                                 ? 'bg-success-tint/40 border-success-border/60 text-success-text' 
                                 : 'bg-card dark:bg-surface/60 border-border text-ink hover:border-primary/50'
@@ -321,13 +387,13 @@ export default function OjtHero() {
                           >
                             <div className="flex items-center gap-2">
                               <span className={cn(
-                                'size-5 rounded-full flex items-center justify-center text-[10px] font-bold',
+                                'size-4 rounded-full flex items-center justify-center text-[9px] font-bold',
                                 isApproved ? 'bg-success text-white' : 'bg-surface border border-border text-copy-muted'
                               )}>
-                                {isApproved ? <Check className="size-3" /> : student.name.charAt(0)}
+                                {isApproved ? <Check className="size-2.5" /> : student.name.charAt(0)}
                               </span>
                               <span className="font-semibold">{student.name}</span>
-                              <span className="text-[10px] text-copy-muted hidden sm:inline">({student.role})</span>
+                              <span className="text-[10px] text-copy-muted">({student.role})</span>
                             </div>
 
                             <span className="font-mono font-bold tabular-nums">
@@ -342,29 +408,29 @@ export default function OjtHero() {
                       <button
                         type="button"
                         onClick={handleApproveAll}
-                        className="w-full h-8 rounded-xl border border-border-strong hover:bg-surface text-ink text-xs font-bold transition-colors cursor-pointer"
+                        className="w-full h-7 rounded-lg border border-border-strong hover:bg-surface text-ink text-[10px] font-bold transition-colors cursor-pointer"
                       >
                         Approve all {pendingCount} shifts
                       </button>
                     )}
                   </div>
 
-                  {/* Card 4: Certification Preview Card */}
-                  <div className="rounded-2xl border border-border bg-surface/90 dark:bg-card/90 p-3.5 shadow-xs flex items-center gap-3">
-                    <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl bg-teal-tint text-teal-text">
-                      <Award className="size-5" />
+                  {/* Card 4: Compact Certification Ready Pill */}
+                  <div className="rounded-xl border border-border bg-surface/80 dark:bg-card/80 p-2.5 shadow-xs flex items-center gap-2.5">
+                    <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-lg bg-teal-tint text-teal-text">
+                      <Award className="size-4" />
                     </span>
-                    <div>
-                      <div className="font-heading text-xs font-bold text-ink">Practicum Certification</div>
-                      <div className="text-[11px] text-copy-muted">Issued automatically once 300 hrs are approved.</div>
+                    <div className="min-w-0">
+                      <div className="font-heading text-xs font-bold text-ink truncate">Practicum Certification</div>
+                      <div className="text-[10px] text-copy-muted truncate">Automated issuance at 300 approved hours.</div>
                     </div>
                   </div>
 
                 </div>
 
                 {/* Bottom Home Indicator Bar */}
-                <div className="relative z-10 pb-3 pt-1 flex justify-center bg-surface/40">
-                  <div className="h-1 w-28 rounded-full bg-border-strong" />
+                <div className="relative z-10 pb-2.5 pt-1 flex justify-center bg-surface/30">
+                  <div className="h-1 w-24 rounded-full bg-border-strong" />
                 </div>
               </div>
             </div>
@@ -374,7 +440,7 @@ export default function OjtHero() {
         {/* ── CONTINUOUS PARTNER MARQUEE TICKER (Smooth Infinite Stream) ── */}
         <div className="mt-12 pt-6 border-t border-border flex flex-col md:flex-row md:items-center gap-4 text-xs font-mono text-copy-muted overflow-hidden">
           <div className="shrink-0 font-bold uppercase text-ink flex items-center gap-2">
-            <Building2 className="size-3.5 text-primary" />
+            <span className="size-1.5 rounded-full bg-primary" />
             <span>Accredited Industry Partners:</span>
           </div>
 
