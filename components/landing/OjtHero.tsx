@@ -522,49 +522,48 @@ export default function OjtHero() {
           </div>
         </div>
 
-        {/* ── CONTINUOUS PARTNER MARQUEE TICKER ── */}
-        <div className="mt-8 sm:mt-12 pt-6 border-t border-border flex flex-col md:flex-row md:items-center gap-3 sm:gap-4 text-xs font-mono text-copy-muted overflow-hidden">
+        {/* ── CONTINUOUS PARTNER MARQUEE TICKER (Free-Floating Stream, Zero Boxes/Cards) ── */}
+        <div className="mt-8 sm:mt-12 pt-6 border-t border-border flex flex-col md:flex-row md:items-center gap-3 sm:gap-6 text-xs font-mono text-copy-muted overflow-hidden">
           <div className="shrink-0 font-bold uppercase text-ink flex items-center gap-2">
-            <Building2 className="size-3.5 text-primary" />
-            <span>Accredited Partners:</span>
+            <Building2 className="size-4 text-primary" />
+            <span className="tracking-wide">Accredited Partners:</span>
           </div>
 
           <div 
-            className="relative flex-1 overflow-hidden"
+            className="relative flex-1 overflow-hidden py-1"
             style={{
               maskImage: 'linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)',
               WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)',
             }}
           >
-            <div className="animate-marquee whitespace-nowrap flex items-center gap-4 sm:gap-6 py-1 select-none">
+            <div className="animate-marquee whitespace-nowrap flex items-center gap-6 sm:gap-8 select-none">
               {/* Track 1 */}
               {accreditedPartners.map((partner, i) => {
                 const IconComponent = partner.icon;
                 return (
                   <div
                     key={`p1-${i}`}
-                    className="inline-flex items-center gap-2 rounded-xl bg-surface/80 dark:bg-card/80 border border-border/80 px-3 py-1.5 hover:border-primary/40 hover:bg-surface transition-all cursor-default"
+                    className="inline-flex items-center gap-2.5 py-1 group cursor-default transition-all duration-150 opacity-80 hover:opacity-100"
                   >
                     {partner.logoSrc ? (
-                      <span className="size-6 sm:size-7 rounded-lg bg-white p-0.5 border border-border/80 shadow-xs flex items-center justify-center overflow-hidden shrink-0">
-                        <img
-                          src={partner.logoSrc}
-                          alt={`${partner.name} logo`}
-                          className="max-h-full max-w-full object-contain"
-                          loading="lazy"
-                        />
-                      </span>
+                      <img
+                        src={partner.logoSrc}
+                        alt={`${partner.name} logo`}
+                        className="h-6 sm:h-7 w-auto max-w-[120px] object-contain shrink-0 filter contrast-105 group-hover:scale-105 transition-transform"
+                        loading="lazy"
+                      />
                     ) : (
-                      <span className={cn('size-6 sm:size-7 rounded-lg border flex items-center justify-center shrink-0', partner.badgeBg, partner.accentColor)}>
-                        {IconComponent && <IconComponent className="size-3.5" />}
+                      <span className="flex items-center justify-center shrink-0 text-primary">
+                        {IconComponent && <IconComponent className="size-4" />}
                       </span>
                     )}
-                    <span className="font-heading text-xs font-bold text-ink">
+                    <span className="font-heading text-xs sm:text-sm font-bold text-ink group-hover:text-primary transition-colors whitespace-nowrap">
                       {partner.name}
                     </span>
-                    <span className="text-[10px] font-mono text-copy-muted hidden sm:inline">
-                      • {partner.category}
+                    <span className="text-[10px] font-mono text-copy-muted hidden md:inline whitespace-nowrap">
+                      ({partner.category})
                     </span>
+                    <span className="text-border-strong select-none text-xs ml-3 sm:ml-4">•</span>
                   </div>
                 );
               })}
@@ -575,28 +574,27 @@ export default function OjtHero() {
                 return (
                   <div
                     key={`p2-${i}`}
-                    className="inline-flex items-center gap-2 rounded-xl bg-surface/80 dark:bg-card/80 border border-border/80 px-3 py-1.5 hover:border-primary/40 hover:bg-surface transition-all cursor-default"
+                    className="inline-flex items-center gap-2.5 py-1 group cursor-default transition-all duration-150 opacity-80 hover:opacity-100"
                   >
                     {partner.logoSrc ? (
-                      <span className="size-6 sm:size-7 rounded-lg bg-white p-0.5 border border-border/80 shadow-xs flex items-center justify-center overflow-hidden shrink-0">
-                        <img
-                          src={partner.logoSrc}
-                          alt={`${partner.name} logo`}
-                          className="max-h-full max-w-full object-contain"
-                          loading="lazy"
-                        />
-                      </span>
+                      <img
+                        src={partner.logoSrc}
+                        alt={`${partner.name} logo`}
+                        className="h-6 sm:h-7 w-auto max-w-[120px] object-contain shrink-0 filter contrast-105 group-hover:scale-105 transition-transform"
+                        loading="lazy"
+                      />
                     ) : (
-                      <span className={cn('size-6 sm:size-7 rounded-lg border flex items-center justify-center shrink-0', partner.badgeBg, partner.accentColor)}>
-                        {IconComponent && <IconComponent className="size-3.5" />}
+                      <span className="flex items-center justify-center shrink-0 text-primary">
+                        {IconComponent && <IconComponent className="size-4" />}
                       </span>
                     )}
-                    <span className="font-heading text-xs font-bold text-ink">
+                    <span className="font-heading text-xs sm:text-sm font-bold text-ink group-hover:text-primary transition-colors whitespace-nowrap">
                       {partner.name}
                     </span>
-                    <span className="text-[10px] font-mono text-copy-muted hidden sm:inline">
-                      • {partner.category}
+                    <span className="text-[10px] font-mono text-copy-muted hidden md:inline whitespace-nowrap">
+                      ({partner.category})
                     </span>
+                    <span className="text-border-strong select-none text-xs ml-3 sm:ml-4">•</span>
                   </div>
                 );
               })}

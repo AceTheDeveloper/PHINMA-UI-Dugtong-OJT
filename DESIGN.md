@@ -47,11 +47,19 @@ The Dugtong OJT interface is engineered using the exact aesthetic, telemetry, an
   * **Live Interactive State:** Users can tap the clock-in button to simulate state transitions, toggle supervisor approvals, and watch dynamic percentage shifts in real time.
   * **Embedded Hours Chain:** The device surfaces the signature progress chain right in the student's active shift card.
 
-### 4. Seamless Dual-Track Infinite Marquee
+### 4. Seamless Dual-Track Infinite Marquee (Free-Floating Logos, Zero Boxes)
 * A continuous, horizontally streaming industry partner ticker:
+  * **Free-Floating Entity Treatment:** Company logos and wordmarks sit organically directly on the background without rectangular card wrappers, bounding boxes, or borders (`no cards/boxes`).
   * **Alpha Gradient Masking:** Uses CSS `-webkit-mask-image: linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%)` to eliminate harsh edge cutoffs and create an infinite optical bleed.
   * **Dual Stream Clones:** The DOM renders two duplicate tracks within a single flex container powered by a silky-smooth `@keyframes marquee` translation (`translateX(-50%)`), completely eliminating stutter or re-trigger jumps.
   * Zero scrollbars (`no-scrollbar`) and non-blocking interaction.
+
+### 5. Sticky Frosted-Glass Island Navigation
+* Modeled directly after Neil's Portfolio and Cortex commanding headers:
+  * **Frosted Backdrop Filter:** `sticky top-0 z-40 backdrop-blur-md bg-page-wash/85 border-b border-border/80`.
+  * **Institutional Branding Anchor:** Dual-badge pairing Dugtong brandmark with `PHINMA UI • CITE BSIT Pilot` live node indicator.
+  * **Segmented Capsule Navigation:** Tactile rounded navigation capsule with subtle hover pill transitions.
+  * **Action Command Hub:** Real-time system latency indicator (`24ms`), accessible theme toggle, and verb-first `"Live Portal"` action button.
 
 ### 5. Glowing SVG Telemetry Curves (Pure Code Visualization)
 * Clean vector telemetry without the bundle weight of bloated third-party charting libraries:
