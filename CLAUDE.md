@@ -13,6 +13,7 @@ You are collaborating with **Neil**, who is strictly responsible for **UI / UX d
    - Clerk authentication configuration or session JWT handling.
    - Server-side DTR calculation functions or backend API routes.
 3. **Core Governance:**
+   - Refer to [`DESIGN.md`](./DESIGN.md) for Neil's comprehensive UI/UX architecture, debouncing rules, skeleton geometry, and design system.
    - Refer to [`AGENTS.md`](./AGENTS.md) for project scope, roles, design tokens (§10), and UI/copy rules (§9).
    - Refer to [`agents/uiuxagent.md`](./agents/uiuxagent.md) for strict UI invariant enforcement (`UX-01` to `UX-16`).
 
