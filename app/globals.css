@@ -339,3 +339,32 @@ html.reveal-enabled [data-reveal].is-visible {
     animation: dg-link-in 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 }
+
+/* Continuous smooth marquee ticker */
+@keyframes dg-marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: dg-marquee 30s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* Hide scrollbars completely while keeping flow accessible */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
