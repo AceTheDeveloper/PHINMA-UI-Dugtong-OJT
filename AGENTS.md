@@ -1,6 +1,6 @@
 # AGENTS.md: Dugtong OJT
 
-Read this file first. It states what we are building, the rules the product must follow, and how it should look. It does not say how to set up or structure the project; the repository itself is the source of truth for that. If a task conflicts with this file, stop and ask. If a decision changes, update this file in the same PR.
+Read this file first. It states what we are building, the rules the product must follow, and how it should look. It does not say how to structure the project; the repository itself is the source of truth for that. Commands to run it are in section 15. Feature plans and decisions are in `plan.md`. If a task conflicts with this file, stop and ask. If a decision changes, a human updates this file in the same PR (AI agents propose the change in the ticket, see section 14).
 
 ## 1. What this project is
 
@@ -27,7 +27,7 @@ Dugtong OJT is a web app (installable PWA) that replaces the paper DTR and scatt
 ### Out of scope (do NOT build unless asked)
 
 - Other schools or departments (for example CHTM). Store things like required hours, evaluation criteria, and certificate templates as data per course or department, never as constants in code, so adding CHTM later is mostly data entry. Build nothing CHTM-specific.
-- Public or guest access. Every page and file requires login.
+- Public or guest access. Every page and file requires login, except the public landing page (see section 7).
 - Company self-registration and document verification (the school decides partners).
 - MOA tracking, OJT requirements and prerequisites, daily-hours rules.
 - Partnership request flow, reports and appeals, company trust score.
@@ -35,7 +35,9 @@ Dugtong OJT is a web app (installable PWA) that replaces the paper DTR and scatt
 
 ## 3. Tech stack (what we use)
 
-Next.js (App Router) and TypeScript, installable PWA. Clerk for auth, integrated with Supabase. Supabase Postgres and private Storage. Tailwind CSS, shadcn/ui, react-hook-form, Zod, TanStack Query. Do not introduce alternatives to these without asking.
+Next.js (App Router) and TypeScript, installable PWA. Clerk for auth, integrated with Supabase. Supabase Postgres and private Storage. Tailwind CSS, shadcn/ui, react-hook-form, Zod, TanStack Query. Tests: Vitest (unit and access-rule tests); Playwright (browser tests) is added once screens exist. Do not introduce alternatives to these without asking.
+
+Use Tailwind utility classes for component styling and shadcn/ui primitives for standard controls where appropriate. Keep global CSS to design-token variables, font setup, reset/base styles, and narrowly scoped exceptions that utilities cannot express; do not build page layouts in large bespoke CSS files.
 
 ## 4. Roles and permissions
 
@@ -52,6 +54,7 @@ There is no separate company representative. The first supervisor invited for a 
 | -------------------------------------------------------- | ---------------------- | ------------------------------ | ----------------- | ---------------------------- |
 | View own profile, logs, applications, certification      | yes                    | no                             | no                | yes                          |
 | Upload and replace own resume                            | yes                    | no                             | no                | no                           |
+| View resumes                                             | own                    | applicants to own company      | all BSIT students | no                           |
 | Browse active listings of partner companies              | yes                    | yes (own company)              | yes               | yes                          |
 | Create, edit, close listings                             | no                     | own company                    | no                | yes                          |
 | Apply to a listing, withdraw an application              | yes                    | no                             | no                | no                           |
@@ -65,7 +68,7 @@ There is no separate company representative. The first supervisor invited for a 
 | View and export reports, DTR PDF                         | own DTR                | own company's students         | all BSIT students | all                          |
 | Create companies, invite supervisors, create coordinator | no                     | invite colleagues (owner only) | no                | yes                          |
 
-Default: the coordinator cannot approve or change a supervisor's decision. This is an open decision (section 12).
+Default: the coordinator cannot approve or change a supervisor's decision. This is an open decision (`plan.md`). Who can view evaluations and certifications is decided in `plan.md`.
 
 ## 5. Core flow
 
@@ -92,12 +95,14 @@ These are product rules. Never weaken them to make a feature easier.
 - Only approved entries count toward hours.
 - The supervisor can approve, reject with a required reason, or correct times. Every correction keeps the old value in the audit log.
 - Rejected entries return to the student to fix and resubmit.
-- Approved entries are locked. Only the supervisor can reopen one, and the reopening is audited.
+- Approved entries are locked. Only the supervisor can reopen one; Admin can do so only as an audited support action. Every reopening is audited.
 - Bulk approve is supported for a day's pending entries.
 - Entries pending longer than a set number of days are flagged as stale to the coordinator. The threshold is an open decision.
 - Each entry has a break duration (default 0, supervisor-editable) and an optional location, so break deduction and location checks can be added later without redesign.
 
 ### Applications and deployments
+
+Rules marked "default" are implemented as written until a human changes them. Do not ask about them again, and do not change them on your own.
 
 - Default (confirm with the coordinator): a student may apply to several listings but may have only one active deployment.
 - Accepting an application creates the deployment and withdraws the student's other open applications. This must succeed or fail as a whole, never half-done.
@@ -113,7 +118,7 @@ These are product rules. Never weaken them to make a feature easier.
 
 ## 7. Security, privacy, and audit
 
-- Every page, route, and file requires login. No public data. All storage is private. Use short-lived signed links for files.
+- Every page, route, and file requires login, except the public landing page at `/` and its non-OJT branding assets. The landing page contains no OJT data. No other public data. All OJT storage is private. Use short-lived signed links for files.
 - Role and scope are checked on the server for every action. Never trust the client for role, company, student, or time.
 - **Users never write to tables directly.** All changes go through server code that first checks the caller's role and ownership (for example, a supervisor can only approve entries of their own company's students).
 - Row Level Security is enabled on every table, and user sessions get read access only where needed (students see only their own data).
@@ -147,15 +152,22 @@ These are standing rules, kept in the database so a future bug cannot break them
 
 ## 9. UI and copy
 
-- Build from approved mockups. Do not invent screens. If there is no mockup, ask.
+- There are no mockups. The agent designs every screen in the ticket's scope from the design direction below, the design tokens, the fonts, and the patterns already in the repo, and the plan describes each screen in words. Design only the screens the ticket's scope asks for.
+- Design direction: "Connected". The Dugtong mark is two linked rounded squares and a teal dot, so connection and progress are the theme. The signature element is the hours chain: a row of linked rounded squares, one link per 40 approved hours, filled with the primary color, with a teal dot on the current link. Use it where hours are shown; spend boldness there and keep everything else quiet.
+- Give every page one focal point (the number or action that matters most) and vary the surfaces: one large panel, then rows with dividers, instead of a stack of identical cards. Page titles are at least 28px; body text is at least 14px; use 12px only for secondary notes.
+- Students use phones first. Interactive targets are at least 44px high on touch screens, the student navigation is a bottom tab bar on phones, and the daily action (time in) must be reachable in one tap.
+- Do not use all-caps tracked labels above headings, and use motion sparingly: one deliberate moment per page at most (for example the chain filling on load), plus feedback to a person's own action. Respect reduced motion.
+- Before finishing UI work, check it at 390 px and 1440 px in light and dark: no horizontal scroll, visible keyboard focus, text and badge contrast at or above 4.5:1. Take screenshots when the environment allows it.
+- Support light and dark themes. Follow the system preference until the user chooses a theme, and remember explicit choices.
+- Use the design tokens for both themes; do not add raw color values in components.
 - Sentence case everywhere. Verb-first buttons ("Time in", "Reject entry", "Approve all").
 - Errors say what happened and what to do, in one sentence, with no "Error:" prefix.
 - Do not use "successfully", "please", or "click here".
 - Turn on tabular numerals for hours, times, and totals.
 
-## 10. Design tokens (light mode)
+## 10. Design tokens
 
-Measured from the existing landing page, except values marked suggested. Pending, rejected, hover, and neutral colors are suggested additions. Dark mode values are not defined yet.
+Light-mode values are measured from the existing landing page, except values marked suggested. Pending, rejected, hover, and neutral colors are suggested additions. Dark-mode values are defined in the `.dark` token set. The stylesheet in the repo is what ships: if it differs from the blocks below, fix one of them in the same PR.
 
 ```css
 :root {
@@ -215,10 +227,96 @@ Measured from the existing landing page, except values marked suggested. Pending
   --neutral: #596579;
   --neutral-hover: #475569;
   --neutral-text: #596579;
+
+  /* shadcn/ui aliases (suggested; mirror the .dark set) */
+  --background: #ffffff;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+  --primary-foreground: #ffffff;
+  --secondary: #ddf4f4;
+  --secondary-foreground: #086a6a;
+  --muted-foreground: #596579;
+  --accent: #e6eefe;
+  --accent-foreground: #1e40af;
+  --destructive: #dc2626;
+  --input: #d5dae2;
+  --ring: #2563eb;
 }
 ```
 
-Use text on tint with the matching `-text` color, and white text on solid fills. All of these pairs pass the 4.5:1 contrast target.
+Use text on tint with the matching `-text` color, and white text on solid fills. These pairs are meant to meet the 4.5:1 contrast target, but that has not been measured for every pair (light `--faint` on `--surface` is borderline). Check with a contrast tool whenever you add or change a pair.
+
+Dark-mode tokens:
+
+```css
+.dark {
+  --primary: #60a5fa;
+  --primary-hover: #93c5fd;
+  --primary-tint: #172b48;
+  --primary-track: #24456f;
+  --ink: #f1f5f9;
+  --muted: #a6b2c4;
+  --faint: #aab7ca;
+  --disabled: #64748b;
+  --border: #263449;
+  --border-strong: #3b4b63;
+  --surface: #152238;
+  --page-wash: #0b1220;
+  --focus-ring: rgb(96 165 250 / 0.4);
+  --success-tint: #12342e;
+  --success-border: #28604e;
+  --success: #087a55;
+  --success-hover: #066245;
+  --success-text: #6ee7b7;
+  --warning-tint: #3a2d12;
+  --warning-border: #7a5a1c;
+  --warning: #b45309;
+  --warning-hover: #92400e;
+  --warning-text: #fcd34d;
+  --error-tint: #3b1d25;
+  --error-border: #7c2c3b;
+  --error: #dc2626;
+  --error-hover: #b91c1c;
+  --error-text: #fca5a5;
+  --info-tint: #172b48;
+  --info-border: #294c7e;
+  --info: #2563eb;
+  --info-hover: #1d4ed8;
+  --info-text: #93c5fd;
+  --teal-tint: #123536;
+  --teal-border: #276466;
+  --teal: #086a6a;
+  --teal-hover: #065454;
+  --teal-text: #5eead4;
+  --neutral-tint: #202c3e;
+  --neutral-border: #3a4a61;
+  --neutral: #596579;
+  --neutral-hover: #475569;
+  --neutral-text: #cbd5e1;
+  --background: #0b1220;
+  --foreground: #f1f5f9;
+  --card: #111b2e;
+  --card-foreground: #f1f5f9;
+  --popover: #111b2e;
+  --popover-foreground: #f1f5f9;
+  --primary-foreground: #0b1220;
+  --secondary: #123536;
+  --secondary-foreground: #5eead4;
+  --muted-foreground: #a6b2c4;
+  --accent: #172b48;
+  --accent-foreground: #93c5fd;
+  --destructive: #f87171;
+  --input: #3b4b63;
+  --ring: #93c5fd;
+}
+```
+
+In dark mode, use `--primary-foreground` on the primary fill; do not assume white text remains readable on a lighter primary color. Keep all text/background pairs at or above 4.5:1 contrast.
+
+`--destructive` is the shadcn alias of the error role. In dark mode it is lighter than `--error`, so put `--primary-foreground` text on it, not white.
 
 ### Status to color role
 
@@ -240,22 +338,13 @@ Use text on tint with the matching `-text` color, and white text on solid fills.
 
 Use the error solid fill only for destructive actions. Everything else that is wrong stays in the tint, so a table with several problems does not turn red.
 
-## 11. Fonts (proposed, confirm)
+## 11. Fonts
 
-Plus Jakarta Sans for headings (700 and 800), Inter for body and UI (400 and 600), JetBrains Mono for times and IDs. Always include system font fallbacks.
+Bricolage Grotesque for headings (700 and 800), Figtree for body and UI (400 and 600), JetBrains Mono for times, hours, and IDs. Keep tabular numerals on for hours, times, and totals. Always include system font fallbacks.
 
-## 12. Open decisions
+## 12. Plans and decisions
 
-Do not decide these on your own. Ask, then record the answer here.
-
-- Certificate issuer and signatories.
-- Evaluation criteria and rating scale.
-- Can the coordinator override a supervisor's approval decision? Default: no.
-- Stale-pending threshold (days) and reminder timing.
-- Lunch-break rule for hours (default: none deducted).
-- Application rules: several applications allowed, one active deployment (confirm).
-- UI language (English assumed).
-- Dark mode palette.
+Feature plans, settled decisions, and open decisions live in `plan.md`, not in this file. Do not decide open decisions on your own: ask in the ticket's "Open questions" and a human records the answer in `plan.md`. This file holds general rules only.
 
 ## 13. Rules for AI agents
 
@@ -264,7 +353,9 @@ Do:
 - Read this file before changing anything. Prefer the smallest change that completes the task.
 - Enforce the business rules in section 6 on the server, not only in the UI.
 - Add or update tests with the code.
-- Ask when a requirement is unclear or missing, and record the answer in this file.
+- Ask when a requirement is unclear or missing, in the ticket's "Open questions". A human records the answer in `plan.md`.
+- Think ahead about what can go wrong for real users and look for a way out, not only for the happy path: a forgotten step, no signal, a wrong entry, a day that did not go to plan. When you find such a case, name it, propose a fix, and write both under the ticket's "Open questions" (or "Suggested new tickets" when it is a separate piece of work). Propose, do not decide: a fix that adds or changes a business rule waits until a human records it in `plan.md`.
+- Test, commit, and push every logical change automatically, following section 14.
 
 Do not:
 
@@ -273,37 +364,58 @@ Do not:
 - Write to tables from the client, or use the service-role key outside server-only code.
 - Edit applied migrations, generated files, or audit rows.
 - Add public routes, public storage, or guest access.
-- Invent UI without a mockup, or invent business rules. Add them to "Open decisions" instead.
+- Invent screens that are not in the ticket's scope, or invent business rules. Add them to the open decisions in `plan.md` instead. The agent designs the in-scope screens itself (section 9).
 - Add dependencies without a clear reason.
 
 ### Definition of done
 
-- Matches the mockup and the rules in this file.
+- Matches the plan's description of the screen, the design direction in section 9, and the rules in this file, checked at 390 px and 1440 px in light and dark.
 - Permission checks and tests exist for every new action or table.
 - Zod validation on every new input.
 - Audit coverage for any new change to hours, evaluations, or deployments.
-- Typecheck, lint, and tests pass.
+- Lint, typecheck, tests, and build pass (commands in section 15).
 
 ## 14. Working on tickets
 
-- Work only from a ticket file in `tickets/`. No ticket, no coding. Read `AGENTS.md`, the ticket, and the mockup first.
+- Work only from a ticket file in `tickets/`. No ticket, no coding. Read `AGENTS.md` and the ticket first.
 - If anything needed is missing or unclear, write the question under "Open questions" in the ticket and stop. Do not guess.
-- For anything bigger than a small change, write a plan in the ticket and wait until a human ticks "Plan approved".
+- Plan first. Before adding a new feature, the developer writes the plan in `plan.md` (one section per feature) and the ticket links to it. Wait until a human marks the plan approved. A small change needs no plan.
 - Do only what "In scope" says. New ideas go under "Suggested new tickets", never into the code.
 - Order of authority: `AGENTS.md`, then the ticket, then your own ideas. If the first two conflict, stop and ask.
-- Never edit `AGENTS.md`, other tickets, or the scope of the current ticket unless a human says so.
-- Commit only on the developer's own branch, after each logical change, with the message `ticket-XX: short message`. Never commit to `dev`, `test`, or `main`. Never force-push. Never merge into `dev` yourself; a human opens and merges the PR.
+- Never edit `AGENTS.md`, other tickets, or the scope of the current ticket unless a human says so. To change `AGENTS.md`, write the proposal under "Suggested AGENTS.md changes" in the ticket; a human applies it.
+- Test, commit, and push automatically; do not wait to be asked. After each logical change:
+  1. Run the checks in section 15 (lint, typecheck, tests, build). Fix failures before going on. Skip them only for a documentation-only change (see section 15).
+  2. Only if every check passes, commit with the message `ticket-XX: short message`. Never commit code that fails a check.
+  3. Push that commit to `origin/<developer-branch>`.
+- Several developers work in this repository, each on their own branch named after them. Never assume whose branch it is: find it with `git branch --show-current`. Commit and push only if that branch is not `dev`, `test`, or `main`, and it matches the developer you are working for (the ticket's Assignee, or the developer who started the session). If it is `dev`, `test`, `main`, or another developer's branch, or you are not sure, stop and ask instead of committing.
+- Work only on a ticket assigned to the developer you are working for. If the ticket's Assignee is someone else, stop and ask. Do not take over or edit another developer's ticket or branch.
+- Never commit or push to `dev`, `test`, or `main`; never force-push. If a check or a push fails, report the failure with its output and do not claim the change was published. Never merge into `dev` yourself; a human opens and merges the PR.
 - One ticket at a time per branch. Do not start the next ticket until the previous one is merged into `dev`.
 - Tick the "Tested by AI" boxes only for commands you actually ran, and write the command and result next to them. Never tick a human box.
-- Before the PR: merge the latest `dev` into the branch and run the checks again. You may resolve trivial conflicts (imports, formatting). Stop and ask a human for conflicts in auth, database migrations, audit logic, or the section 6 rules.
-- Git steps for humans are in `CONTRIBUTING.md`.
+- Before changing any code: run `git fetch origin` and merge the latest `origin/dev` into the developer's branch (`git merge origin/dev`). Do this at the start of every session and before starting each ticket, so work is never built on stale code. Do not use `--force`, `--strategy-option`, or a blanket "ours"/"theirs" choice to make a conflict go away.
+- Resolving merge conflicts: read both sides of every conflict and keep the intent of both. Nothing from either side may be silently dropped, and no conflict marker (`<<<<<<<`, `=======`, `>>>>>>>`) may remain. After resolving, check that imports, types, migrations order, tests, and callers of any changed function still line up, then run all four checks in section 15. Fix every failure before going on. If the merge pulled in changes to files this ticket also touches, re-read those files before continuing.
+- The AI resolves every conflict itself, including in auth, database migrations, audit logic, and the section 6 rules, following the steps above. For those areas, re-read both versions in full, confirm the section 6 and section 7 rules and their tests still hold, and list in the ticket's notes what each side contributed and how it was combined. Never edit an applied migration to resolve a conflict; if two branches added migrations with the same number, add the later one as a new migration with the next free number, keeping order and dependencies correct. Stop and ask a human only if the two sides contradict each other and the right result cannot be worked out from `AGENTS.md`, the ticket, and `plan.md`.
+- Before the PR: merge the latest `dev` into the branch again and re-run the checks. You may resolve trivial conflicts (imports, formatting) following the rules above.
+- Git steps for humans are in `contributing.md`.
 
 ## 15. Local setup
 
-TODO (project owner): add install, environment variables, and run instructions after the project is scaffolded. Never commit secrets.
+Commands, run from the repository root:
+
+- Install: `npm install`
+- Run locally: `npm run dev`
+- Lint: `npm run lint`
+- Typecheck: `npx tsc --noEmit`
+- Build: `npm run build`
+- Tests: `npm run test` (single run). Watch mode: `npm run test:watch`.
+
+The checks that gate every commit and push (section 14) are lint (`npm run lint`), typecheck (`npx tsc --noEmit`), tests (`npm run test`), and build (`npm run build`). Run all four before every commit and every push; do not commit or push if any fails.
+
+Exception: if a change touches only planning and ticket documents (`plan.md`, `to-confirm.md`, files in `tickets/`, `contributing.md`, `README.md`, and this file), skip the checks and commit and push directly. Any change to code, tests, migrations, configuration, or `package.json` runs all four checks, even if it also changes documents.
+
+TODO (project owner): add environment variables once Clerk and Supabase are wired in. Never commit secrets.
 
 <!-- ## 16. Reference
 
 - Final Development Plan (Claude Doc): link to be added.
-- Mockups: link or folder to be added.
 - Existing landing page (visual reference): https://dugtong-ojt.vercel.app/ -->

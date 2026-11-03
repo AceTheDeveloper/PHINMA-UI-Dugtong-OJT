@@ -6,21 +6,47 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "bootstrap:admin": "node --env-file=.env.local scripts/bootstrap-admin.mts",
+    "test:e2e": "playwright test",
+    "merge-dev": "git switch dev && git merge ace && git push && git switch ace"
   },
   "dependencies": {
+    "@base-ui/react": "^1.9.0",
+    "@clerk/backend": "^3.26.5",
+    "@clerk/nextjs": "^7.9.23",
+    "@hookform/resolvers": "^7.0.1",
+    "@supabase/supabase-js": "^2.118.0",
+    "class-variance-authority": "^0.7.1",
+    "cn": "^0.5.0",
+    "input-otp": "^1.5.0",
+    "lucide-react": "^1.64.0",
     "next": "16.4.3",
+    "papaparse": "^5.7.0",
+    "pdf-lib": "^1.17.1",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "react-hook-form": "^7.91.0",
+    "read-excel-file": "^9.3.14",
+    "server-only": "^0.0.1",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.14",
+    "@playwright/test": "^1.64.1",
     "@tailwindcss/turbopack": "^4",
-    "@types/node": "^20",
+    "@types/node": "^22.20.5",
+    "@types/papaparse": "^5.5.2",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.4.3",
+    "shadcn": "^4.23.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^5.0.5",
+    "write-excel-file": "^4.1.1"
   }
 }

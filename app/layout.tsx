@@ -1,33 +1,54 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// One family for the whole interface: IBM Plex Sans, a clear, institutional face
+// with excellent tabular figures. Headings and big numbers are the same family at
+// a heavier weight and a tighter tracking. The monospace is only for codes: a
+// student number, a stamped clock time.
+const plexSans = IBM_Plex_Sans({
+  variable: "--font-plex-sans",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const plexMono = IBM_Plex_Mono({
+  variable: "--font-plex-mono",
   subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Dugtong OJT — PHINMA University of Iloilo CITE",
-  description: "Digital DTR, Daily Journals, and OJT Hours Certification for BSIT Students",
+  title: "Dugtong OJT",
+  description:
+    "Students log their hours and a short daily journal. Supervisors approve them the same day. Coordinators see every student's progress without chasing signatures.",
 };
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${plexSans.variable} ${plexMono.variable}`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <head>
+        <Script id="theme-init" strategy="beforeInteractive">
+          {`const preference = localStorage.getItem("dugtong-theme");
+const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+document.documentElement.classList.toggle(
+  "dark",
+  preference === "dark" || (preference !== "light" && prefersDark),
+);`}
+        </Script>
+      </head>
+      <body className="font-sans text-ink">{children}</body>
     </html>
   );
 }
