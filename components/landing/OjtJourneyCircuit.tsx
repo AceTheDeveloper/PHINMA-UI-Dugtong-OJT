@@ -9,10 +9,7 @@ import {
   CheckCircle2, 
   Award, 
   Sparkles,
-  Cpu,
-  Layers,
-  ShieldCheck,
-  Check
+  Cpu
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -21,8 +18,10 @@ import { cn } from '@/lib/utils';
  *
  * Rigid Technical / Cortex Geometry:
  *   - Continuous, unbroken 2px vertical circuit line on left of cards (no gaps)
- *   - Node junctions with horizontal stubs connecting to each phase
+ *   - Mathematically exact horizontal stubs terminating cleanly at the node
+ *     (ZERO lines extending past the node or overlapping)
  *   - Zero dead space: wraps tightly from Phase 01 to Phase 06
+ *   - Flat, solid colors: NO GRADIENT BUTTONS
  *   - Flat, rigid engineering badges (border border-slate-700 bg-transparent rounded-sm)
  *   - Clean CSS Grid: lg:col-span-4 (Core Hub) + lg:col-span-8 (Phases 01-06)
  * ───────────────────────────────────────────────────────────────────────────── */
@@ -129,12 +128,12 @@ export default function OjtJourneyCircuit() {
             {/* Core Hub Box */}
             <div className="p-6 rounded-2xl border border-border dark:border-slate-700 bg-card dark:bg-[#0f172a] shadow-xs flex flex-col items-center text-center">
               
-              {/* Central Glowing Node */}
+              {/* Central Glowing Node (Solid Flat Primary, No Gradient) */}
               <div className="relative my-3 flex items-center justify-center">
                 <div className="absolute size-24 rounded-full border border-primary/40 animate-ping opacity-30" />
-                <div className="absolute size-20 rounded-full border-2 border-primary/60 shadow-[0_0_25px_rgba(34,85,242,0.35)]" />
+                <div className="absolute size-20 rounded-full border-2 border-primary/60 shadow-[0_0_20px_rgba(34,85,242,0.3)]" />
                 
-                <div className="relative size-14 rounded-full bg-gradient-to-tr from-[#2255f2] to-[#3b82f6] flex items-center justify-center text-white shadow-md">
+                <div className="relative size-14 rounded-full bg-primary flex items-center justify-center text-primary-foreground shadow-sm">
                   <GraduationCap className="size-7 stroke-[2.2]" />
                 </div>
               </div>
@@ -185,12 +184,14 @@ export default function OjtJourneyCircuit() {
           </div>
 
           {/* ── RIGHT COLUMN: UNBROKEN CONTINUOUS VERTICAL LINE + 6 RIGID CARDS ── */}
-          <div className="lg:col-span-8 relative flex flex-col gap-5 pl-7 sm:pl-8">
+          <div className="lg:col-span-8 relative flex flex-col gap-5 pl-10">
             
-            {/* ── SINGLE CONTINUOUS UNBROKEN VERTICAL LINE (Starts center of Phase 01, Ends center of Phase 06) ── */}
+            {/* ── SINGLE CONTINUOUS UNBROKEN VERTICAL LINE ──
+                Placed at exactly left-[15px]. Cards are indented by pl-10 (40px).
+                Distance from card edge (x=0) to line is exactly 25px. ── */}
             <div 
               aria-hidden="true"
-              className="absolute left-[7px] top-[40px] bottom-[40px] w-[2px] bg-slate-300 dark:bg-slate-700 pointer-events-none z-0" 
+              className="absolute left-[15px] top-[40px] bottom-[40px] w-[2px] bg-slate-300 dark:bg-slate-700 pointer-events-none z-0" 
             />
 
             {/* 6 Rigid Cards */}
@@ -210,20 +211,22 @@ export default function OjtJourneyCircuit() {
                       : 'border-border dark:border-slate-700 hover:border-slate-500 dark:hover:border-slate-600'
                   )}
                 >
-                  {/* Horizontal Connector Stub + Junction Node on the Line */}
+                  {/* Horizontal Connector Stub: Runs from x = -25px (line) to x = 0 (card edge).
+                      Does NOT extend past the node to the left! Zero overhang! */}
                   <div 
                     aria-hidden="true"
                     className={cn(
-                      'absolute -left-7 sm:-left-8 top-[40px] -translate-y-1/2 w-7 sm:w-8 h-[2px] transition-colors',
+                      'absolute -left-[25px] top-[40px] -translate-y-1/2 w-[25px] h-[2px] transition-colors z-0',
                       isSelected ? 'bg-primary dark:bg-blue-500' : 'bg-slate-300 dark:bg-slate-700'
                     )}
                   />
                   
-                  {/* Node Dot on the continuous line */}
+                  {/* Node Dot: Exactly centered on the vertical line at x = -25px.
+                      Width is 12px (size-3), centered at -25px => left = -25 - 6 = -31px. */}
                   <div 
                     aria-hidden="true"
                     className={cn(
-                      'absolute -left-[25px] sm:-left-[29px] top-[40px] -translate-y-1/2 size-3 rounded-full border-2 transition-all',
+                      'absolute -left-[31px] top-[40px] -translate-y-1/2 size-3 rounded-full border-2 transition-all z-10',
                       isSelected 
                         ? 'border-primary bg-primary shadow-[0_0_8px_rgba(59,130,246,0.9)]' 
                         : 'border-slate-400 dark:border-slate-600 bg-page-wash dark:bg-[#0b1120]'
@@ -271,7 +274,7 @@ export default function OjtJourneyCircuit() {
                     </span>
                   </div>
 
-                  {/* Flat Rigid Technical Badges (Exact prompt requirement 2) */}
+                  {/* Flat Rigid Technical Badges (No Gradients, Exact Flat Spec) */}
                   <div className="mt-4 pt-3.5 border-t border-border dark:border-slate-800/80 flex flex-wrap gap-2">
                     {step.tags.map((tag) => (
                       <span

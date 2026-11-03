@@ -282,10 +282,10 @@ export default function OjtDashboardView() {
         </div>
       </div>
 
-      {/* ── TOAST NOTIFICATION ── */}
+      {/* ── TOAST NOTIFICATION (Top-right, never obscuring actions or table) ── */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 p-4 rounded-xl bg-ink text-surface border border-border-strong shadow-lg flex items-center gap-3 text-xs font-medium animate-in fade-in slide-in-from-bottom-3 duration-200">
-          <CheckCircle2 className="size-4 text-success" />
+        <div className="fixed top-6 right-6 z-50 px-4 py-3 rounded-xl bg-card dark:bg-[#101b33] text-ink border border-border dark:border-slate-700 shadow-xl flex items-center gap-3 text-xs font-semibold animate-in fade-in slide-in-from-top-3 duration-200">
+          <CheckCircle2 className="size-4 text-success shrink-0" />
           <span>{toastMessage}</span>
         </div>
       )}
@@ -410,10 +410,10 @@ export default function OjtDashboardView() {
                   type="button"
                   onClick={handleToggleClock}
                   className={cn(
-                    'h-14 min-w-[240px] px-6 rounded-2xl font-black text-sm flex items-center justify-between gap-4 transition-all duration-300 cursor-pointer shadow-lg select-none relative overflow-hidden group',
+                    'h-14 min-w-[240px] px-6 rounded-2xl font-black text-sm flex items-center justify-between gap-4 transition-all duration-200 cursor-pointer shadow-xs select-none relative overflow-hidden group',
                     isClockedIn
-                      ? 'bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 hover:from-red-500 hover:to-rose-500 text-white shadow-[0_0_25px_rgba(220,38,38,0.4)]'
-                      : 'bg-gradient-to-r from-emerald-600 via-teal-600 to-blue-600 hover:from-emerald-500 hover:to-blue-500 text-white shadow-[0_0_25px_rgba(16,185,129,0.4)]',
+                      ? 'bg-error hover:bg-[#b91c1c] text-white'
+                      : 'bg-primary hover:bg-primary-hover text-primary-foreground',
                     focusStyle
                   )}
                 >

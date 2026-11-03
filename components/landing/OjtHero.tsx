@@ -282,10 +282,10 @@ export default function OjtHero() {
                       type="button"
                       onClick={handleToggleShift}
                       className={cn(
-                        'mt-3 w-full h-11 rounded-xl font-bold text-xs flex items-center justify-between px-4 transition-all duration-300 cursor-pointer shadow-md select-none relative overflow-hidden',
+                        'mt-3 w-full h-11 rounded-xl font-bold text-xs flex items-center justify-between px-4 transition-all duration-200 cursor-pointer shadow-xs select-none relative overflow-hidden',
                         isClockedIn 
-                          ? 'bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white shadow-[0_0_20px_rgba(220,38,38,0.35)]' 
-                          : 'bg-gradient-to-r from-emerald-600 via-teal-600 to-blue-600 hover:from-emerald-500 hover:to-blue-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.35)]'
+                          ? 'bg-error hover:bg-error-hover text-white' 
+                          : 'bg-primary hover:bg-primary-hover text-primary-foreground'
                       )}
                     >
                       <div className="flex items-center gap-2">
