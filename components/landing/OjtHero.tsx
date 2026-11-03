@@ -95,6 +95,7 @@ export const accreditedPartners: AccreditedPartner[] = [
   {
     name: 'iXL',
     category: 'EdTech & Learning Analytics',
+    logoSrc: '/partners/ixl.png',
     icon: Sparkles,
     accentColor: 'text-sky-600 dark:text-sky-400',
     badgeBg: 'bg-sky-500/10 border-sky-500/25',
@@ -102,6 +103,7 @@ export const accreditedPartners: AccreditedPartner[] = [
   {
     name: 'iGift',
     category: 'Rewards & E-Commerce',
+    logoSrc: '/partners/igift.jpg',
     icon: Gift,
     accentColor: 'text-purple-600 dark:text-purple-400',
     badgeBg: 'bg-purple-500/10 border-purple-500/25',
@@ -109,6 +111,7 @@ export const accreditedPartners: AccreditedPartner[] = [
   {
     name: 'PESO Province of Iloilo',
     category: 'Provincial Employment',
+    logoSrc: '/partners/peso-province-iloilo.jpg',
     icon: Landmark,
     accentColor: 'text-teal-600 dark:text-teal-400',
     badgeBg: 'bg-teal-500/10 border-teal-500/25',
@@ -116,6 +119,7 @@ export const accreditedPartners: AccreditedPartner[] = [
   {
     name: 'Inspiro',
     category: 'Global CX & BPO Operations',
+    logoSrc: '/partners/inspiro.jpg',
     icon: Users,
     accentColor: 'text-rose-600 dark:text-rose-400',
     badgeBg: 'bg-rose-500/10 border-rose-500/25',
