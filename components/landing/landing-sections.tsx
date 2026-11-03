@@ -37,43 +37,99 @@ const navLink = cn(
 
 export function LandingHeader() {
   return (
-    <header className="relative z-[5]">
+    <header className="sticky top-0 z-40 w-full border-b border-border/80 bg-page-wash/85 backdrop-blur-md transition-all">
       <div
         className={cn(
           container,
-          "flex min-h-[88px] items-center gap-8 max-sm:grid max-sm:min-h-0 max-sm:grid-cols-[minmax(0,1fr)_auto_auto] max-sm:gap-x-3 max-sm:py-4",
+          "flex min-h-[72px] sm:min-h-[80px] items-center justify-between gap-4 py-2.5 sm:py-0",
         )}
       >
-        <BrandLink />
+        {/* Left: Brand + Institutional Hub Badge */}
+        <div className="flex items-center gap-3 shrink-0">
+          <BrandLink size="md" />
+
+          <div className="hidden sm:flex items-center gap-2 pl-3 border-l border-border-strong text-xs font-mono">
+            <span className="font-bold text-ink tracking-tight">PHINMA UI</span>
+            <span className="text-border-strong">•</span>
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-primary-tint text-primary border border-primary/20">
+              <span className="size-1.5 rounded-full bg-success animate-pulse" />
+              CITE BSIT Pilot
+            </span>
+          </div>
+        </div>
+
+        {/* Center: Sleek Segmented Capsule Navigation */}
         <nav
           aria-label="Main navigation"
-          className="ml-auto flex items-center gap-[clamp(20px,3vw,40px)] max-sm:col-span-full max-sm:col-start-1 max-sm:row-start-2 max-sm:ml-0 max-sm:gap-[22px]"
+          className="hidden md:flex items-center gap-1 p-1 rounded-full border border-border bg-surface/70 backdrop-blur-xs text-xs font-semibold"
         >
-          <a className={navLink} href="#how-it-works">
-            How it works
+          <a
+            className="px-3.5 py-1.5 rounded-full text-copy-muted hover:text-ink hover:bg-card dark:hover:bg-card/80 transition-all"
+            href="#how-it-works"
+          >
+            Journey
           </a>
-          <a className={navLink} href="#who-its-for">
+          <a
+            className="px-3.5 py-1.5 rounded-full text-copy-muted hover:text-ink hover:bg-card dark:hover:bg-card/80 transition-all"
+            href="#telemetry-data"
+          >
+            Telemetry
+          </a>
+          <a
+            className="px-3.5 py-1.5 rounded-full text-copy-muted hover:text-ink hover:bg-card dark:hover:bg-card/80 transition-all"
+            href="#ojt-portal-preview"
+          >
+            Portal Deck
+          </a>
+          <a
+            className="px-3.5 py-1.5 rounded-full text-copy-muted hover:text-ink hover:bg-card dark:hover:bg-card/80 transition-all"
+            href="#who-its-for"
+          >
             Who it&apos;s for
           </a>
-          <a className={navLink} href="#team">
+          <a
+            className="px-3.5 py-1.5 rounded-full text-copy-muted hover:text-ink hover:bg-card dark:hover:bg-card/80 transition-all"
+            href="#team"
+          >
             Team
           </a>
         </nav>
-        <ThemeToggle />
-        {!isLandingOnly() && (
-          <Button
-            nativeButton={false}
-            render={<Link href="/sign-in" />}
-            role="link"
-            size="lg"
-            className={cn(
-              "h-11 min-w-[88px] rounded-lg bg-primary px-4 text-primary-foreground hover:bg-primary-hover max-sm:col-start-3 max-sm:row-start-1",
-              focusStyle,
-            )}
+
+        {/* Right: Telemetry Ping, Theme Toggle & Action CTA */}
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          {/* Live Node Telemetry (Desktop) */}
+          <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-border bg-surface/60 font-mono text-[10px] text-copy-muted">
+            <span className="size-1.5 rounded-full bg-success animate-pulse" />
+            <span className="font-semibold text-ink">SYSTEM ONLINE</span>
+            <span className="text-border-strong">•</span>
+            <span>24ms</span>
+          </div>
+
+          <ThemeToggle />
+
+          <Link
+            href="#ojt-portal-preview"
+            className="inline-flex items-center gap-1.5 h-9 sm:h-10 px-3.5 sm:px-4 rounded-xl bg-primary hover:bg-primary-hover text-primary-foreground font-semibold text-xs transition-colors shadow-xs"
           >
-            Sign in
-          </Button>
-        )}
+            <span>Live Portal</span>
+            <ArrowRight className="size-3.5" />
+          </Link>
+
+          {!isLandingOnly() && (
+            <Button
+              nativeButton={false}
+              render={<Link href="/sign-in" />}
+              role="link"
+              size="sm"
+              className={cn(
+                "h-9 rounded-xl border border-border bg-card px-3 text-xs font-semibold text-ink hover:bg-surface",
+                focusStyle,
+              )}
+            >
+              Sign in
+            </Button>
+          )}
+        </div>
       </div>
     </header>
   );
