@@ -30,11 +30,6 @@ const primaryButton = cn(
 const dotGrid =
   "bg-primary-tint bg-[radial-gradient(var(--border-strong)_1px,transparent_1px)] bg-[length:22px_22px]";
 
-const navLink = cn(
-  "inline-flex min-h-11 items-center text-[15px] font-semibold text-copy-muted transition-colors duration-150 hover:text-primary-hover max-sm:text-sm",
-  focusStyle,
-);
-
 export function LandingHeader() {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/80 bg-page-wash/85 backdrop-blur-md transition-all">

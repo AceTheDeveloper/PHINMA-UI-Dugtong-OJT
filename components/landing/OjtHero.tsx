@@ -12,7 +12,6 @@ import {
   Wifi,
   BatteryMedium,
   Check,
-  Building2,
   RotateCw,
   LogOut,
   LogIn,
@@ -389,7 +388,10 @@ export default function OjtHero() {
                     {/* Live Server Clock */}
                     <div className="flex items-baseline justify-between">
                       <div>
-                        <div className="font-mono text-2xl sm:text-3xl font-black text-ink tracking-tight tabular-nums">
+                        <div
+                          className="font-mono text-2xl sm:text-3xl font-black text-ink tracking-tight tabular-nums"
+                          suppressHydrationWarning
+                        >
                           {liveClock}
                         </div>
                         <div className="text-[10px] text-copy-muted font-mono mt-0.5">

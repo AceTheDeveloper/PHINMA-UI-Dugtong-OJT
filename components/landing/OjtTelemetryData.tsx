@@ -1,7 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
-import { cn } from '@/lib/utils';
+import React from 'react';
 
 /* ────────────────────────────────────────────────────────────────────────────
  * MINIMALIST DATA // TELEMETRY & SCALE
@@ -12,25 +11,9 @@ import { cn } from '@/lib/utils';
  *   - 2 Glowing Minimalist SVG Curve Charts (Hours Trajectory & Attendance Rate)
  * ──────────────────────────────────────────────────────────────────────────── */
 
-interface ChartPoint {
-  label: string;
-  hours: number;
-  week: string;
-}
-
-const HOURS_TRAJECTORY: ChartPoint[] = [
-  { label: 'Wk 1: Deployment', hours: 40, week: 'W1' },
-  { label: 'Wk 3: Core Tasks', hours: 120, week: 'W3' },
-  { label: 'Wk 6: Midterm Evaluation', hours: 240, week: 'W6' },
-  { label: 'Wk 9: Advanced Projects', hours: 360, week: 'W9' },
-  { label: 'Wk 12: Certification Target', hours: 486, week: 'W12' },
-];
-
 const container = 'mx-auto w-[min(100%_-_64px,1200px)] max-md:w-[calc(100%_-_48px)]';
 
 export default function OjtTelemetryData() {
-  const [hoveredPoint, setHoveredPoint] = useState<ChartPoint | null>(null);
-
   return (
     <section id="telemetry" className="border-b border-border bg-page-wash py-20 max-sm:py-14" data-reveal>
       <div className={container}>

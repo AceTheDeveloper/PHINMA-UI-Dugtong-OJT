@@ -2,11 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import {
-  Clock,
   CheckCircle2,
   Calendar,
   Building2,
-  ArrowRight,
   Send,
   Check,
   X,
@@ -109,7 +107,7 @@ export default function OjtDashboardView() {
   const percentage = Math.round((approvedHours / requiredHours) * 1000) / 10;
 
   // Student timesheet records
-  const [studentLogs, setStudentLogs] = useState<LogEntry[]>([
+  const [studentLogs] = useState<LogEntry[]>([
     {
       id: 'log-01',
       date: 'Today, Nov 3',
