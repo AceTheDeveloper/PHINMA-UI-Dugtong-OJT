@@ -81,6 +81,7 @@ const links: Record<Role, readonly ShellLink[]> = {
     link("Applicants", "applicants", "/supervisor/applicants"),
     link("Students", "students", "/supervisor/students"),
     link("Evaluations", "evaluations", "/supervisor/evaluations"),
+    link("Team", "people", "/supervisor/team"),
   ],
   coordinator: [
     link("Dashboard", "dashboard", "/coordinator", true),
