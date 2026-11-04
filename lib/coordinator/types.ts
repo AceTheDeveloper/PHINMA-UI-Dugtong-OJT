@@ -53,6 +53,8 @@ export type Activity = {
 // course names, the required hours, and the stale threshold are data, never
 // constants in code.
 export type CourseInfo = {
+  // The OJT batch the page shows; the coordinator's required-hours form edits it.
+  batchId: string;
   school: string;
   department: string;
   departmentShort: string;

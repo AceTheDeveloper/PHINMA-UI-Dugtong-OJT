@@ -7,6 +7,7 @@ import { AttentionPanel } from "@/components/coordinator/attention-panel";
 import { CompaniesOverview } from "@/components/coordinator/companies-overview";
 import { DashboardCharts } from "@/components/coordinator/dashboard-charts";
 import { RecentActivity } from "@/components/coordinator/recent-activity";
+import { RequiredHoursSheet } from "@/components/coordinator/required-hours-sheet";
 import { StudentTable } from "@/components/coordinator/student-table";
 import { SummaryCards } from "@/components/coordinator/summary-cards";
 import { Button } from "@/components/ui/button";
@@ -77,6 +78,15 @@ export default async function CoordinatorDashboardPage() {
         students={data.students}
         companies={data.companies}
         requiredHours={course.requiredHours}
+        action={
+          <RequiredHoursSheet
+            batchId={course.batchId}
+            batchLabel={course.batchLabel}
+            courseShort={course.courseShort}
+            current={course.requiredHours}
+            students={data.students}
+          />
+        }
       />
       <div className="grid gap-6 xl:grid-cols-2">
         <CompaniesOverview companies={data.companies} students={data.students} />

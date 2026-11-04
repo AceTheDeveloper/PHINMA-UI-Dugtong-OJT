@@ -74,6 +74,7 @@ function student(over: Partial<DashboardStudent>): DashboardStudent {
 
 const dashboard = (students: DashboardStudent[]): Dashboard => ({
   course: {
+    batchId: "batch-1",
     school: "PHINMA University of Iloilo",
     department: "College of IT",
     departmentShort: "CITE",

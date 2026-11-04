@@ -1,9 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { Search } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { DtrLink } from "@/components/export/download-link";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
@@ -109,12 +116,15 @@ export function StudentTable({
   courses,
   requiredHours,
   basePath = "/coordinator/students",
+  action,
 }: {
   students: DashboardStudent[];
   companies: DashboardCompany[];
   courses?: { id: string; label: string }[];
   requiredHours: number;
   basePath?: string;
+  // Shown beside the required hours, for example the coordinator's edit control.
+  action?: ReactNode;
 }) {
   const companyNames = useMemo(
     () => new Map(companies.map((company) => [company.id, company.name])),
@@ -156,8 +166,14 @@ export function StudentTable({
           Student progress
         </CardTitle>
         <CardDescription>
-          Approved hours toward {requiredHours} required hours. Read-only.
+          Approved hours toward <span className="tabular-nums">{requiredHours}</span> required
+          hours.
         </CardDescription>
+        {action ? (
+          <CardAction className="max-sm:col-start-1 max-sm:row-span-1 max-sm:row-start-3 max-sm:justify-self-start max-sm:pt-2">
+            {action}
+          </CardAction>
+        ) : null}
       </CardHeader>
       <CardContent className="grid gap-4">
         <div

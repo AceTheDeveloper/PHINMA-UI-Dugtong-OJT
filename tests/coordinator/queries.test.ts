@@ -11,6 +11,8 @@ type Call = { table: string; filters: [string, unknown][] };
 const calls: Call[] = [];
 const rpcCalls: { name: string; args: unknown }[] = [];
 const results: Record<string, unknown> = {};
+// Answers for one table in call order, used before results[table].
+const queued: Record<string, unknown[]> = {};
 let rpcResult: unknown = [];
 let failTable: string | null = null;
 
@@ -32,7 +34,7 @@ function builder(table: string) {
   chain.then = (resolve: (value: unknown) => unknown) =>
     failTable === table
       ? resolve({ data: null, error: { message: "boom" } })
-      : resolve({ data: results[table] ?? [], error: null });
+      : resolve({ data: queued[table]?.shift() ?? results[table] ?? [], error: null });
   return chain;
 }
 
@@ -102,6 +104,7 @@ beforeEach(() => {
   calls.length = 0;
   rpcCalls.length = 0;
   for (const key of Object.keys(results)) delete results[key];
+  for (const key of Object.keys(queued)) delete queued[key];
   failTable = null;
   seed();
 });
@@ -155,6 +158,7 @@ describe("getDashboard", () => {
   it("names the course, department, school, batch, required hours, and stale threshold as data", async () => {
     const result = await queries.getDashboard(["course-1"]);
     expect(result.ok && result.data?.course).toEqual({
+      batchId,
       school: "PHINMA University of Iloilo",
       department: "College of IT",
       departmentShort: "CITE",
@@ -311,5 +315,36 @@ describe("activityFrom", () => {
       row(index + 1, "deployments", "insert", { row_id: "d1", created_at: `2026-11-03T00:${String(index).padStart(2, "0")}:00Z` }),
     );
     expect(queries.activityFrom(rows, context)).toHaveLength(8);
+  });
+});
+
+describe("getBatchScope", () => {
+  it("names the batch's course and says it is the newest", async () => {
+    queued.ojt_batches = [[{ id: batchId, course_id: "course-1" }], [{ id: batchId }]];
+    expect(await queries.getBatchScope(batchId)).toEqual({
+      ok: true,
+      data: { courseId: "course-1", isNewest: true },
+    });
+    const [lookup, newest] = calls.filter((call) => call.table === "ojt_batches");
+    expect(lookup.filters).toEqual([["eq:id", batchId]]);
+    expect(newest.filters).toEqual([["eq:course_id", "course-1"]]);
+  });
+
+  it("says when a newer batch of the course exists", async () => {
+    queued.ojt_batches = [[{ id: batchId, course_id: "course-1" }], [{ id: "batch-2" }]];
+    expect(await queries.getBatchScope(batchId)).toEqual({
+      ok: true,
+      data: { courseId: "course-1", isNewest: false },
+    });
+  });
+
+  it("returns null for a batch that does not exist", async () => {
+    queued.ojt_batches = [[]];
+    expect(await queries.getBatchScope("nope")).toEqual({ ok: true, data: null });
+  });
+
+  it("passes on a database failure as a typed result", async () => {
+    failTable = "ojt_batches";
+    expect(await queries.getBatchScope(batchId)).toMatchObject({ ok: false });
   });
 });

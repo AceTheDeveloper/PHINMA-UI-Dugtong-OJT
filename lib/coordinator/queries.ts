@@ -301,6 +301,7 @@ export async function getDashboard(courseIds: readonly string[]): Promise<Dashbo
 
   return ok({
     course: {
+      batchId: batch.id,
       school: school.data[0]?.name ?? "",
       department: course.department.name,
       departmentShort: course.department.code,
@@ -384,4 +385,29 @@ export function activityFrom(
     if (events.length === 8) break;
   }
   return events;
+}
+
+export type BatchScope = { courseId: string; isNewest: boolean };
+
+// The course of an OJT batch, and whether it is that course's newest batch (the
+// one the dashboard shows). Null when there is no such batch. The caller checks
+// the course against the session before it writes.
+export async function getBatchScope(batchId: string): Promise<Result<BatchScope | null>> {
+  const found = await read(z.array(z.object({ id: z.string(), course_id: z.string() })), () =>
+    db().from("ojt_batches").select("id, course_id").eq("id", batchId).limit(1),
+  );
+  if (!found.ok) return found;
+  const batch = found.data[0];
+  if (!batch) return ok(null);
+
+  const newest = await read(z.array(z.object({ id: z.string() })), () =>
+    db()
+      .from("ojt_batches")
+      .select("id")
+      .eq("course_id", batch.course_id)
+      .order("school_year", { ascending: false })
+      .limit(1),
+  );
+  if (!newest.ok) return newest;
+  return ok({ courseId: batch.course_id, isNewest: newest.data[0]?.id === batch.id });
 }
