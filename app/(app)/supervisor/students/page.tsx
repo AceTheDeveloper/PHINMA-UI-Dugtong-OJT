@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { EmptyState, LoadError, PageHeader } from "@/components/admin/admin-parts";
 import { focusStyle } from "@/components/brand-link";
+import { DownloadButton } from "@/components/export/download-link";
 import { RoleBadge } from "@/components/coordinator/status-badge";
 import { DeploymentStatusBadge } from "@/components/supervisor/student-status";
 import { HoursChain } from "@/components/ui/hours-chain";
@@ -28,6 +29,7 @@ export default async function SupervisorStudentsPage() {
       <PageHeader
         title="Students"
         description="Students deployed at your company. Open a student to set their work schedule."
+        actions={students?.ok ? <DownloadButton href="/supervisor/export">Export CSV</DownloadButton> : undefined}
       />
       {!students ? (
         <LoadError message="This account has no company. Contact the admin." />
