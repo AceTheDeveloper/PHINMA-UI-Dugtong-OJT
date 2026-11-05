@@ -1,6 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import Script from "next/script";
+import { pwaColors } from "@/lib/pwa/colors";
+import { RegisterServiceWorker } from "@/components/pwa/register-service-worker";
 import "./globals.css";
 
 // One family for the whole interface: IBM Plex Sans, a clear, institutional face
@@ -25,7 +27,23 @@ export const metadata: Metadata = {
   title: "Dugtong OJT",
   description:
     "Students log their hours and a short daily journal. Supervisors approve them the same day. Coordinators see every student's progress without chasing signatures.",
+  // The manifest (app/manifest.ts) is linked automatically. iOS ignores its icons
+  // and needs its own, and "capable" opens the installed app without browser chrome.
+  icons: { apple: "/icons/apple-touch-icon.png" },
+  appleWebApp: { capable: true, title: "Dugtong", statusBarStyle: "default" },
 };
+
+// The browser bar follows the page background of each theme.
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: pwaColors.background },
+    { media: "(prefers-color-scheme: dark)", color: pwaColors.darkBackground },
+  ],
+};
+
+// A new build is a new service worker URL, so an installed app updates on its
+// next launch. VERCEL_GIT_COMMIT_SHA or the build time is set in next.config.ts.
+const serviceWorkerVersion = process.env.NEXT_PUBLIC_SW_VERSION ?? "dev";
 
 export default function RootLayout({
   children,
@@ -50,6 +68,7 @@ document.documentElement.classList.toggle(
       </head>
       <body className="font-sans text-ink" suppressHydrationWarning>
         {children}
+        <RegisterServiceWorker version={serviceWorkerVersion} />
       </body>
     </html>
   );

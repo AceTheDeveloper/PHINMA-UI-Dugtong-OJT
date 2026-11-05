@@ -7,9 +7,9 @@ import { errorFromDatabase, type ErrorCode } from "@/lib/result";
 import { sessionRowSchema } from "@/lib/auth/session-row";
 
 describe("public routes", () => {
-  it("are exactly the landing page, sign-in, and accept-invitation", () => {
+  it("are exactly the landing page, sign-in, accept-invitation, and the offline page", () => {
     // Adding a public path is a security decision. Change this list on purpose.
-    expect([...publicPaths]).toEqual(["/", "/sign-in", "/accept-invitation"]);
+    expect([...publicPaths]).toEqual(["/", "/sign-in", "/accept-invitation", "/offline"]);
   });
 
   it.each([
@@ -18,6 +18,8 @@ describe("public routes", () => {
     ["/sign-in/sso-callback", true],
     ["/accept-invitation", true],
     ["/accept-invitation/sso-callback", true],
+    ["/offline", true],
+    ["/offline-mode", false],
     ["/consent", false],
     ["/no-access", false],
     ["/deactivated", false],
@@ -54,7 +56,7 @@ describe("public routes", () => {
     expect(routes.length).toBeGreaterThan(3);
     // /sign-in/sso-callback is where Google returns the browser after sign-in.
     expect(routes.filter(isPublicPath).sort()).toEqual(
-      ["/", "/accept-invitation", "/sign-in", "/sign-in/sso-callback"].sort(),
+      ["/", "/accept-invitation", "/offline", "/sign-in", "/sign-in/sso-callback"].sort(),
     );
   });
 });

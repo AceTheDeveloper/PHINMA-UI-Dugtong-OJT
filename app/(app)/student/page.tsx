@@ -5,6 +5,7 @@ import { LoadError } from "@/components/admin/admin-parts";
 import { focusStyle } from "@/components/brand-link";
 import { RoleBadge } from "@/components/coordinator/status-badge";
 import { TodayCard } from "@/components/student/today-card";
+import { IosInstallHint } from "@/components/pwa/ios-install-hint";
 import { WeekStrip } from "@/components/student/week-strip";
 import { HoursChain } from "@/components/ui/hours-chain";
 import { getStudentSummary } from "@/lib/applications/queries";
@@ -183,6 +184,8 @@ export default async function StudentHomePage() {
           }
         />
       </section>
+
+      <IosInstallHint />
     </>
   );
 }

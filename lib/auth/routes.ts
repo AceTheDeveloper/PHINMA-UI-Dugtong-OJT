@@ -1,9 +1,11 @@
 import type { ErrorCode } from "@/lib/result";
 
-// The only pages a signed-out visitor may open. Branding assets are static
-// files and are skipped by the proxy matcher. Adding a path here is a security
-// decision: a test fails until the list in tests/auth/routes.test.ts matches.
-export const publicPaths = ["/", "/sign-in", "/accept-invitation"] as const;
+// The only pages a signed-out visitor may open. Branding assets, the service
+// worker, the app icons, and the manifest are static files and are skipped by the
+// proxy matcher. /offline is the page the service worker shows with no signal; it
+// holds no OJT data. Adding a path here is a security decision: a test fails
+// until the list in tests/auth/routes.test.ts matches.
+export const publicPaths = ["/", "/sign-in", "/accept-invitation", "/offline"] as const;
 
 export function isPublicPath(pathname: string): boolean {
   return publicPaths.some((path) =>

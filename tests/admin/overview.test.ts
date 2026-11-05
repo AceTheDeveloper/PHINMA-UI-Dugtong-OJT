@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
 
@@ -88,9 +88,18 @@ function seed() {
   ];
 }
 
+// The log dates above are written for this day (Asia/Manila). The stale count is
+// "pending for more than 3 days", so it moves with the real date unless the clock
+// is pinned; the test failed from 2026-11-06 for that reason alone.
 beforeEach(() => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(new Date("2026-11-03T04:00:00Z"));
   vi.resetAllMocks();
   seed();
+});
+
+afterEach(() => {
+  vi.useRealTimers();
 });
 
 describe("getAdminOverviewMetrics", () => {

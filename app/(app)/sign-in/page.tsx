@@ -4,6 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import ThemeToggle from "@/app/components/theme-toggle";
 import { BrandLink } from "@/components/brand-link";
 import { SignInForm } from "@/components/auth/sign-in-form";
+import { ClearOfflineCaches } from "@/components/pwa/clear-offline-caches";
 import {
   CertificationCard,
   HoursCard,
@@ -30,6 +31,7 @@ export default async function SignInPage({
 
   return (
     <div className="grid min-h-screen grid-cols-2 bg-background max-lg:grid-cols-1">
+      <ClearOfflineCaches />
       <section className="flex min-w-0 flex-col px-14 pb-10 pt-7 max-sm:px-6">
         <header className="flex items-center justify-between gap-4">
           <BrandLink />
