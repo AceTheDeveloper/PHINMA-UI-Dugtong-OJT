@@ -49,5 +49,7 @@ supabase/.temp/
 /tickets/
 
 # playwright
+# saved test sessions and the ids the seed wrote (never commit)
+/playwright/
 /test-results/
 /playwright-report/

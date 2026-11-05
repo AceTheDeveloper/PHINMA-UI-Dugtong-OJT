@@ -112,7 +112,10 @@ export default async function StudentHomePage() {
         </p>
 
         <div className="mt-8 flex flex-wrap items-end gap-x-3 gap-y-1">
-          <p className="font-heading text-[56px] font-bold leading-none tabular-nums tracking-[-0.04em] text-ink sm:text-[72px]">
+          <p
+            data-testid="approved-hours"
+            className="font-heading text-[56px] font-bold leading-none tabular-nums tracking-[-0.04em] text-ink sm:text-[72px]"
+          >
             {hours}
           </p>
           <p className="pb-1.5 text-[15px] text-copy-muted sm:pb-2.5 sm:text-base">
