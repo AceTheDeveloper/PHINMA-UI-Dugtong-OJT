@@ -1056,3 +1056,37 @@ export async function saveCertificateTemplate(
   });
   return result.ok ? ok(null) : result;
 }
+
+export async function clerkSyncUserEmail(input: {
+  clerkId: string;
+  email: string;
+}): Promise<Result<null>> {
+  const parsed = z
+    .object({
+      clerkId: z.string().min(1),
+      email: z.string().email(),
+    })
+    .safeParse(input);
+  if (!parsed.success) return invalid("The email or Clerk ID is not valid.");
+  const result = await call("clerk_sync_user_email", {
+    p_clerk_id: parsed.data.clerkId,
+    p_email: parsed.data.email,
+  });
+  return result.ok ? ok(null) : result;
+}
+
+export async function clerkDeactivateUser(input: {
+  clerkId: string;
+}): Promise<Result<null>> {
+  const parsed = z
+    .object({
+      clerkId: z.string().min(1),
+    })
+    .safeParse(input);
+  if (!parsed.success) return invalid("The Clerk ID is not valid.");
+  const result = await call("clerk_deactivate_user", {
+    p_clerk_id: parsed.data.clerkId,
+  });
+  return result.ok ? ok(null) : result;
+}
+

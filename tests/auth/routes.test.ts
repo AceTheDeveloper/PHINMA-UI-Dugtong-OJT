@@ -7,9 +7,15 @@ import { errorFromDatabase, type ErrorCode } from "@/lib/result";
 import { sessionRowSchema } from "@/lib/auth/session-row";
 
 describe("public routes", () => {
-  it("are exactly the landing page, sign-in, accept-invitation, and the offline page", () => {
+  it("are exactly the landing page, sign-in, accept-invitation, offline page, and Clerk webhook", () => {
     // Adding a public path is a security decision. Change this list on purpose.
-    expect([...publicPaths]).toEqual(["/", "/sign-in", "/accept-invitation", "/offline"]);
+    expect([...publicPaths]).toEqual([
+      "/",
+      "/sign-in",
+      "/accept-invitation",
+      "/offline",
+      "/api/webhooks/clerk",
+    ]);
   });
 
   it.each([
@@ -19,6 +25,7 @@ describe("public routes", () => {
     ["/accept-invitation", true],
     ["/accept-invitation/sso-callback", true],
     ["/offline", true],
+    ["/api/webhooks/clerk", true],
     ["/offline-mode", false],
     ["/consent", false],
     ["/no-access", false],

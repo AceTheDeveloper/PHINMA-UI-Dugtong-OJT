@@ -5,7 +5,13 @@ import type { ErrorCode } from "@/lib/result";
 // proxy matcher. /offline is the page the service worker shows with no signal; it
 // holds no OJT data. Adding a path here is a security decision: a test fails
 // until the list in tests/auth/routes.test.ts matches.
-export const publicPaths = ["/", "/sign-in", "/accept-invitation", "/offline"] as const;
+export const publicPaths = [
+  "/",
+  "/sign-in",
+  "/accept-invitation",
+  "/offline",
+  "/api/webhooks/clerk",
+] as const;
 
 export function isPublicPath(pathname: string): boolean {
   return publicPaths.some((path) =>
